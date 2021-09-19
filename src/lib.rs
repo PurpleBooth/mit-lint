@@ -2,7 +2,7 @@
 extern crate lazy_static;
 
 pub use cmd::lint;
-pub use model::{Error, Lint, LintError, Lints, Problem};
+pub use model::{Code, Error, Lint, LintError, Lints, Problem};
 
 mod checks;
 mod cmd;
