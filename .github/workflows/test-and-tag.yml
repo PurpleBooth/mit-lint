@@ -185,7 +185,7 @@ jobs:
         uses: ncipollo/release-action@v1.8.9
         with:
           allowUpdates: true
-          token: ${{ secrets.COMMITTER_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           bodyFile: CHANGELOG.md
           name: Release v${{ needs.release.outputs.current_version }}
           tag: v${{ needs.release.outputs.current_version }}
