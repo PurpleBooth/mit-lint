@@ -1,7 +1,7 @@
 [package]
 name = "mit-lint"
 version = "0.1.0"
-edition = "2021"
+edition = "2018"
 authors = [ "Billie Thompson <billie+mit-lint@billiecodes.com>" ]
 license = "CC0-1.0"
 description = "Lints for commits parsed with mit-commit."
