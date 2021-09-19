@@ -11,7 +11,7 @@ show-help:
 .PHONY: test
 ## Test it was built ok
 test:
-	unset GIT_MIT_AUTHORS_EXEC && RUST_BACKTRACE=1 cargo test
+	RUST_BACKTRACE=1 cargo test
 
 .PHONY: build
 ## Build release version
