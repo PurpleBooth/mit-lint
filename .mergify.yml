@@ -1,0 +1,38 @@
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=lint-markdown
+      - check-success=security-audit
+      - check-success=version
+      - check-success=check
+      - check-success=test
+      - check-success=lints
+      - check-success=bench
+      - base=main
+      - author~=^dependabot(|-preview)\[bot\]$
+
+pull_request_rules:
+  - name: request review on external contributor
+    conditions:
+      - -author=PurpleBooth
+    actions:
+      assign:
+        add_users:
+          - PurpleBooth
+
+  - name: automatic rebase for dependencies
+    conditions:
+      - check-success=lint-markdown
+      - check-success=security-audit
+      - check-success=version
+      - check-success=check
+      - check-success=test
+      - check-success=lints
+      - check-success=bench
+      - base=main
+      - author~=^dependabot(|-preview)\[bot\]$
+    actions:
+      queue:
+        method: rebase
+        rebase_fallback: merge
+        name: default
