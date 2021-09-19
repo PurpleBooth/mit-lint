@@ -22,7 +22,7 @@ pub enum Lint {
     NotEmojiLog,
 }
 
-pub(crate) const CONFIG_KEY_PREFIX: &str = "mit.lint";
+pub const CONFIG_KEY_PREFIX: &str = "mit.lint";
 
 impl std::convert::TryFrom<&str> for Lint {
     type Error = Error;
