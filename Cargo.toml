@@ -18,7 +18,13 @@ indoc = "1.0.3"
 toml = "0.5.8"
 lazy_static = "1.4.0"
 
-
 [dependencies.serde]
 version = "1.0.125"
 features = [ "derive" ]
+
+[dev-dependencies]
+criterion = "0.3.5"
+
+[[bench]]
+name = "linting"
+harness = false
