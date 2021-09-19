@@ -122,7 +122,8 @@ jobs:
         with:
           toolchain: stable
           profile: default
-      - run: cargo bench
+      - run: cargo install cargo-criterion
+      - run: cargo criterion
   release:
     if: github.ref == 'refs/heads/main'
     env:
