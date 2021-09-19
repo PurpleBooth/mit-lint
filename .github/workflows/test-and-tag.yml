@@ -61,10 +61,7 @@ jobs:
       - uses: actions-rs/toolchain@v1.0.7
         with:
           toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1.0.3
-        with:
-          command: check
+      - run: cargo check
   test:
     runs-on: ubuntu-latest
     steps:
@@ -81,10 +78,7 @@ jobs:
       - uses: actions-rs/toolchain@v1.0.7
         with:
           toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
+      - run: cargo test
   lints:
     runs-on: ubuntu-latest
     steps:
@@ -101,18 +95,9 @@ jobs:
       - uses: actions-rs/toolchain@v1.0.7
         with:
           toolchain: stable
-          default: true
           components: rustfmt, clippy
-      - uses: actions-rs/cargo@v1.0.3
-        with:
-          command: fmt
-          args: --all -- --check
-      - uses: actions-rs/cargo@v1.0.3
-        with:
-          command: clippy
-          args:
-            --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
-            -D clippy::cargo
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo
       - uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
   bench:
     runs-on: ubuntu-latest
@@ -128,12 +113,8 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/toolchain@v1.0.7
         with:
-          profile: minimal
           toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1.0.3
-        with:
-          command: bench
+      - run: cargo bench
   release:
     if: github.ref == 'refs/heads/main'
     env:
@@ -208,6 +189,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
+      - uses: actions-rs/toolchain@v1.0.7
+        with:
+          toolchain: stable
       - env:
           CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
         run: |
