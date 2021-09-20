@@ -1,3 +1,6 @@
+/// Error codes for lints that have failed
+///
+/// Useful for exit codes and other user facing things
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 pub enum Code {
