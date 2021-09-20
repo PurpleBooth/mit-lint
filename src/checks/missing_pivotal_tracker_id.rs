@@ -53,9 +53,8 @@ mod tests_has_missing_pivotal_tracker_id {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn with_id() {

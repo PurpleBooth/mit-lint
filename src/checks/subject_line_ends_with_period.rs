@@ -35,9 +35,8 @@ mod tests {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn subject_does_not_end_with_period() {

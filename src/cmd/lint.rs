@@ -8,9 +8,11 @@ use crate::model::{Lints, Problem};
 ///
 /// ```rust
 /// use mit_commit::CommitMessage;
-/// use mit_lint::Lints;
-/// use mit_lint::lint;
-/// let actual = lint(&CommitMessage::from("An example commit message"), Lints::available().clone());
+/// use mit_lint::{lint, Lints};
+/// let actual = lint(
+///     &CommitMessage::from("An example commit message"),
+///     Lints::available().clone(),
+/// );
 /// assert!(!actual.is_empty());
 /// ```
 

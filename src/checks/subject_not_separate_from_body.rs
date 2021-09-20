@@ -38,10 +38,8 @@ mod tests {
 
     use indoc::indoc;
 
-    use crate::model::Code;
-    use crate::model::Problem;
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn with_gutter() {

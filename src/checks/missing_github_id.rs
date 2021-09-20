@@ -50,9 +50,8 @@ mod tests_has_missing_github_id {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn id_and_close() {

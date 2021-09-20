@@ -37,9 +37,8 @@ mod tests_has_missing_jira_issue_key {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn id_present() {
