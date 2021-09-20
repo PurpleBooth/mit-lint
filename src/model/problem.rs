@@ -1,5 +1,6 @@
 use crate::model::code::Code;
 
+/// Information about the breaking of the lint
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Problem {
     error: String,
@@ -8,21 +9,63 @@ pub struct Problem {
 }
 
 impl Problem {
+    /// Create a new problem
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::{Problem, Code};
+    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    ///
+    /// assert_eq!(problem.error(), "Error title".to_string())
+    /// ```
     #[must_use]
     pub fn new(error: String, tip: String, code: Code) -> Problem {
         Problem { error, tip, code }
     }
 
+    /// Get the code for this problem
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::{Problem, Code};
+    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    ///
+    /// assert_eq!(problem.code(), &Code::BodyWiderThan72Characters)
+    /// ```
     #[must_use]
     pub fn code(&self) -> &Code {
         &self.code
     }
 
+    /// Get the descriptive title for this error
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::{Problem, Code};
+    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    ///
+    /// assert_eq!(problem.error(), "Error title".to_string())
+    /// ```
     #[must_use]
     pub fn error(&self) -> &str {
         &self.error
     }
 
+    /// Get advice on how to fix the problem
+    ///
+    /// This should be a description of why this is a problem, and how to fix it
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::{Problem, Code};
+    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    ///
+    /// assert_eq!(problem.tip(), "Some advice on how to fix it".to_string())
+    /// ```
     #[must_use]
     pub fn tip(&self) -> &str {
         &self.tip
