@@ -39,26 +39,77 @@ impl Lints {
     }
 
     /// Get the available lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::{Lint, Lints};
+    ///
+    /// let lints = Lints::available().clone();
+    /// assert!(lints.into_iter().count() > 0);
+    /// ```
     #[must_use]
     pub fn available() -> &'static Lints {
         &AVAILABLE
     }
 
+    /// Get all the names of these lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::{Lint, Lints};
+    ///
+    /// let names = Lints::available().clone().names();
+    /// assert!(names.contains(&Lint::SubjectNotSeparateFromBody.name()));
+    /// ```
     #[must_use]
     pub fn names(self) -> Vec<&'static str> {
         self.lints.iter().map(|lint| lint.name()).collect()
     }
 
+    /// Get all the config keys of these lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::{Lint, Lints};
+    ///
+    /// let names = Lints::available().clone().config_keys();
+    /// assert!(names.contains(&Lint::SubjectNotSeparateFromBody.config_key()));
+    /// ```
     #[must_use]
     pub fn config_keys(self) -> Vec<String> {
         self.lints.iter().map(|lint| lint.config_key()).collect()
     }
 
+    /// Create the union of two lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::{Lint, Lints};
+    ///
+    /// let to_add = Lints::new(vec![Lint::NotEmojiLog].into_iter().collect());
+    /// let actual = Lints::available().clone().merge(&to_add).names();
+    /// assert!(actual.contains(&Lint::NotEmojiLog.name()));
+    /// ```
     #[must_use]
     pub fn merge(&self, other: &Lints) -> Lints {
         Lints::new(self.lints.union(&other.lints).copied().collect())
     }
 
+    /// Get the lints that are in self, but not in other
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::{Lint, Lints};
+    ///
+    /// let to_remove = Lints::new(vec![Lint::SubjectNotSeparateFromBody].into_iter().collect());
+    /// let actual = Lints::available().clone().subtract(&to_remove).names();
+    /// assert!(!actual.contains(&Lint::SubjectNotSeparateFromBody.name()));
+    /// ```
     #[must_use]
     pub fn subtract(&self, other: &Lints) -> Lints {
         Lints::new(self.lints.difference(&other.lints).copied().collect())
