@@ -124,12 +124,28 @@ impl Lint {
     }
 
     /// Get a key suitable for a configuration document
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::Lint;
+    /// assert_eq!(Lint::SubjectNotSeparateFromBody.config_key(), "mit.lint.subject-not-separated-from-body");
+    /// ```
     #[must_use]
     pub fn config_key(self) -> String {
         format!("{}.{}", CONFIG_KEY_PREFIX, self)
     }
 
     /// Run this lint on a commit message
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    /// let actual = Lint::NotConventionalCommit.lint(&CommitMessage::from("An example commit message"));
+    /// assert!(actual.is_some());
+    /// ```
     #[must_use]
     pub fn lint(self, commit_message: &CommitMessage) -> Option<Problem> {
         match self {
@@ -158,6 +174,14 @@ impl Lint {
     }
 
     /// Try and convert a list of names into lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::Lint;
+    /// let actual = Lint::from_names(vec!["not-emoji-log", "body-wider-than-72-characters"]);
+    /// assert_eq!(actual.unwrap(), vec![Lint::BodyWiderThan72Characters, Lint::NotEmojiLog]);
+    /// ```
     ///
     /// # Errors
     /// If the lint does not exist
@@ -230,6 +254,7 @@ impl std::fmt::Display for Lint {
     }
 }
 
+/// Errors
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("Lint not found: {0}")]
