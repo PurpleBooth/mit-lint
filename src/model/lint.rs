@@ -22,6 +22,7 @@ pub enum Lint {
     NotEmojiLog,
 }
 
+/// The prefix we put in front of the lint when serialising
 pub const CONFIG_KEY_PREFIX: &str = "mit.lint";
 
 impl std::convert::TryFrom<&str> for Lint {
