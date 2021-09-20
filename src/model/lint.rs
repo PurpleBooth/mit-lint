@@ -52,6 +52,7 @@ impl From<Lint> for &str {
 }
 
 impl Lint {
+    /// Get an lint's unique name
     #[must_use]
     pub fn name(self) -> &'static str {
         match self {
@@ -73,6 +74,7 @@ impl Lint {
 }
 
 lazy_static! {
+    /// All the available lints
     static ref ALL_LINTS: [Lint; 11] = [
         Lint::DuplicatedTrailers,
         Lint::PivotalTrackerIdMissing,
@@ -86,6 +88,7 @@ lazy_static! {
         Lint::NotConventionalCommit,
         Lint::NotEmojiLog,
     ];
+    /// The ones that are enabled by default
     static ref DEFAULT_ENABLED_LINTS: [Lint; 4] = [
         Lint::DuplicatedTrailers,
         Lint::SubjectNotSeparateFromBody,
@@ -94,20 +97,39 @@ lazy_static! {
     ];
 }
 impl Lint {
+    /// Iterator over all the lints
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::Lint;
+    /// assert!(Lint::iterator().next().is_some())
+    /// ```
     pub fn iterator() -> impl Iterator<Item = Lint> {
         ALL_LINTS.iter().copied()
     }
 
+    /// Check if a lint is enabled by default
+    ///
+    /// # Examples
+    ///
+    /// ``` rust
+    /// use mit_lint::Lint;
+    /// assert!(Lint::SubjectNotSeparateFromBody.enabled_by_default());
+    /// assert!(!Lint::NotConventionalCommit.enabled_by_default());
+    /// ```
     #[must_use]
     pub fn enabled_by_default(self) -> bool {
         DEFAULT_ENABLED_LINTS.contains(&self)
     }
 
+    /// Get a key suitable for a configuration document
     #[must_use]
     pub fn config_key(self) -> String {
         format!("{}.{}", CONFIG_KEY_PREFIX, self)
     }
 
+    /// Run this lint on a commit message
     #[must_use]
     pub fn lint(self, commit_message: &CommitMessage) -> Option<Problem> {
         match self {
