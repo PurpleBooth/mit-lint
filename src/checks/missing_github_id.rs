@@ -3,8 +3,10 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "github-id-missing";
 
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = indoc!(
     "
     It's important to add the issue ID because it allows us to link code back to the motivations \
@@ -21,7 +23,7 @@ const HELP_MESSAGE: &str = indoc!(
 
     Be careful just putting '#642' on a line by itself, as '#' is the default comment character"
 );
-
+// Description of the problem
 const ERROR: &str = "Your commit message is missing a GitHub ID";
 
 lazy_static! {

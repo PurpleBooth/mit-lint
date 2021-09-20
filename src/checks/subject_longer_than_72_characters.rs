@@ -2,13 +2,16 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "subject-longer-than-72-characters";
 
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "It's important to keep the subject of the commit less than 72 \
                             characters because when you look at the git log, that's where it \
                             truncates the message. This means that people won't get the entirety \
                             of the information in your commit.\n\nPlease keep the subject line 72 \
                             characters or under";
+// Description of the problem
 const ERROR: &str = "Your subject is longer than 72 characters";
 
 pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {

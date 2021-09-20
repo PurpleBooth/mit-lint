@@ -4,11 +4,13 @@ use mit_commit::{CommitMessage, Trailer};
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "duplicated-trailers";
 
 const TRAILERS_TO_CHECK_FOR_DUPLICATES: [&str; 3] =
     ["Signed-off-by", "Co-authored-by", "Relates-to"];
 const FIELD_SINGULAR: &str = "field";
+// Description of the problem
 const ERROR: &str = "Your commit message has duplicated trailers";
 
 const FIELD_PLURAL: &str = "fields";

@@ -2,7 +2,9 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "jira-issue-key-missing";
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = indoc::indoc!(
     "
     It's important to add the issue key because it allows us to link code back to the motivations \
@@ -10,6 +12,7 @@ const HELP_MESSAGE: &str = indoc::indoc!(
 
     You can fix this by adding a key like `JRA-123` to the commit message"
 );
+// Description of the problem
 const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 lazy_static! {
