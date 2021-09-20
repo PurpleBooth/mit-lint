@@ -2,9 +2,11 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "subject-not-separated-from-body";
-
+// Description of the problem
 const ERROR: &str = "Your commit message is missing a blank line between the subject and the body";
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "Most tools that render and parse commit messages, expect commit \
                             messages to be in the form of subject and body. This includes git \
                             itself in tools like git-format-patch. If you don't include this you \

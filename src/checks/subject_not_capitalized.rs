@@ -2,11 +2,13 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "subject-line-not-capitalized";
-
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "The subject line is a title, and as such should be \
                             capitalised.\n\nYou can fix this by capitalising the first character \
                             in the subject";
+// Description of the problem
 const ERROR: &str = "Your commit message is missing a capital letter";
 
 fn has_problem(commit_message: &CommitMessage) -> bool {

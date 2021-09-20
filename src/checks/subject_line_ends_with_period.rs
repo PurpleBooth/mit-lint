@@ -2,9 +2,11 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
+// Canonical lint ID
 pub(crate) const CONFIG: &str = "subject-line-ends-with-period";
-
+// Description of the problem
 const ERROR: &str = "Your commit message ends with a period";
+// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "It's important to keep your commits short, because we only have a \
                             limited number of characters to use (72) before the subject line is \
                             truncated. Full stops aren't normally in subject lines, and take up \
