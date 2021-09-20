@@ -31,8 +31,7 @@ impl Problem {
 
 #[cfg(test)]
 mod tests {
-    use crate::model::code::Code;
-    use crate::model::Problem;
+    use crate::model::{code::Code, Problem};
 
     #[test]
     fn test_has_error() {

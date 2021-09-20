@@ -3,8 +3,7 @@ use std::collections::BTreeSet;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use indoc::indoc;
 use mit_commit::CommitMessage;
-use mit_lint::lint;
-use mit_lint::{Lint, Lints};
+use mit_lint::{lint, Lint, Lints};
 
 const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
     "

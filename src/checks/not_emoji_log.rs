@@ -60,9 +60,8 @@ mod test {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn new() {

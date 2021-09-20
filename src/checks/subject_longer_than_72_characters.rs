@@ -32,9 +32,8 @@ mod tests {
 
     use indoc::indoc;
 
-    use crate::model::{Code, Problem};
-
     use super::*;
+    use crate::model::{Code, Problem};
 
     #[test]
     fn shorter_than_72_characters() {

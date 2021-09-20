@@ -28,8 +28,9 @@ impl Lints {
     /// # Examples
     ///
     /// ```rust
-    /// use mit_lint::Lints;
     /// use std::collections::BTreeSet;
+    ///
+    /// use mit_lint::Lints;
     /// Lints::new(BTreeSet::new());
     /// ```
     #[must_use]
@@ -65,8 +66,8 @@ impl Lints {
 }
 
 impl std::iter::IntoIterator for Lints {
-    type Item = Lint;
     type IntoIter = IntoIter<Lint>;
+    type Item = Lint;
 
     fn into_iter(self) -> Self::IntoIter {
         self.lints.into_iter().collect::<Vec<_>>().into_iter()
@@ -137,12 +138,19 @@ mod tests {
 
     use indoc::indoc;
 
-    use crate::model::lint::Lint::{
-        BodyWiderThan72Characters, DuplicatedTrailers, JiraIssueKeyMissing,
-        PivotalTrackerIdMissing, SubjectLongerThan72Characters, SubjectNotSeparateFromBody,
+    use crate::model::{
+        lint::Lint::{
+            BodyWiderThan72Characters,
+            DuplicatedTrailers,
+            JiraIssueKeyMissing,
+            PivotalTrackerIdMissing,
+            SubjectLongerThan72Characters,
+            SubjectNotSeparateFromBody,
+        },
+        lints::Error,
+        Lint,
+        Lints,
     };
-    use crate::model::lints::Error;
-    use crate::model::{Lint, Lints};
 
     #[test]
     fn it_returns_an_error_if_one_of_the_names_is_wrong() {
