@@ -4,7 +4,7 @@ use crate::model::{Lints, Problem};
 
 /// Lint a commit message
 ///
-/// Example
+/// # Example
 ///
 /// ```rust
 /// use mit_commit::CommitMessage;
