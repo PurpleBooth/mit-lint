@@ -8,12 +8,14 @@ use thiserror::Error;
 
 use crate::model::{lint, Lint};
 
+/// A collection of lints
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Lints {
     lints: BTreeSet<Lint>,
 }
 
 lazy_static! {
+    /// All the available lints
     static ref AVAILABLE: Lints = {
         let set = Lint::iterator().collect();
         Lints::new(set)
@@ -21,11 +23,21 @@ lazy_static! {
 }
 
 impl Lints {
+    /// Create a new lint
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::Lints;
+    /// use std::collections::BTreeSet;
+    /// Lints::new(BTreeSet::new());
+    /// ```
     #[must_use]
     pub fn new(lints: BTreeSet<Lint>) -> Lints {
         Lints { lints }
     }
 
+    /// Get the available lints
     #[must_use]
     pub fn available() -> &'static Lints {
         &AVAILABLE
