@@ -3,10 +3,10 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
-// Canonical lint ID
+/// Canonical lint ID
 pub(crate) const CONFIG: &str = "pivotal-tracker-id-missing";
 
-// Advice on how to correct the problem
+/// Advice on how to correct the problem
 const HELP_MESSAGE: &str = indoc!(
     "
     It's important to add the ID because it allows code to be linked back to the stories it was \
@@ -25,7 +25,7 @@ const HELP_MESSAGE: &str = indoc!(
     This will address [#12345884]"
 );
 
-// Description of the problem
+/// Description of the problem
 const ERROR: &str = "Your commit message is missing a Pivotal Tracker Id";
 
 lazy_static! {
