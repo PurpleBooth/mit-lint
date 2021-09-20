@@ -3,10 +3,10 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
-// Canonical lint ID
+/// Canonical lint ID
 pub(crate) const CONFIG: &str = "not-emoji-log";
 
-// Advice on how to correct the problem
+/// Advice on how to correct the problem
 const HELP_MESSAGE: &str = indoc!(
     "
     It's important to follow the emoji log style when creating your commit message. By using this \
@@ -26,7 +26,7 @@ const HELP_MESSAGE: &str = indoc!(
     You can read more at https://github.com/ahmadawais/Emoji-Log\
      "
 );
-// Description of the problem
+/// Description of the problem
 const ERROR: &str = "Your commit message isn't in emoji log style";
 
 const PREFIXES: &[&str] = &[

@@ -3,10 +3,10 @@ use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
 
-// Canonical lint ID
+/// Canonical lint ID
 pub(crate) const CONFIG: &str = "not-conventional-commit";
 
-// Advice on how to correct the problem
+/// Advice on how to correct the problem
 const HELP_MESSAGE: &str = indoc!(
     "
     It's important to follow the conventional commit style when creating your commit message. By \
@@ -23,7 +23,7 @@ const HELP_MESSAGE: &str = indoc!(
 
     You can read more at https://www.conventionalcommits.org/"
 );
-// Description of the problem
+/// Description of the problem
 const ERROR: &str = "Your commit message isn't in conventional style";
 
 lazy_static! {
