@@ -100,7 +100,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/toolchain@v1.0.7
         with:
-          toolchain: stable
+          toolchain: nightly
           profile: default
           components: rustfmt, clippy
       - run: cargo fmt --all -- --check
