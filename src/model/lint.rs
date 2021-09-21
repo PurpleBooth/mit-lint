@@ -121,8 +121,160 @@ pub enum Lint {
     /// );
     /// ```
     PivotalTrackerIdMissing,
+    /// Check for a missing pivotal tracker id
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Relates-to: JRA-123
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::JiraIssueKeyMissing.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     This is an example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///     "Your commit message is missing a JIRA Issue Key".into(),
+    ///     "It's important to add the issue key because it allows us to link code back to the motivations for doing it, and in some cases provide an audit trail for compliance purposes.\n\nYou can fix this by adding a key like `JRA-123` to the commit message"
+    ///         .into(),
+    ///     Code::JiraIssueKeyMissing,
+    /// ));
+    /// let actual = Lint::JiraIssueKeyMissing.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     JiraIssueKeyMissing,
+    /// Check for a missing pivotal tracker id
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Relates-to: AnOrganisation/git-mit#642
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::GitHubIdMissing.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     This is an example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///      "Your commit message is missing a GitHub ID".into(),
+    ///     "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.\n\nYou can fix this by adding a ID like the following examples:\n\n#642\nGH-642\nAnUser/git-mit#642\nAnOrganisation/git-mit#642\nfixes #642\n\nBe careful just putting '#642' on a line by itself, as '#' is the default comment character"
+    ///         .into(),
+    ///     Code::GitHubIdMissing,
+    /// ));
+    /// let actual = Lint::GitHubIdMissing.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     GitHubIdMissing,
+    /// Check for a missing pivotal tracker id
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::SubjectNotSeparateFromBody.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///     This is an example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///       "Your commit message is missing a blank line between the subject and the body".into(),
+    ///     "Most tools that render and parse commit messages, expect commit messages to be in the form of subject and body. This includes git itself in tools like git-format-patch. If you don't include this you may see strange behaviour from git and any related tools.\n\nTo fix this separate subject from body with a blank line"
+    ///         .into(),
+    ///     Code::SubjectNotSeparateFromBody,
+    /// ));
+    /// let actual = Lint::SubjectNotSeparateFromBody.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     SubjectNotSeparateFromBody,
     SubjectLongerThan72Characters,
     SubjectNotCapitalized,
