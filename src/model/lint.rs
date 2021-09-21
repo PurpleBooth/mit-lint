@@ -12,7 +12,114 @@ use crate::{
 /// The lints that are supported
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Ord, PartialOrd)]
 pub enum Lint {
+    /// Check for duplicated trailers
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     This is an example commit without any duplicate trailers
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::DuplicatedTrailers.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     This is an example commit without any duplicate trailers
+    ///
+    ///     Signed-off-by: Billie Thompson <email@example.com>
+    ///     Signed-off-by: Billie Thompson <email@example.com>
+    ///     Co-authored-by: Billie Thompson <email@example.com>
+    ///     Co-authored-by: Billie Thompson <email@example.com>
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///     "Your commit message has duplicated trailers".into(),
+    ///     "These are normally added accidentally when you\'re rebasing or amending to a \
+    ///      commit, sometimes in the text editor, but often by git hooks.\n\nYou can fix \
+    ///      this by deleting the duplicated \"Co-authored-by\", \"Signed-off-by\" fields"
+    ///         .into(),
+    ///     Code::DuplicatedTrailers,
+    /// ));
+    /// let actual = Lint::DuplicatedTrailers.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     DuplicatedTrailers,
+    /// Check for a missing pivotal tracker id
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit [fixes #12345678]
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     This is an example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///     "Your commit message is missing a Pivotal Tracker Id".into(),
+    ///     "It's important to add the ID because it allows code to be linked back to the stories it was done for, it can provide a chain of custody for code for audit purposes, and it can give future explorers of the codebase insight into the wider organisational need behind the change. We may also use it for automation purposes, like generating changelogs or notification emails.\n\nYou can fix this by adding the Id in one of the styles below to the commit message\n[Delivers #12345678]\n[fixes #12345678]\n[finishes #12345678]\n[#12345884 #12345678]\n[#12345884,#12345678]\n[#12345678],[#12345884]\nThis will address [#12345884]"
+    ///         .into(),
+    ///     Code::PivotalTrackerIdMissing,
+    /// ));
+    /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     PivotalTrackerIdMissing,
     JiraIssueKeyMissing,
     GitHubIdMissing,
