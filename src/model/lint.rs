@@ -121,7 +121,7 @@ pub enum Lint {
     /// );
     /// ```
     PivotalTrackerIdMissing,
-    /// Check for a missing pivotal tracker id
+    /// Check for a missing jira issue key
     ///
     /// # Examples
     ///
@@ -173,7 +173,7 @@ pub enum Lint {
     /// );
     /// ```
     JiraIssueKeyMissing,
-    /// Check for a missing pivotal tracker id
+    /// Check for a missing github id
     ///
     /// # Examples
     ///
@@ -225,7 +225,7 @@ pub enum Lint {
     /// );
     /// ```
     GitHubIdMissing,
-    /// Check for a missing pivotal tracker id
+    /// Subject being not being seperated from the body
     ///
     /// # Examples
     ///
@@ -276,11 +276,296 @@ pub enum Lint {
     /// );
     /// ```
     SubjectNotSeparateFromBody,
+    /// Check for a long subject line
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::SubjectLongerThan72Characters.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message:String = "x".repeat(73).into();
+    /// let expected = Some(Problem::new(
+    ///       "Your subject is longer than 72 characters".into(),
+    ///     "It's important to keep the subject of the commit less than 72 characters because when you look at the git log, that's where it truncates the message. This means that people won't get the entirety of the information in your commit.\n\nPlease keep the subject line 72 characters or under"
+    ///         .into(),
+    ///     Code::SubjectLongerThan72Characters,
+    /// ));
+    /// let actual = Lint::SubjectLongerThan72Characters.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     SubjectLongerThan72Characters,
+    /// Check for a non-capitalised subject
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::SubjectNotCapitalized.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     an example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///       "Your commit message is missing a capital letter".into(),
+    ///     "The subject line is a title, and as such should be capitalised.\n\nYou can fix this by capitalising the first character in the subject"
+    ///         .into(),
+    ///     Code::SubjectNotCapitalized,
+    /// ));
+    /// let actual = Lint::SubjectNotCapitalized.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     SubjectNotCapitalized,
+    /// Check for period at the end of the subject
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::SubjectEndsWithPeriod.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit.
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(     Problem::new(
+    ///       "Your commit message ends with a period".into(),
+    ///     "It's important to keep your commits short, because we only have a limited number of characters to use (72) before the subject line is truncated. Full stops aren't normally in subject lines, and take up an extra character, so we shouldn't use them in commit message subjects.\n\nYou can fix this by removing the period"
+    ///         .into(),
+    ///     Code::SubjectEndsWithPeriod,
+    /// ));
+    /// let actual = Lint::SubjectEndsWithPeriod.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     SubjectEndsWithPeriod,
+    /// Check for a long body line
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::BodyWiderThan72Characters.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message:String = ["Subject".to_string(), "x".repeat(73).into()].join("\n\n");
+    /// let expected = Some(Problem::new(
+    ///       "Your commit has a body wider than 72 characters".into(),
+    ///     "It's important to keep the body of the commit narrower than 72 characters because when you look at the git log, that's where it truncates the message. This means that people won't get the entirety of the information in your commit.\n\nYou can fix this by making the lines in your body no more than 72 characters"
+    ///         .into(),
+    ///     Code::BodyWiderThan72Characters,
+    /// ));
+    /// let actual = Lint::BodyWiderThan72Characters.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     BodyWiderThan72Characters,
+    /// Check for commits following the conventional standard
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     refactor: An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::NotConventionalCommit.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(Problem::new(
+    ///       "Your commit message isn't in conventional style".into(),
+    ///      "It's important to follow the conventional commit style when creating your commit message. By using this style we can automatically calculate the version of software using deployment pipelines, and also generate changelogs and other useful information without human interaction.\n\nYou can fix it by following style\n\n<type>[optional scope]: <description>\n\n[optional body]\n\n[optional footer(s)]\n\nYou can read more at https://www.conventionalcommits.org/"
+    ///         .into(),
+    ///     Code::NotConventionalCommit,
+    /// ));
+    /// let actual = Lint::NotConventionalCommit.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     NotConventionalCommit,
+    /// Check for commits following the emoji log standard
+    ///
+    /// # Examples
+    ///
+    /// Passing
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::Lint;
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     📖 DOC: An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let actual = Lint::NotEmojiLog.lint(&CommitMessage::from(message));
+    /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
+    /// ```
+    ///
+    /// Erring
+    ///
+    /// ```rust
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_lint::{Code, Lint, Problem};
+    ///
+    /// let message: &str = indoc!(
+    ///     "
+    ///     An example commit
+    ///
+    ///     Some Body Content
+    ///     "
+    /// )
+    /// .into();
+    /// let expected = Some(
+    /// Problem::new(
+    ///        "Your commit message isn't in emoji log style".into(),
+    ///      "It's important to follow the emoji log style when creating your commit message. By using this style we can automatically generate changelogs.\n\nYou can fix it using one of the prefixes:\n\n📦 NEW:\n👌 IMPROVE:\n🐛 FIX:\n📖 DOC:\n🚀 RELEASE:🤖 TEST:\n‼\u{fe0f} BREAKING:\n\nYou can read more at https://github.com/ahmadawais/Emoji-Log"
+    ///         .into(),
+    ///     Code::NotEmojiLog,
+    /// ));
+    /// let actual = Lint::NotEmojiLog.lint(&CommitMessage::from(message));
+    /// assert_eq!(
+    ///     actual, expected,
+    ///     "Expected {:?}, found {:?}",
+    ///     expected, actual
+    /// );
+    /// ```
     NotEmojiLog,
 }
 
@@ -363,7 +648,7 @@ impl Lint {
     ///
     /// # Examples
     ///
-    /// ``` rust
+    /// ```rust
     /// use mit_lint::Lint;
     /// assert!(Lint::iterator().next().is_some())
     /// ```
@@ -375,7 +660,7 @@ impl Lint {
     ///
     /// # Examples
     ///
-    /// ``` rust
+    /// ```rust
     /// use mit_lint::Lint;
     /// assert!(Lint::SubjectNotSeparateFromBody.enabled_by_default());
     /// assert!(!Lint::NotConventionalCommit.enabled_by_default());
@@ -389,9 +674,12 @@ impl Lint {
     ///
     /// # Examples
     ///
-    /// ``` rust
+    /// ```rust
     /// use mit_lint::Lint;
-    /// assert_eq!(Lint::SubjectNotSeparateFromBody.config_key(), "mit.lint.subject-not-separated-from-body");
+    /// assert_eq!(
+    ///     Lint::SubjectNotSeparateFromBody.config_key(),
+    ///     "mit.lint.subject-not-separated-from-body"
+    /// );
     /// ```
     #[must_use]
     pub fn config_key(self) -> String {

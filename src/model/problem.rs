@@ -13,9 +13,13 @@ impl Problem {
     ///
     /// # Examples
     ///
-    /// ``` rust
-    /// use mit_lint::{Problem, Code};
-    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    /// ```rust
+    /// use mit_lint::{Code, Problem};
+    /// let problem = Problem::new(
+    ///     "Error title".to_string(),
+    ///     "Some advice on how to fix it".to_string(),
+    ///     Code::BodyWiderThan72Characters,
+    /// );
     ///
     /// assert_eq!(problem.error(), "Error title".to_string())
     /// ```
@@ -28,9 +32,13 @@ impl Problem {
     ///
     /// # Examples
     ///
-    /// ``` rust
-    /// use mit_lint::{Problem, Code};
-    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    /// ```rust
+    /// use mit_lint::{Code, Problem};
+    /// let problem = Problem::new(
+    ///     "Error title".to_string(),
+    ///     "Some advice on how to fix it".to_string(),
+    ///     Code::BodyWiderThan72Characters,
+    /// );
     ///
     /// assert_eq!(problem.code(), &Code::BodyWiderThan72Characters)
     /// ```
@@ -43,9 +51,13 @@ impl Problem {
     ///
     /// # Examples
     ///
-    /// ``` rust
-    /// use mit_lint::{Problem, Code};
-    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    /// ```rust
+    /// use mit_lint::{Code, Problem};
+    /// let problem = Problem::new(
+    ///     "Error title".to_string(),
+    ///     "Some advice on how to fix it".to_string(),
+    ///     Code::BodyWiderThan72Characters,
+    /// );
     ///
     /// assert_eq!(problem.error(), "Error title".to_string())
     /// ```
@@ -60,9 +72,13 @@ impl Problem {
     ///
     /// # Examples
     ///
-    /// ``` rust
-    /// use mit_lint::{Problem, Code};
-    /// let problem = Problem::new("Error title".to_string(), "Some advice on how to fix it".to_string(), Code::BodyWiderThan72Characters);
+    /// ```rust
+    /// use mit_lint::{Code, Problem};
+    /// let problem = Problem::new(
+    ///     "Error title".to_string(),
+    ///     "Some advice on how to fix it".to_string(),
+    ///     Code::BodyWiderThan72Characters,
+    /// );
     ///
     /// assert_eq!(problem.tip(), "Some advice on how to fix it".to_string())
     /// ```
