@@ -4,7 +4,7 @@ Lint commit messages
 
 ## Example
 
-```rust
+``` rust
 use mit_commit::CommitMessage;
 use mit_lint::{Code, lint, Problem, Lints, Lint};
 
