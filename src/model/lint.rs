@@ -576,8 +576,8 @@ impl std::convert::TryFrom<&str> for Lint {
     type Error = Error;
 
     fn try_from(from: &str) -> Result<Self, Self::Error> {
-        Lint::iterator()
-            .zip(Lint::iterator().map(|lint| format!("{}", lint)))
+        Lint::all_lints()
+            .zip(Lint::all_lints().map(|lint| format!("{}", lint)))
             .filter_map(|(lint, name): (Lint, String)| if name == from { Some(lint) } else { None })
             .collect::<Vec<Lint>>()
             .first()
@@ -650,10 +650,23 @@ impl Lint {
     ///
     /// ```rust
     /// use mit_lint::Lint;
+    /// assert!(Lint::all_lints().next().is_some())
+    /// ```
+    pub fn all_lints() -> impl Iterator<Item = Lint> {
+        ALL_LINTS.iter().copied()
+    }
+
+    /// Iterator over all the lints
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use mit_lint::Lint;
     /// assert!(Lint::iterator().next().is_some())
     /// ```
+    #[deprecated(since = "0.1.5", note = "iterator was an unusual name. Use all_lints")]
     pub fn iterator() -> impl Iterator<Item = Lint> {
-        ALL_LINTS.iter().copied()
+        Lint::all_lints()
     }
 
     /// Check if a lint is enabled by default
@@ -773,7 +786,7 @@ mod tests_lints {
 
     #[test]
     fn i_can_get_all_the_lints() {
-        let all: Vec<Lint> = Lint::iterator().collect();
+        let all: Vec<Lint> = Lint::all_lints().collect();
         assert_eq!(
             all,
             vec![

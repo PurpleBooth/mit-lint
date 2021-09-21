@@ -55,7 +55,7 @@ const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
 );
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let lints = Lint::iterator().collect::<Vec<_>>();
+    let lints = Lint::all_lints().collect::<Vec<_>>();
 
     for enabled_lint in &lints {
         let mut btree_lints = BTreeSet::new();

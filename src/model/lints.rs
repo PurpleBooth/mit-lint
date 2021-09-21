@@ -17,7 +17,7 @@ pub struct Lints {
 lazy_static! {
     /// All the available lints
     static ref AVAILABLE: Lints = {
-        let set = Lint::iterator().collect();
+        let set = Lint::all_lints().collect();
         Lints::new(set)
     };
 }
@@ -131,7 +131,7 @@ impl TryFrom<Lints> for String {
     fn try_from(lints: Lints) -> Result<Self, Self::Error> {
         let enabled: Vec<_> = lints.into();
 
-        let config: BTreeMap<String, bool> = Lint::iterator()
+        let config: BTreeMap<String, bool> = Lint::all_lints()
             .map(|x| (x, enabled.contains(&x)))
             .fold(BTreeMap::new(), |mut acc, (lint, state)| {
                 acc.insert(lint.to_string(), state);
@@ -287,7 +287,7 @@ mod tests {
     #[test]
     fn can_get_all() {
         let actual = Lints::available();
-        let lints = Lint::iterator().collect();
+        let lints = Lint::all_lints().collect();
         let expected = &Lints::new(lints);
 
         assert_eq!(
