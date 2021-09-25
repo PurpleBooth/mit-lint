@@ -3,7 +3,8 @@ use std::collections::BTreeSet;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use indoc::indoc;
 use mit_commit::CommitMessage;
-use mit_lint::{lint, Lint, Lints};
+use mit_lint::{async_lint, Lint, Lints};
+use tokio::runtime::Runtime;
 
 const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
     "
@@ -54,7 +55,13 @@ const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
         "
 );
 
+/// Run the benchmark
+///
+/// # Panics
+///
+/// Panics if tokio fails to start
 pub fn criterion_benchmark(c: &mut Criterion) {
+    let tokio = Runtime::new().unwrap();
     let lints = Lint::all_lints().collect::<Vec<_>>();
 
     for enabled_lint in &lints {
@@ -66,7 +73,8 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             &(COMMIT_WITH_ALL_FEATURES, enabled_lints),
             |b, (message, enabled_lints)| {
                 let commit = CommitMessage::from(*message);
-                b.iter(|| lint(&commit, enabled_lints.clone()));
+                b.to_async(&tokio)
+                    .iter(|| async_lint(&commit, enabled_lints.clone()));
             },
         );
     }
@@ -77,7 +85,8 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         &(COMMIT_WITH_ALL_FEATURES, all_lints.clone()),
         |b, (message, all_lints)| {
             let commit = CommitMessage::from(*message);
-            b.iter(|| lint(&commit, all_lints.clone()));
+            b.to_async(&tokio)
+                .iter(|| async_lint(&commit, all_lints.clone()));
         },
     );
 }
