@@ -50,6 +50,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotEmojiLog,
+            commit_message,
         ))
     }
 }
@@ -163,54 +164,60 @@ mod test {
 
     #[test]
     fn no_gap() {
-        run_lint(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 \u{203c}\u{fe0f} BREAKING:An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        run_lint(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotEmojiLog,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn unknown_emoji() {
-        run_lint(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 \u{1f408} UNKNOWN: An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        run_lint(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotEmojiLog,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn not_emoji() {
-        run_lint(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        run_lint(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotEmojiLog,
+                &message.into(),
             )),
         );
     }

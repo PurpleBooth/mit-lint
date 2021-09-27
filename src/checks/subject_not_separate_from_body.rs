@@ -26,6 +26,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotSeparateFromBody,
+            commit_message,
         ))
     } else {
         None
@@ -156,6 +157,13 @@ mod tests {
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectNotSeparateFromBody,
+                &indoc!(
+                    "
+                An example commit
+                This is an example commit
+                "
+                )
+                .into(),
             )),
         );
         test_subject_not_separate_from_body(
@@ -171,6 +179,15 @@ mod tests {
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectNotSeparateFromBody,
+                &indoc!(
+                    "
+                An example commit
+                This is an example commit
+                It has more lines
+                It has even more lines
+                "
+                )
+                .into(),
             )),
         );
     }

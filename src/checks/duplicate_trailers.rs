@@ -54,6 +54,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             warning,
             Code::DuplicatedTrailers,
+            commit,
         ))
     }
 }
@@ -100,9 +101,8 @@ mod tests_has_duplicated_trailers {
 
     #[test]
     fn two_duplicates() {
-        test_lint_duplicated_trailers(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit without any duplicate trailers
@@ -112,8 +112,9 @@ mod tests_has_duplicated_trailers {
                 Co-authored-by: Billie Thompson <email@example.com>
                 Co-authored-by: Billie Thompson <email@example.com>
                 "
-            )
-            .into(),
+        );
+        test_lint_duplicated_trailers(
+            message.into(),
             &Some(Problem::new(
                 ERROR.into(),
                 "These are normally added accidentally when you\'re rebasing or amending to a \
@@ -121,15 +122,15 @@ mod tests_has_duplicated_trailers {
                  this by deleting the duplicated \"Co-authored-by\", \"Signed-off-by\" fields"
                     .into(),
                 Code::DuplicatedTrailers,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn signed_off_by() {
-        test_lint_duplicated_trailers(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit without any duplicate trailers
@@ -137,8 +138,9 @@ mod tests_has_duplicated_trailers {
                 Signed-off-by: Billie Thompson <email@example.com>
                 Signed-off-by: Billie Thompson <email@example.com>
                 "
-            )
-            .into(),
+        );
+        test_lint_duplicated_trailers(
+            message.into(),
             &Some(Problem::new(
                 ERROR.into(),
                 "These are normally added accidentally when you\'re rebasing or amending to a \
@@ -146,15 +148,15 @@ mod tests_has_duplicated_trailers {
                  this by deleting the duplicated \"Signed-off-by\" field"
                     .into(),
                 Code::DuplicatedTrailers,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn co_authored_by() {
-        test_lint_duplicated_trailers(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit without any duplicate trailers
@@ -162,8 +164,9 @@ mod tests_has_duplicated_trailers {
                 Co-authored-by: Billie Thompson <email@example.com>
                 Co-authored-by: Billie Thompson <email@example.com>
                 "
-            )
-            .into(),
+        );
+        test_lint_duplicated_trailers(
+            message.into(),
             &Some(Problem::new(
                 ERROR.into(),
                 "These are normally added accidentally when you\'re rebasing or amending to a \
@@ -171,15 +174,15 @@ mod tests_has_duplicated_trailers {
                  this by deleting the duplicated \"Co-authored-by\" field"
                     .into(),
                 Code::DuplicatedTrailers,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn relates_to() {
-        test_lint_duplicated_trailers(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit without any duplicate trailers
@@ -187,8 +190,9 @@ mod tests_has_duplicated_trailers {
                 Relates-to: #315
                 Relates-to: #315
                 "
-            )
-            .into(),
+        );
+        test_lint_duplicated_trailers(
+            message.into(),
             &Some(Problem::new(
                 ERROR.into(),
                 "These are normally added accidentally when you\'re rebasing or amending to a \
@@ -196,6 +200,7 @@ mod tests_has_duplicated_trailers {
                  this by deleting the duplicated \"Relates-to\" field"
                     .into(),
                 Code::DuplicatedTrailers,
+                &message.into(),
             )),
         );
     }

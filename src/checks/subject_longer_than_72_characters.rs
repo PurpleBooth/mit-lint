@@ -20,6 +20,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectLongerThan72Characters,
+            commit,
         ))
     } else {
         None
@@ -178,24 +179,28 @@ mod tests {
 
     #[test]
     fn longer_than_72_characters() {
+        let message = "x".repeat(73);
         test_subject_longer_than_72_characters(
-            &"x".repeat(73),
+            &message.clone(),
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn longer_than_72_characters_and_a_newline() {
+        let message = format!("{}\n", "x".repeat(73));
         test_subject_longer_than_72_characters(
-            &format!("{}\n", "x".repeat(73)),
+            &message.clone(),
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
+                &message.into(),
             )),
         );
     }
@@ -260,12 +265,14 @@ mod tests {
 
             "
         );
+        let message = format!("{}\n\n{}", "x".repeat(73), message);
         test_subject_longer_than_72_characters(
-            &format!("{}\n\n{}", "x".repeat(73), message),
+            &message.clone(),
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
+                &message.into(),
             )),
         );
     }

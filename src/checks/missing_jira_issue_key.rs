@@ -27,6 +27,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
+            commit_message,
         ))
     }
 }
@@ -102,50 +103,56 @@ mod tests_has_missing_jira_issue_key {
 
     #[test]
     fn id_missing() {
-        test_has_missing_jira_issue_key(
-            indoc!(
-                "
+        let message_1 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_has_missing_jira_issue_key(
+            message_1,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
+                &message_1.into(),
             )),
         );
-        test_has_missing_jira_issue_key(
-            indoc!(
-                "
+        let message_2 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
 
                 A-123
                 "
-            ),
+        );
+        test_has_missing_jira_issue_key(
+            message_2,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
+                &message_2.into(),
             )),
         );
-        test_has_missing_jira_issue_key(
-            indoc!(
-                "
+        let message_3 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
 
                 JRA-
                 "
-            ),
+        );
+        test_has_missing_jira_issue_key(
+            message_3,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
+                &message_3.into(),
             )),
         );
     }
