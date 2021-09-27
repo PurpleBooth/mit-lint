@@ -2,15 +2,16 @@
 name = "mit-lint"
 version = "0.2.0"
 edition = "2018"
-authors = [ "Billie Thompson <billie+mit-lint@billiecodes.com>" ]
+authors = ["Billie Thompson <billie+mit-lint@billiecodes.com>"]
 license = "CC0-1.0"
 description = "Lints for commits parsed with mit-commit."
-categories = [ "development-tools" ]
-keywords = [ "git", "commit", "lints" ]
+categories = ["development-tools"]
+keywords = ["git", "commit", "lints"]
 readme = "README.md"
 repository = "https://github.com/PurpleBooth/mit-lint"
 
 [dependencies]
+miette = { version = "3.0.0", features = ["fancy"] }
 thiserror = "1.0.29"
 mit-commit = "1.29.8"
 regex = "1.5.4"
@@ -21,7 +22,7 @@ lazy_static = "1.4.0"
 
 [dependencies.serde]
 version = "1.0.125"
-features = [ "derive" ]
+features = ["derive"]
 
 [dev-dependencies]
 criterion = { version = "0.3.5", features = ["async_tokio"] }

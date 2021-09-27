@@ -32,14 +32,15 @@ lazy_static! {
             .unwrap();
 }
 
-pub(crate) fn lint(mit_commit: &CommitMessage) -> Option<Problem> {
-    if mit_commit.matches_pattern(&*RE) {
+pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+    if commit_message.matches_pattern(&*RE) {
         None
     } else {
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::GitHubIdMissing,
+            commit_message,
         ))
     }
 }
@@ -265,54 +266,60 @@ mod tests_has_missing_github_id {
 
     #[test]
     fn id_missing() {
-        test_has_missing_github_id(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_has_missing_github_id(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn id_malformed() {
-        test_has_missing_github_id(
-            indoc!(
-                "
+        let message_1 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
 
                 H-123
                 "
-            ),
+        );
+        test_has_missing_github_id(
+            message_1,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
+                &message_1.into(),
             )),
         );
-        test_has_missing_github_id(
-            indoc!(
-                "
+        let message_2 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
 
                 git-mit#123
                 "
-            ),
+        );
+        test_has_missing_github_id(
+            message_2,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
+                &message_2.into(),
             )),
         );
     }

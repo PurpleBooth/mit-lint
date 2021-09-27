@@ -14,4 +14,4 @@ projects:
 
 sizes:
   use_angular: true
-  none: [ci, "-"]
+  none: [ ci, "-" ]

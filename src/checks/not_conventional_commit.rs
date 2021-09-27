@@ -42,6 +42,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotConventionalCommit,
+            commit_message,
         ))
     } else {
         None
@@ -159,54 +160,60 @@ mod tests {
 
     #[test]
     fn non_conventional() {
-        test_subject_not_separate_from_body(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_subject_not_separate_from_body(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn missing_bracket() {
-        test_subject_not_separate_from_body(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 fix(example: An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_subject_not_separate_from_body(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn missing_space() {
-        test_subject_not_separate_from_body(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 fix(example):An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_subject_not_separate_from_body(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
+                &message.into(),
             )),
         );
     }

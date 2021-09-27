@@ -33,6 +33,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
+            commit,
         ))
     } else {
         None
@@ -125,24 +126,28 @@ mod tests {
 
     #[test]
     fn longer_than_72_characters() {
+        let message = format!("Subject\n\n{}", "x".repeat(73));
         test_body_wider_than_72_characters(
-            &format!("Subject\n\n{}", "x".repeat(73)),
+            &message.clone(),
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::BodyWiderThan72Characters,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn first_line_ok_but_second_line_too_long() {
+        let message = format!("Subject\n\nx\n{}\nx\n", "x".repeat(73));
         test_body_wider_than_72_characters(
-            &format!("Subject\n\nx\n{}\nx\n", "x".repeat(73)),
+            &message.clone(),
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::BodyWiderThan72Characters,
+                &message.into(),
             )),
         );
     }

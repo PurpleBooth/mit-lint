@@ -27,6 +27,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotCapitalized,
+            commit_message,
         ))
     } else {
         None
@@ -66,6 +67,12 @@ mod tests {
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectNotCapitalized,
+                &indoc!(
+                    "
+                subject line
+                "
+                )
+                .into(),
             )),
         );
     }

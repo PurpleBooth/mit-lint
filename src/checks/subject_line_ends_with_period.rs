@@ -23,6 +23,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectEndsWithPeriod,
+            commit_message,
         ))
     } else {
         None
@@ -52,32 +53,36 @@ mod tests {
 
     #[test]
     fn subject_ends_with_period() {
-        run_test(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 Subject Line.
                 "
-            ),
+        );
+        run_test(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn subject_has_period_then_whitespace() {
-        run_test(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 Subject Line.
                 "
-            ),
+        );
+        run_test(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
+                &message.into(),
             )),
         );
     }

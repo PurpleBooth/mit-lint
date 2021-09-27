@@ -43,6 +43,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
+            commit,
         ))
     }
 }
@@ -376,9 +377,8 @@ mod tests_has_missing_pivotal_tracker_id {
 
     #[test]
     fn invalid_state_change() {
-        test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
+        let message = indoc!(
+            "
                 An example commit
 
                 This is an example commit
@@ -386,35 +386,39 @@ mod tests_has_missing_pivotal_tracker_id {
                 [fake #12345678]
                 # some comment
                 "
-            ),
+        );
+        test_has_missing_pivotal_tracker_id(
+            message,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
+                &message.into(),
             )),
         );
     }
 
     #[test]
     fn missing_id_with_square_brackets() {
-        test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
+        let message_1 = indoc!(
+            "
                 An example commit
 
                 This is an example commit
                 "
-            ),
+        );
+        test_has_missing_pivotal_tracker_id(
+            message_1,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
+                &message_1.into(),
             )),
         );
 
-        test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
+        let message_2 = indoc!(
+            "
             An example commit
 
             This is an example commit
@@ -422,11 +426,14 @@ mod tests_has_missing_pivotal_tracker_id {
             [#]
             # some comment
             "
-            ),
+        );
+        test_has_missing_pivotal_tracker_id(
+            message_2,
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
+                &message_2.into(),
             )),
         );
     }
