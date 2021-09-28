@@ -1,58 +1,54 @@
 use std::collections::BTreeSet;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use indoc::indoc;
 use mit_commit::CommitMessage;
 use mit_lint::{lint, Lint, Lints};
 
-const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
-    "
-        Add file
+const COMMIT_WITH_ALL_FEATURES: &str = "Add file
 
-        Looks-like-a-trailer: But isn't
+Looks-like-a-trailer: But isn't
 
-        This adds file primarily for demonstration purposes. It might not be
-        useful as an actual commit, but it's very useful as a example to use in
-        tests.
+This adds file primarily for demonstration purposes. It might not be
+useful as an actual commit, but it's very useful as a example to use in
+tests.
 
-        Relates-to: #128
+Relates-to: #128
 
-        # Short (50 chars or less) summary of changes
-        #
-        # More detailed explanatory text, if necessary.  Wrap it to
-        # about 72 characters or so.  In some contexts, the first
-        # line is treated as the subject of an email and the rest of
-        # the text as the body.  The blank line separating the
-        # summary from the body is critical (unless you omit the body
-        # entirely); tools like rebase can get confused if you run
-        # the two together.
-        #
-        # Further paragraphs come after blank lines.
-        #
-        #   - Bullet points are okay, too
-        #
-        #   - Typically a hyphen or asterisk is used for the bullet,
-        #     preceded by a single space, with blank lines in
-        #     between, but conventions vary here
+# Short (50 chars or less) summary of changes
+#
+# More detailed explanatory text, if necessary.  Wrap it to
+# about 72 characters or so.  In some contexts, the first
+# line is treated as the subject of an email and the rest of
+# the text as the body.  The blank line separating the
+# summary from the body is critical (unless you omit the body
+# entirely); tools like rebase can get confused if you run
+# the two together.
+#
+# Further paragraphs come after blank lines.
+#
+#   - Bullet points are okay, too
+#
+#   - Typically a hyphen or asterisk is used for the bullet,
+#     preceded by a single space, with blank lines in
+#     between, but conventions vary here
 
-        # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
-        # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
-        # bricht den Commit ab.
-        #
-        # Auf Branch main
-        # Ihr Branch ist auf demselben Stand wie 'origin/main'.
-        #
-        # Zum Commit vorgemerkte \u{00E4}nderungen:
-        #	neue Datei:     file
-        #
-        # ------------------------ >8 ------------------------
-        # \u{00E4}ndern oder entfernen Sie nicht die obige Zeile.
-        # Alles unterhalb von ihr wird ignoriert.
-        diff --git a/file b/file
-        new file mode 100644
-        index 0000000..e69de29
-        "
-);
+# Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+# die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+# bricht den Commit ab.
+#
+# Auf Branch main
+# Ihr Branch ist auf demselben Stand wie 'origin/main'.
+#
+# Zum Commit vorgemerkte \u{00E4}nderungen:
+#   neue Datei:     file
+#
+# ------------------------ >8 ------------------------
+# \u{00E4}ndern oder entfernen Sie nicht die obige Zeile.
+# Alles unterhalb von ihr wird ignoriert.
+diff --git a/file b/file
+new file mode 100644
+index 0000000..e69de29
+";
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let lints = Lint::all_lints().collect::<Vec<_>>();

@@ -19,17 +19,13 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     This is an example commit without any duplicate trailers
-    ///     "
-    /// )
+    /// This is an example commit without any duplicate trailers
+    /// "
     /// .into();
     /// let actual = Lint::DuplicatedTrailers.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -38,24 +34,18 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use std::option::Option::None;
-    ///
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     This is an example commit without any duplicate trailers
+    /// This is an example commit without any duplicate trailers
     ///
-    ///     Signed-off-by: Billie Thompson <email@example.com>
-    ///     Signed-off-by: Billie Thompson <email@example.com>
-    ///     Co-authored-by: Billie Thompson <email@example.com>
-    ///     Co-authored-by: Billie Thompson <email@example.com>
-    ///     "
-    /// )
+    /// Signed-off-by: Billie Thompson <email@example.com>
+    /// Signed-off-by: Billie Thompson <email@example.com>
+    /// Co-authored-by: Billie Thompson <email@example.com>
+    /// Co-authored-by: Billie Thompson <email@example.com>
+    /// "
     /// .into();
     /// let expected = Some(Problem::new(
     ///     "Your commit message has duplicated trailers".into(),
@@ -86,15 +76,11 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit [fixes #12345678]
-    ///     "
-    /// )
+    /// let message: &str = "An example commit [fixes #12345678]
+    /// "
     /// .into();
     /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -103,24 +89,23 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     This is an example commit
-    ///     "
-    /// )
+    /// This is an example commit
+    /// "
+    ///
     /// .into();
     /// let expected = Some(Problem::new(
     ///     "Your commit message is missing a Pivotal Tracker ID".into(),
     ///     "It's important to add the ID because it allows code to be linked back to the stories it was done for, it can provide a chain of custody for code for audit purposes, and it can give future explorers of the codebase insight into the wider organisational need behind the change. We may also use it for automation purposes, like generating changelogs or notification emails.\n\nYou can fix this by adding the Id in one of the styles below to the commit message\n[Delivers #12345678]\n[fixes #12345678]\n[finishes #12345678]\n[#12345884 #12345678]\n[#12345884,#12345678]\n[#12345678],[#12345884]\nThis will address [#12345884]"
     ///         .into(),
-    ///     Code::PivotalTrackerIdMissing,&message.into(),Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),None,
+    ///     Code::PivotalTrackerIdMissing,
+    ///     &message.into(),
+    ///     Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
+    ///     None,
     /// ));
     /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -137,17 +122,13 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     Relates-to: JRA-123
-    ///     "
-    /// )
+    /// Relates-to: JRA-123
+    /// "
     /// .into();
     /// let actual = Lint::JiraIssueKeyMissing.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -156,18 +137,14 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     This is an example commit
-    ///     "
-    /// )
+    /// This is an example commit
+    /// "
+    ///
     /// .into();
     /// let expected = Some(Problem::new(
     ///     "Your commit message is missing a JIRA Issue Key".into(),
@@ -190,17 +167,13 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     Relates-to: AnOrganisation/git-mit#642
-    ///     "
-    /// )
+    /// Relates-to: AnOrganisation/git-mit#642
+    /// "
     /// .into();
     /// let actual = Lint::GitHubIdMissing.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -209,18 +182,14 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     This is an example commit
-    ///     "
-    /// )
+    /// This is an example commit
+    /// "
+    ///
     /// .into();
     /// let expected = Some(Problem::new(
     ///      "Your commit message is missing a GitHub ID".into(),
@@ -243,17 +212,13 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     Some Body Content
-    ///     "
-    /// )
+    /// Some Body Content
+    /// "
     /// .into();
     /// let actual = Lint::SubjectNotSeparateFromBody.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -262,17 +227,12 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///     This is an example commit
-    ///     "
-    /// )
+    /// let message: &str = "An example commit
+    /// This is an example commit
+    /// "
     /// .into();
     /// let expected = Some(Problem::new(
     ///       "Your commit message is missing a blank line between the subject and the body".into(),
@@ -295,17 +255,13 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
+    /// let message: &str = "An example commit
     ///
-    ///     Some Body Content
-    ///     "
-    /// )
+    /// Some Body Content
+    /// "
     /// .into();
     /// let actual = Lint::SubjectLongerThan72Characters.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
@@ -313,11 +269,9 @@ pub enum Lint {
     ///
     /// Erring
     ///
-    /// ```rust
-    /// use indoc::indoc;
+    /// ```
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
     /// let message:String = "x".repeat(73).into();
     /// let expected = Some(Problem::new(
@@ -341,16 +295,10 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///     "
-    /// )
-    /// .into();
+    /// let message: &str = "An example commit\n".into();
     /// let actual = Lint::SubjectNotCapitalized.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
     /// ```
@@ -358,23 +306,20 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     an example commit
-    ///     "
-    /// )
+    /// let message: &str =
+    ///     "an example commit\n"
     /// .into();
-    /// let expected = Some(Problem::new(
-    ///       "Your commit message is missing a capital letter".into(),
-    ///     "The subject line is a title, and as such should be capitalised.\n\nYou can fix this by capitalising the first character in the subject"
-    ///         .into(),
-    ///     Code::SubjectNotCapitalized,&message.into(),Some(vec![("Not capitalised".to_string(), 0, 1)]),None,
-    /// ));
+    /// let expected = Some(
+    ///     Problem::new(
+    ///         "Your commit message is missing a capital letter".into(),
+    ///         "The subject line is a title, and as such should be capitalised.\n\nYou can fix this by capitalising the first character in the subject".into(),
+    ///     Code::SubjectNotCapitalized,&message.into(),Some(vec![("Not capitalised".to_string(), 0, 1)]),
+    ///     None,
+    /// )
+    /// );
     /// let actual = Lint::SubjectNotCapitalized.lint(&CommitMessage::from(message));
     /// assert_eq!(
     ///     actual, expected,
@@ -390,16 +335,10 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///     "
-    /// )
-    /// .into();
+    /// let message: &str = "An example commit\n".into();
     /// let actual = Lint::SubjectEndsWithPeriod.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
     /// ```
@@ -407,23 +346,21 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit.
-    ///     "
-    /// )
-    /// .into();
-    /// let expected = Some(     Problem::new(
-    ///       "Your commit message ends with a period".into(),
+    /// let message: &str =
+    ///     "An example commit.\n".into();
+    /// let expected = Some(
+    /// Problem::new(
+    ///     "Your commit message ends with a period".into(),
     ///     "It's important to keep your commits short, because we only have a limited number of characters to use (72) before the subject line is truncated. Full stops aren't normally in subject lines, and take up an extra character, so we shouldn't use them in commit message subjects.\n\nYou can fix this by removing the period"
     ///         .into(),
-    ///     Code::SubjectEndsWithPeriod,&message.into(),Some(vec![("Unneeded period".to_string(), 17, 1)]),None,
-    /// ));
+    ///     Code::SubjectEndsWithPeriod,&message.into(),
+    ///     Some(vec![("Unneeded period".to_string(), 17, 1)]),
+    ///     None,
+    /// )
+    /// );
     /// let actual = Lint::SubjectEndsWithPeriod.lint(&CommitMessage::from(message));
     /// assert_eq!(
     ///     actual, expected,
@@ -439,18 +376,10 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///
-    ///     Some Body Content
-    ///     "
-    /// )
-    /// .into();
+    /// let message: &str = "An example commit\n\nSome Body Content\n".into();
     /// let actual = Lint::BodyWiderThan72Characters.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
     /// ```
@@ -458,10 +387,8 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
     /// let message:String = ["Subject".to_string(), "x".repeat(73).into()].join("\n\n");
     /// let expected = Some(Problem::new(
@@ -487,18 +414,10 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     refactor: An example commit
-    ///
-    ///     Some Body Content
-    ///     "
-    /// )
-    /// .into();
+    /// let message: &str = "refactor: An example commit\n\nSome Body Content\n".into();
     /// let actual = Lint::NotConventionalCommit.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
     /// ```
@@ -506,18 +425,11 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///
-    ///     Some Body Content
-    ///     "
-    /// )
+    /// let message: &str =
+    ///     "An example commit\n\nSome Body Content\n"
     /// .into();
     /// let expected = Some(Problem::new(
     ///       "Your commit message isn't in conventional style".into(),
@@ -540,18 +452,10 @@ pub enum Lint {
     /// Passing
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::Lint;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     📖 DOC: An example commit
-    ///
-    ///     Some Body Content
-    ///     "
-    /// )
-    /// .into();
+    /// let message: &str = "📖 DOC: An example commit\n\nSome Body Content\n".into();
     /// let actual = Lint::NotEmojiLog.lint(&CommitMessage::from(message));
     /// assert!(actual.is_none(), "Expected None, found {:?}", actual);
     /// ```
@@ -559,18 +463,11 @@ pub enum Lint {
     /// Erring
     ///
     /// ```rust
-    /// use indoc::indoc;
     /// use mit_commit::CommitMessage;
     /// use mit_lint::{Code, Lint, Problem};
-    /// use std::option::Option::None;
     ///
-    /// let message: &str = indoc!(
-    ///     "
-    ///     An example commit
-    ///
-    ///     Some Body Content
-    ///     "
-    /// )
+    /// let message: &str =
+    ///     "An example commit\n\nSome Body Content\n"
     /// .into();
     /// let expected = Some(
     /// Problem::new(

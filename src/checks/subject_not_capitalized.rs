@@ -51,19 +51,14 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
 mod tests {
     #![allow(clippy::wildcard_imports)]
 
-    use indoc::indoc;
-
     use super::*;
     use crate::model::{Code, Problem};
 
     #[test]
     fn capitalised() {
         run_test(
-            indoc!(
-                "
-                Subject Line
-                "
-            ),
+            "Subject Line
+",
             &None,
         );
     }
@@ -71,20 +66,14 @@ mod tests {
     #[test]
     fn lower_case() {
         run_test(
-            indoc!(
-                "
-                subject line
-                "
-            ),
+            "subject line
+",
             &Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectNotCapitalized,
-                &indoc!(
-                    "
-                    subject line
-                    "
-                )
+                &"subject line
+"
                 .into(),
                 Some(vec![("Not capitalised".to_string(), 0_usize, 1_usize)]),
                 None,
@@ -110,12 +99,8 @@ mod tests {
     #[test]
     fn numbers_are_fine() {
         run_test(
-            indoc!(
-                "
-                1234567
-                "
-            ),
-            &None,
+            "1234567
+", &None,
         );
     }
 
@@ -128,22 +113,19 @@ mod tests {
         let message = "  an example commit\n\nexample";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = indoc!(
-            "
-            SubjectNotCapitalized
-            
-              \u{d7} Your commit message is missing a capital letter
-               \u{256d}\u{2500}[1:1]
-             1 \u{2502} an example commit
-               \u{b7} \u{252c}
-               \u{b7} \u{2570}\u{2500}\u{2500} Not capitalised
-             2 \u{2502} 
-               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
-              help: The subject line is a title, and as such should be capitalised.
-                    
-                    You can fix this by capitalising the first character in the subject
-            "
-        )
+        let expected = "SubjectNotCapitalized
+
+  \u{d7} Your commit message is missing a capital letter
+   \u{256d}\u{2500}[1:1]
+ 1 \u{2502} an example commit
+   \u{b7} \u{252c}
+   \u{b7} \u{2570}\u{2500}\u{2500} Not capitalised
+ 2 \u{2502} 
+   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  help: The subject line is a title, and as such should be capitalised.
+        
+        You can fix this by capitalising the first character in the subject
+"
         .to_string();
         assert_eq!(
             actual, expected,

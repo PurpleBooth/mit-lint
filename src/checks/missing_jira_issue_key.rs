@@ -7,13 +7,10 @@ use crate::model::{Code, Problem};
 /// Canonical lint ID
 pub(crate) const CONFIG: &str = "jira-issue-key-missing";
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = indoc::indoc!(
-    "
-    It's important to add the issue key because it allows us to link code back to the motivations \
-    for doing it, and in some cases provide an audit trail for compliance purposes.
+const HELP_MESSAGE: &str = "It's important to add the issue key because it allows us to link code back to the motivations \
+for doing it, and in some cases provide an audit trail for compliance purposes.
 
-    You can fix this by adding a key like `JRA-123` to the commit message"
-);
+You can fix this by adding a key like `JRA-123` to the commit message" ;
 /// Description of the problem
 const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
@@ -52,7 +49,6 @@ mod tests_has_missing_jira_issue_key {
 
     use std::option::Option::None;
 
-    use indoc::indoc;
     use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
@@ -61,72 +57,54 @@ mod tests_has_missing_jira_issue_key {
     #[test]
     fn id_present() {
         test_has_missing_jira_issue_key(
-            indoc!(
-                "
-                JRA-123 An example commit
+            "JRA-123 An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
         test_has_missing_jira_issue_key(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an JRA-123 example commit
-                "
-            ),
+This is an JRA-123 example commit
+",
             &None,
         );
         test_has_missing_jira_issue_key(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                JRA-123
+JRA-123
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
         test_has_missing_jira_issue_key(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                JRA-123
-                "
-            ),
+JRA-123
+",
             &None,
         );
         test_has_missing_jira_issue_key(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                JR-123
-                "
-            ),
+JR-123
+",
             &None,
         );
     }
 
     #[test]
     fn id_missing() {
-        let message_1 = indoc!(
-            "
-            An example commit
+        let message_1 = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_has_missing_jira_issue_key(
             message_1,
             &Some(Problem::new(
@@ -138,15 +116,12 @@ mod tests_has_missing_jira_issue_key {
                 None,
             )),
         );
-        let message_2 = indoc!(
-            "
-                An example commit
+        let message_2 = "An example commit
 
-                This is an example commit
+This is an example commit
 
-                A-123
-                "
-        );
+A-123
+";
         test_has_missing_jira_issue_key(
             message_2,
             &Some(Problem::new(
@@ -158,15 +133,12 @@ mod tests_has_missing_jira_issue_key {
                 None,
             )),
         );
-        let message_3 = indoc!(
-            "
-                An example commit
+        let message_3 = "An example commit
 
-                This is an example commit
+This is an example commit
 
-                JRA-
-                "
-        );
+JRA-
+";
         test_has_missing_jira_issue_key(
             message_3,
             &Some(Problem::new(
@@ -182,35 +154,28 @@ mod tests_has_missing_jira_issue_key {
 
     #[test]
     fn formatting() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = indoc!(
-            "
-            JiraIssueKeyMissing
-            
-              \u{d7} Your commit message is missing a JIRA Issue Key
-               \u{256d}\u{2500}[2:1]
-             2 \u{2502} 
-             3 \u{2502} This is an example commit
-               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-               \u{b7}              \u{2570}\u{2500}\u{2500} No JIRA Issue Key
-               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
-              help: It's important to add the issue key because it allows us to link
-                    code back to the motivations for doing it, and in some cases provide
-                    an audit trail for compliance purposes.
-                    
-                    You can fix this by adding a key like `JRA-123` to the commit
-                    message
-            "
-        )
-        .to_string();
+        let expected = "JiraIssueKeyMissing
+
+  \u{d7} Your commit message is missing a JIRA Issue Key
+   \u{256d}\u{2500}[2:1]
+ 2 \u{2502} 
+ 3 \u{2502} This is an example commit
+   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+   \u{b7}              \u{2570}\u{2500}\u{2500} No JIRA Issue Key
+   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  help: It's important to add the issue key because it allows us to link
+        code back to the motivations for doing it, and in some cases provide
+        an audit trail for compliance purposes.
+        
+        You can fix this by adding a key like `JRA-123` to the commit
+        message
+" .to_string();
         assert_eq!(
             actual, expected,
             "Message {:?} should have returned {:?}, found {:?}",

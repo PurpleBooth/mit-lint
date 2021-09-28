@@ -1,6 +1,5 @@
 use std::{ops::Add, option::Option::None};
 
-use indoc::indoc;
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -9,20 +8,17 @@ use crate::model::{Code, Problem};
 pub(crate) const CONFIG: &str = "github-id-missing";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = indoc!(
-    "
-    It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.
+const HELP_MESSAGE: &str = "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.
 
-    You can fix this by adding a ID like the following examples:
+You can fix this by adding a ID like the following examples:
 
-    #642
-    GH-642
-    AnUser/git-mit#642
-    AnOrganisation/git-mit#642
-    fixes #642
+#642
+GH-642
+AnUser/git-mit#642
+AnOrganisation/git-mit#642
+fixes #642
 
-    Be careful just putting '#642' on a line by itself, as '#' is the default comment character"
-);
+Be careful just putting '#642' on a line by itself, as '#' is the default comment character" ;
 /// Description of the problem
 const ERROR: &str = "Your commit message is missing a GitHub ID";
 
@@ -63,7 +59,6 @@ mod tests_has_missing_github_id {
 
     use std::option::Option::None;
 
-    use indoc::indoc;
     use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
@@ -72,39 +67,30 @@ mod tests_has_missing_github_id {
     #[test]
     fn id_and_close() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                close #642
-                "
-            ),
+close #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                closes: #642
-                "
-            ),
+closes: #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                Closed GH-642
-                "
-            ),
+Closed GH-642
+",
             &None,
         );
     }
@@ -112,39 +98,30 @@ mod tests_has_missing_github_id {
     #[test]
     fn id_and_fix() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                fix #642
-                "
-            ),
+fix #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                This fixes #642
-                "
-            ),
+This fixes #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                fixed #642
-                "
-            ),
+fixed #642
+",
             &None,
         );
     }
@@ -152,39 +129,30 @@ mod tests_has_missing_github_id {
     #[test]
     fn id_and_resolve() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                resolve #642
-                "
-            ),
+fixed #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                resolves #642
-                "
-            ),
+resolve #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                resolved #642
-                "
-            ),
+resolves #642
+",
             &None,
         );
     }
@@ -192,27 +160,21 @@ mod tests_has_missing_github_id {
     #[test]
     fn issue() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                Issue #642
-                "
-            ),
+resolved #642
+",
             &None,
         );
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                Issue #642
-                "
-            ),
+Issue #642
+",
             &None,
         );
     }
@@ -220,15 +182,12 @@ mod tests_has_missing_github_id {
     #[test]
     fn gh_id_variant() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                GH-642
-                "
-            ),
+GH-642
+",
             &None,
         );
     }
@@ -236,16 +195,13 @@ mod tests_has_missing_github_id {
     #[test]
     fn hash_alone_variant() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                #642
-                ; Comment character is set to something else like ';'
-                "
-            ),
+#642
+; Comment character is set to something else like ';'
+",
             &None,
         );
     }
@@ -253,41 +209,32 @@ mod tests_has_missing_github_id {
     #[test]
     fn long_variant() {
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                AnUser/git-mit#642
-                "
-            ),
+AnUser/git-mit#642
+",
             &None,
         );
 
         test_has_missing_github_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                AnOrganisation/git-mit#642
-                "
-            ),
+AnOrganisation/git-mit#642
+",
             &None,
         );
     }
 
     #[test]
     fn id_missing() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_has_missing_github_id(
             message,
             &Some(Problem::new(
@@ -303,15 +250,12 @@ mod tests_has_missing_github_id {
 
     #[test]
     fn id_malformed() {
-        let message_1 = indoc!(
-            "
-            An example commit
+        let message_1 = "An example commit
 
-            This is an example commit
+This is an example commit
 
-            H-123
-            "
-        );
+H-123
+";
         test_has_missing_github_id(
             message_1,
             &Some(Problem::new(
@@ -323,15 +267,12 @@ mod tests_has_missing_github_id {
                 None,
             )),
         );
-        let message_2 = indoc!(
-            "
-            An example commit
+        let message_2 = "An example commit
 
-            This is an example commit
+This is an example commit
 
-            git-mit#123
-            "
-        );
+git-mit#123
+";
         test_has_missing_github_id(
             message_2,
             &Some(Problem::new(
@@ -347,43 +288,36 @@ mod tests_has_missing_github_id {
 
     #[test]
     fn formatting() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = indoc!(
-            "
-            GitHubIdMissing
-            
-              \u{d7} Your commit message is missing a GitHub ID
-               \u{256d}\u{2500}[2:1]
-             2 \u{2502} 
-             3 \u{2502} This is an example commit
-               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-               \u{b7}              \u{2570}\u{2500}\u{2500} No GitHub ID
-               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
-              help: It's important to add the issue ID because it allows us to link code
-                    back to the motivations for doing it, and because we can help people
-                    exploring the repository link their issues to specific bits of code.
-                    
-                    You can fix this by adding a ID like the following examples:
-                    
-                    #642
-                    GH-642
-                    AnUser/git-mit#642
-                    AnOrganisation/git-mit#642
-                    fixes #642
-                    
-                    Be careful just putting '#642' on a line by itself, as '#' is the
-                    default comment character
-            "
-        )
-        .to_string();
+        let expected = "GitHubIdMissing
+
+  \u{d7} Your commit message is missing a GitHub ID
+   \u{256d}\u{2500}[2:1]
+ 2 \u{2502} 
+ 3 \u{2502} This is an example commit
+   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+   \u{b7}              \u{2570}\u{2500}\u{2500} No GitHub ID
+   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  help: It's important to add the issue ID because it allows us to link code
+        back to the motivations for doing it, and because we can help people
+        exploring the repository link their issues to specific bits of code.
+        
+        You can fix this by adding a ID like the following examples:
+        
+        #642
+        GH-642
+        AnUser/git-mit#642
+        AnOrganisation/git-mit#642
+        fixes #642
+        
+        Be careful just putting '#642' on a line by itself, as '#' is the
+        default comment character
+".to_string();
         assert_eq!(
             actual, expected,
             "Message {:?} should have returned {:?}, found {:?}",
