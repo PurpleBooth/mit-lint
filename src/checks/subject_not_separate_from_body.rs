@@ -1,3 +1,5 @@
+use std::option::Option::None;
+
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -22,11 +24,21 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
 
 pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
+        let commit_text = String::from(commit_message.clone());
+        let mut lines = commit_text.lines();
+        let first_line_length = lines.next().map(str::len).unwrap_or_default() + 1;
+        let gutter_line_length = lines.next().map(str::len).unwrap_or_default();
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotSeparateFromBody,
             commit_message,
+            Some(vec![(
+                "Missing blank line".to_string(),
+                first_line_length,
+                gutter_line_length,
+            )]),
+            None,
         ))
     } else {
         None
@@ -159,11 +171,13 @@ mod tests {
                 Code::SubjectNotSeparateFromBody,
                 &indoc!(
                     "
-                An example commit
-                This is an example commit
-                "
+                    An example commit
+                    This is an example commit
+                    "
                 )
                 .into(),
+                Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
+                None,
             )),
         );
         test_subject_not_separate_from_body(
@@ -181,15 +195,68 @@ mod tests {
                 Code::SubjectNotSeparateFromBody,
                 &indoc!(
                     "
-                An example commit
-                This is an example commit
-                It has more lines
-                It has even more lines
-                "
+                    An example commit
+                    This is an example commit
+                    It has more lines
+                    It has even more lines
+                    "
                 )
                 .into(),
+                Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
+                None,
             )),
         );
+    }
+
+    use std::option::Option::None;
+
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+
+    #[test]
+    fn formatting() {
+        let message = indoc!(
+            "
+            An example commit
+            This is an example commit
+            "
+        );
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            SubjectNotSeparateFromBody
+            
+              \u{d7} Your commit message is missing a blank line between the subject and the
+              \u{2502} body
+               \u{256d}\u{2500}[1:1]
+             1 \u{2502} An example commit
+             2 \u{2502} This is an example commit
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}             \u{2570}\u{2500}\u{2500} Missing blank line
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: Most tools that render and parse commit messages, expect commit
+                    messages to be in the form of subject and body. This includes git
+                    itself in tools like git-format-patch. If you don't include this you
+                    may see strange behaviour from git and any related tools.
+                    
+                    To fix this separate subject from body with a blank line
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
     }
 
     fn test_subject_not_separate_from_body(message: &str, expected: &Option<Problem>) {

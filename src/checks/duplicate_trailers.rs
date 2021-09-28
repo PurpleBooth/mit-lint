@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ops::Add};
+use std::{collections::BTreeMap, ops::Add, option::Option::None};
 
 use mit_commit::{CommitMessage, Trailer};
 
@@ -49,12 +49,36 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
     if duplicated_trailers.is_empty() {
         None
     } else {
+        let commit_text = String::from(commit.clone());
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
             ERROR.into(),
             warning,
             Code::DuplicatedTrailers,
             commit,
+            Some(
+                duplicated_trailers
+                    .into_iter()
+                    .flat_map(|trailer| {
+                        commit_text
+                            .match_indices(&trailer)
+                            .skip(1)
+                            .map(|x| {
+                                (
+                                    format!("Duplicated `{}`", trailer),
+                                    x.0,
+                                    commit_text
+                                        .chars()
+                                        .skip(x.0)
+                                        .take_while(|x| x != &'\n')
+                                        .count(),
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                    .collect(),
+            ),
+            None,
         ))
     }
 }
@@ -78,7 +102,10 @@ fn warning(duplicated_trailers: &[String]) -> String {
 mod tests_has_duplicated_trailers {
     #![allow(clippy::wildcard_imports)]
 
+    use std::option::Option::None;
+
     use indoc::indoc;
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
     use mit_commit::CommitMessage;
 
     use super::*;
@@ -103,15 +130,15 @@ mod tests_has_duplicated_trailers {
     fn two_duplicates() {
         let message = indoc!(
             "
-                An example commit
+            An example commit
 
-                This is an example commit without any duplicate trailers
+            This is an example commit without any duplicate trailers
 
-                Signed-off-by: Billie Thompson <email@example.com>
-                Signed-off-by: Billie Thompson <email@example.com>
-                Co-authored-by: Billie Thompson <email@example.com>
-                Co-authored-by: Billie Thompson <email@example.com>
-                "
+            Signed-off-by: Billie Thompson <email@example.com>
+            Signed-off-by: Billie Thompson <email@example.com>
+            Co-authored-by: Billie Thompson <email@example.com>
+            Co-authored-by: Billie Thompson <email@example.com>
+            "
         );
         test_lint_duplicated_trailers(
             message.into(),
@@ -123,6 +150,19 @@ mod tests_has_duplicated_trailers {
                     .into(),
                 Code::DuplicatedTrailers,
                 &message.into(),
+                Some(vec![
+                    (
+                        "Duplicated `Co-authored-by`".to_string(),
+                        231_usize,
+                        51_usize,
+                    ),
+                    (
+                        "Duplicated `Signed-off-by`".to_string(),
+                        128_usize,
+                        50_usize,
+                    ),
+                ]),
+                None,
             )),
         );
     }
@@ -149,6 +189,8 @@ mod tests_has_duplicated_trailers {
                     .into(),
                 Code::DuplicatedTrailers,
                 &message.into(),
+                Some(vec![("Duplicated `Signed-off-by`".to_string(), 128, 50)]),
+                None,
             )),
         );
     }
@@ -175,6 +217,8 @@ mod tests_has_duplicated_trailers {
                     .into(),
                 Code::DuplicatedTrailers,
                 &message.into(),
+                Some(vec![("Duplicated `Co-authored-by`".to_string(), 129, 51)]),
+                None,
             )),
         );
     }
@@ -201,6 +245,8 @@ mod tests_has_duplicated_trailers {
                     .into(),
                 Code::DuplicatedTrailers,
                 &message.into(),
+                Some(vec![("Duplicated `Relates-to`".to_string(), 94, 16)]),
+                None,
             )),
         );
     }
@@ -271,5 +317,61 @@ mod tests_has_duplicated_trailers {
             "Expected {:?}, found {:?}",
             expected, actual
         );
+    }
+
+    #[test]
+    fn formatting() {
+        let message = indoc!(
+            "
+            An example commit
+
+            This is an example commit without any duplicate trailers
+
+            Signed-off-by: Billie Thompson <email@example.com>
+            Signed-off-by: Billie Thompson <email@example.com>
+            Co-authored-by: Billie Thompson <email@example.com>
+            Co-authored-by: Billie Thompson <email@example.com>
+            "
+        );
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            DuplicatedTrailers
+            
+              \u{d7} Your commit message has duplicated trailers
+               \u{256d}\u{2500}[5:1]
+             5 \u{2502} Signed-off-by: Billie Thompson <email@example.com>
+             6 \u{2502} Signed-off-by: Billie Thompson <email@example.com>
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}                          \u{2570}\u{2500}\u{2500} Duplicated `Signed-off-by`
+             7 \u{2502} Co-authored-by: Billie Thompson <email@example.com>
+             8 \u{2502} Co-authored-by: Billie Thompson <email@example.com>
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}                          \u{2570}\u{2500}\u{2500} Duplicated `Co-authored-by`
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: These are normally added accidentally when you're rebasing or
+                    amending to a commit, sometimes in the text editor, but often by
+                    git hooks.
+                    
+                    You can fix this by deleting the duplicated \"Co-authored-by\",
+                    \"Signed-off-by\" fields
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
     }
 }

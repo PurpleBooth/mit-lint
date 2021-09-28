@@ -1,3 +1,5 @@
+use std::{ops::Add, option::Option::None};
+
 use indoc::indoc;
 use mit_commit::CommitMessage;
 
@@ -10,10 +12,10 @@ pub(crate) const CONFIG: &str = "pivotal-tracker-id-missing";
 const HELP_MESSAGE: &str = indoc!(
     "
     It's important to add the ID because it allows code to be linked back to the stories it was \
-     done for, it can provide a chain of custody for code for audit purposes, and it can give \
-     future explorers of the codebase insight into the wider organisational need behind the \
-     change. We may also use it for automation purposes, like generating changelogs or \
-     notification emails.
+    done for, it can provide a chain of custody for code for audit purposes, and it can give \
+    future explorers of the codebase insight into the wider organisational need behind the \
+    change. We may also use it for automation purposes, like generating changelogs or \
+    notification emails.
 
     You can fix this by adding the Id in one of the styles below to the commit message
     [Delivers #12345678]
@@ -26,7 +28,7 @@ const HELP_MESSAGE: &str = indoc!(
 );
 
 /// Description of the problem
-const ERROR: &str = "Your commit message is missing a Pivotal Tracker Id";
+const ERROR: &str = "Your commit message is missing a Pivotal Tracker ID";
 
 lazy_static! {
     static ref RE: regex::Regex = regex::Regex::new(
@@ -35,15 +37,27 @@ lazy_static! {
     .unwrap();
 }
 
-pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
-    if commit.matches_pattern(&*RE) {
+pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+    if commit_message.matches_pattern(&*RE) {
         None
     } else {
+        let commit_text = String::from(commit_message.clone());
+        let last_line_location = commit_text
+            .trim_end()
+            .rfind('\n')
+            .unwrap_or_default()
+            .add(1);
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
-            commit,
+            commit_message,
+            Some(vec![(
+                "No Pivotal Tracker ID".to_string(),
+                last_line_location,
+                commit_text.len().saturating_sub(last_line_location),
+            )]),
+            None,
         ))
     }
 }
@@ -52,7 +66,10 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
 mod tests_has_missing_pivotal_tracker_id {
     #![allow(clippy::wildcard_imports)]
 
+    use std::option::Option::None;
+
     use indoc::indoc;
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
     use crate::model::{Code, Problem};
@@ -379,13 +396,13 @@ mod tests_has_missing_pivotal_tracker_id {
     fn invalid_state_change() {
         let message = indoc!(
             "
-                An example commit
+            An example commit
 
-                This is an example commit
+            This is an example commit
 
-                [fake #12345678]
-                # some comment
-                "
+            [fake #12345678]
+            # some comment
+            "
         );
         test_has_missing_pivotal_tracker_id(
             message,
@@ -394,6 +411,8 @@ mod tests_has_missing_pivotal_tracker_id {
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
                 &message.into(),
+                Some(vec![("No Pivotal Tracker ID".to_string(), 63, 15)]),
+                None,
             )),
         );
     }
@@ -402,10 +421,10 @@ mod tests_has_missing_pivotal_tracker_id {
     fn missing_id_with_square_brackets() {
         let message_1 = indoc!(
             "
-                An example commit
+            An example commit
 
-                This is an example commit
-                "
+            This is an example commit
+            "
         );
         test_has_missing_pivotal_tracker_id(
             message_1,
@@ -414,6 +433,8 @@ mod tests_has_missing_pivotal_tracker_id {
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
                 &message_1.into(),
+                Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
+                None,
             )),
         );
 
@@ -434,7 +455,66 @@ mod tests_has_missing_pivotal_tracker_id {
                 HELP_MESSAGE.into(),
                 Code::PivotalTrackerIdMissing,
                 &message_2.into(),
+                Some(vec![("No Pivotal Tracker ID".to_string(), 50, 15)]),
+                None,
             )),
         );
+    }
+
+    #[test]
+    fn formatting() {
+        let message = indoc!(
+            "
+            An example commit
+
+            This is an example commit
+            "
+        );
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            PivotalTrackerIdMissing
+            
+              \u{d7} Your commit message is missing a Pivotal Tracker ID
+               \u{256d}\u{2500}[2:1]
+             2 \u{2502} 
+             3 \u{2502} This is an example commit
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}              \u{2570}\u{2500}\u{2500} No Pivotal Tracker ID
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: It's important to add the ID because it allows code to be linked
+                    back to the stories it was done for, it can provide a chain
+                    of custody for code for audit purposes, and it can give future
+                    explorers of the codebase insight into the wider organisational need
+                    behind the change. We may also use it for automation purposes, like
+                    generating changelogs or notification emails.
+                    
+                    You can fix this by adding the Id in one of the styles below to the
+                    commit message
+                    [Delivers #12345678]
+                    [fixes #12345678]
+                    [finishes #12345678]
+                    [#12345884 #12345678]
+                    [#12345884,#12345678]
+                    [#12345678],[#12345884]
+                    This will address [#12345884]
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
     }
 }

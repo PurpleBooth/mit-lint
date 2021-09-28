@@ -1,3 +1,5 @@
+use std::{ops::Add, option::Option::None};
+
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -8,7 +10,7 @@ pub(crate) const CONFIG: &str = "jira-issue-key-missing";
 const HELP_MESSAGE: &str = indoc::indoc!(
     "
     It's important to add the issue key because it allows us to link code back to the motivations \
-     for doing it, and in some cases provide an audit trail for compliance purposes.
+    for doing it, and in some cases provide an audit trail for compliance purposes.
 
     You can fix this by adding a key like `JRA-123` to the commit message"
 );
@@ -23,11 +25,23 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if commit_message.matches_pattern(&*RE) {
         None
     } else {
+        let commit_text = String::from(commit_message.clone());
+        let last_line_location = commit_text
+            .trim_end()
+            .rfind('\n')
+            .unwrap_or_default()
+            .add(1);
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             commit_message,
+            Some(vec![(
+                "No JIRA Issue Key".to_string(),
+                last_line_location,
+                commit_text.len().saturating_sub(last_line_location),
+            )]),
+            None,
         ))
     }
 }
@@ -36,7 +50,10 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
 mod tests_has_missing_jira_issue_key {
     #![allow(clippy::wildcard_imports)]
 
+    use std::option::Option::None;
+
     use indoc::indoc;
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
     use crate::model::{Code, Problem};
@@ -105,10 +122,10 @@ mod tests_has_missing_jira_issue_key {
     fn id_missing() {
         let message_1 = indoc!(
             "
-                An example commit
+            An example commit
 
-                This is an example commit
-                "
+            This is an example commit
+            "
         );
         test_has_missing_jira_issue_key(
             message_1,
@@ -117,6 +134,8 @@ mod tests_has_missing_jira_issue_key {
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
                 &message_1.into(),
+                Some(vec![("No JIRA Issue Key".to_string(), 19_usize, 26_usize)]),
+                None,
             )),
         );
         let message_2 = indoc!(
@@ -135,6 +154,8 @@ mod tests_has_missing_jira_issue_key {
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
                 &message_2.into(),
+                Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 6_usize)]),
+                None,
             )),
         );
         let message_3 = indoc!(
@@ -153,10 +174,58 @@ mod tests_has_missing_jira_issue_key {
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
                 &message_3.into(),
+                Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
+                None,
             )),
         );
     }
 
+    #[test]
+    fn formatting() {
+        let message = indoc!(
+            "
+            An example commit
+
+            This is an example commit
+            "
+        );
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            JiraIssueKeyMissing
+            
+              \u{d7} Your commit message is missing a JIRA Issue Key
+               \u{256d}\u{2500}[2:1]
+             2 \u{2502} 
+             3 \u{2502} This is an example commit
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}              \u{2570}\u{2500}\u{2500} No JIRA Issue Key
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: It's important to add the issue key because it allows us to link
+                    code back to the motivations for doing it, and in some cases provide
+                    an audit trail for compliance purposes.
+                    
+                    You can fix this by adding a key like `JRA-123` to the commit
+                    message
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
+    }
     fn test_has_missing_jira_issue_key(message: &str, expected: &Option<Problem>) {
         let actual = &lint(&CommitMessage::from(message));
         assert_eq!(

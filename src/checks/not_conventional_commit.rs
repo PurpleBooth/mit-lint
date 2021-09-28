@@ -1,3 +1,5 @@
+use std::option::Option::None;
+
 use indoc::indoc;
 use mit_commit::CommitMessage;
 
@@ -19,9 +21,7 @@ const HELP_MESSAGE: &str = indoc!(
 
     [optional body]
 
-    [optional footer(s)]
-
-    You can read more at https://www.conventionalcommits.org/"
+    [optional footer(s)]"
 );
 /// Description of the problem
 const ERROR: &str = "Your commit message isn't in conventional style";
@@ -38,11 +38,18 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
 
 pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
+        let commit_text = String::from(commit_message.clone());
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotConventionalCommit,
             commit_message,
+            Some(vec![(
+                "Not conventional".to_string(),
+                0_usize,
+                commit_text.lines().next().map(str::len).unwrap(),
+            )]),
+            Some("https://www.conventionalcommits.org/".to_string()),
         ))
     } else {
         None
@@ -162,10 +169,10 @@ mod tests {
     fn non_conventional() {
         let message = indoc!(
             "
-                An example commit
+            An example commit
 
-                This is an example commit
-                "
+            This is an example commit
+            "
         );
         test_subject_not_separate_from_body(
             message,
@@ -174,6 +181,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
                 &message.into(),
+                Some(vec![("Not conventional".to_string(), 0_usize, 17_usize)]),
+                Some("https://www.conventionalcommits.org/".parse().unwrap()),
             )),
         );
     }
@@ -182,10 +191,10 @@ mod tests {
     fn missing_bracket() {
         let message = indoc!(
             "
-                fix(example: An example commit
+            fix(example: An example commit
 
-                This is an example commit
-                "
+            This is an example commit
+            "
         );
         test_subject_not_separate_from_body(
             message,
@@ -194,6 +203,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
                 &message.into(),
+                Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
+                Some("https://www.conventionalcommits.org/".parse().unwrap()),
             )),
         );
     }
@@ -202,10 +213,10 @@ mod tests {
     fn missing_space() {
         let message = indoc!(
             "
-                fix(example):An example commit
+            fix(example):An example commit
 
-                This is an example commit
-                "
+            This is an example commit
+            "
         );
         test_subject_not_separate_from_body(
             message,
@@ -214,6 +225,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
                 &message.into(),
+                Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
+                Some("https://www.conventionalcommits.org/".parse().unwrap()),
             )),
         );
     }
@@ -225,5 +238,63 @@ mod tests {
             "Message {:?} should have returned {:?}, found {:?}",
             message, expected, actual
         );
+    }
+
+    use std::option::Option::None;
+
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+
+    #[test]
+    fn formatting() {
+        let message = indoc!(
+            "
+            An example commit
+
+            This is an example commit
+            "
+        );
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            \u{1b}]8;;https://www.conventionalcommits.org/\u{1b}\\NotConventionalCommit (link)\u{1b}]8;;\u{1b}\\
+            
+              \u{d7} Your commit message isn't in conventional style
+               \u{256d}\u{2500}[1:1]
+             1 \u{2502} An example commit
+               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+               \u{b7}         \u{2570}\u{2500}\u{2500} Not conventional
+             2 \u{2502} 
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: It's important to follow the conventional commit style when creating
+                    your commit message. By using this style we can automatically
+                    calculate the version of software using deployment pipelines, and
+                    also generate changelogs and other useful information without human
+                    interaction.
+                    
+                    You can fix it by following style
+                    
+                    <type>[optional scope]: <description>
+                    
+                    [optional body]
+                    
+                    [optional footer(s)]
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
     }
 }

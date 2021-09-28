@@ -1,3 +1,6 @@
+use std::{ops::Add, option::Option::None};
+
+use miette::SourceOffset;
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -27,13 +30,38 @@ fn has_problem(commit: &CommitMessage) -> bool {
         .any(|line| line.len() > 72)
 }
 
+const LIMIT: usize = 72;
+
 pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
     if has_problem(commit) {
+        let commit_text = String::from(commit.clone());
+
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             commit,
+            Some(
+                commit_text
+                    .clone()
+                    .lines()
+                    .enumerate()
+                    .filter(|(line_index, line)| line_index > &0 && line.len() > LIMIT)
+                    .map(|(line_index, line)| {
+                        (
+                            "Too long".to_string(),
+                            SourceOffset::from_location(
+                                commit_text.clone(),
+                                line_index.add(1),
+                                LIMIT.add(2),
+                            )
+                            .offset(),
+                            line.len() - (LIMIT),
+                        )
+                    })
+                    .collect(),
+            ),
+            None,
         ))
     } else {
         None
@@ -44,7 +72,10 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
 mod tests {
     #![allow(clippy::wildcard_imports)]
 
+    use std::option::Option::None;
+
     use indoc::indoc;
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
     use crate::model::Code;
@@ -134,6 +165,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::BodyWiderThan72Characters,
                 &message.into(),
+                Some(vec![("Too long".to_string(), 81, 1)]),
+                None,
             )),
         );
     }
@@ -148,6 +181,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::BodyWiderThan72Characters,
                 &message.into(),
+                Some(vec![("Too long".to_string(), 83, 1)]),
+                None,
             )),
         );
     }
@@ -159,5 +194,54 @@ mod tests {
             "Message {:?} should have returned {:?}, found {:?}",
             message, expected, actual
         );
+    }
+
+    #[test]
+    fn formatting() {
+        let message = format!(
+            "Subject\n\nx\n{}\nx\n{}\nx\n",
+            "x".repeat(73),
+            "x".repeat(80)
+        );
+        let problem = lint(&CommitMessage::from(message.clone()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            BodyWiderThan72Characters
+
+              \u{d7} Your commit has a body wider than 72 characters
+               \u{256d}\u{2500}[3:1]
+             3 \u{2502} x
+             4 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+               \u{b7}                                                                         \u{252c}
+               \u{b7}                                                                         \u{2570}\u{2500}\u{2500} Too long
+             5 \u{2502} x
+             6 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+               \u{b7}                                                                         \u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}
+               \u{b7}                                                                             \u{2570}\u{2500}\u{2500} Too long
+             7 \u{2502} x
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: It's important to keep the body of the commit narrower than 72
+                    characters because when you look at the git log, that's where it
+                    truncates the message. This means that people won't get the entirety
+                    of the information in your commit.
+                    
+                    You can fix this by making the lines in your body no more than 72
+                    characters
+            ").to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
     }
 }
