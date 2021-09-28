@@ -1,6 +1,5 @@
 use std::option::Option::None;
 
-use indoc::indoc;
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -9,20 +8,18 @@ use crate::model::{Code, Problem};
 pub(crate) const CONFIG: &str = "not-conventional-commit";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = indoc!(
-    "
-    It's important to follow the conventional commit style when creating your commit message. By \
-    using this style we can automatically calculate the version of software using deployment \
-    pipelines, and also generate changelogs and other useful information without human interaction.
+const HELP_MESSAGE: &str =
+    "It's important to follow the conventional commit style when creating your commit message. By \
+using this style we can automatically calculate the version of software using deployment \
+pipelines, and also generate changelogs and other useful information without human interaction.
 
-    You can fix it by following style
+You can fix it by following style
 
-    <type>[optional scope]: <description>
+<type>[optional scope]: <description>
 
-    [optional body]
+[optional body]
 
-    [optional footer(s)]"
-);
+[optional footer(s)]";
 /// Description of the problem
 const ERROR: &str = "Your commit message isn't in conventional style";
 
@@ -60,8 +57,6 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
 mod tests {
     #![allow(clippy::wildcard_imports)]
 
-    use indoc::indoc;
-
     use super::*;
     use crate::model::Code;
 
@@ -70,14 +65,11 @@ mod tests {
     #[test]
     fn commit_message_with_description_and_breaking_change_footer() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                feat: allow provided config object to extend other configs
+            "feat: allow provided config object to extend other configs
 
-                BREAKING CHANGE: `extends` key in config file is now used for extending other \
-                 config files
-                "
-            ),
+BREAKING CHANGE: `extends` key in config file is now used for extending other \
+ config files
+",
             &None,
         );
     }
@@ -85,11 +77,8 @@ mod tests {
     #[test]
     fn commit_message_with_bang_to_draw_attention_to_breaking_change() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                refactor!: drop support for Node 6
-                "
-            ),
+            "refactor!: drop support for Node 6
+",
             &None,
         );
     }
@@ -97,13 +86,10 @@ mod tests {
     #[test]
     fn commit_message_with_both_bang_and_breaking_change_footer() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                refactor!: drop support for Node 6
+            "refactor!: drop support for Node 6
 
-                BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
-                "
-            ),
+BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
+",
             &None,
         );
     }
@@ -111,11 +97,8 @@ mod tests {
     #[test]
     fn commit_message_with_no_body() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                docs: correct spelling of CHANGELOG
-                "
-            ),
+            "docs: correct spelling of CHANGELOG
+",
             &None,
         );
     }
@@ -123,11 +106,8 @@ mod tests {
     #[test]
     fn commit_message_with_scope() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                feat(lang): add polish language
-                "
-            ),
+            "feat(lang): add polish language
+",
             &None,
         );
     }
@@ -135,18 +115,15 @@ mod tests {
     #[test]
     fn commit_message_with_multi_paragraph_body_and_multiple_footers() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                fix: correct minor typos in code
+            "fix: correct minor typos in code
 
-                see the issue for details
+see the issue for details
 
-                on typos fixed.
+on typos fixed.
 
-                Reviewed-by: Z
-                Refs #133
-                "
-            ),
+Reviewed-by: Z
+Refs #133
+",
             &None,
         );
     }
@@ -154,26 +131,20 @@ mod tests {
     #[test]
     fn revert_example() {
         test_subject_not_separate_from_body(
-            indoc!(
-                "
-                revert: let us never again speak of the noodle incident
+            "revert: let us never again speak of the noodle incident
 
-                Refs: 676104e, a215868
-                "
-            ),
+Refs: 676104e, a215868
+",
             &None,
         );
     }
 
     #[test]
     fn non_conventional() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_subject_not_separate_from_body(
             message,
             &Some(Problem::new(
@@ -189,13 +160,10 @@ mod tests {
 
     #[test]
     fn missing_bracket() {
-        let message = indoc!(
-            "
-            fix(example: An example commit
+        let message = "fix(example: An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_subject_not_separate_from_body(
             message,
             &Some(Problem::new(
@@ -211,13 +179,10 @@ mod tests {
 
     #[test]
     fn missing_space() {
-        let message = indoc!(
-            "
-            fix(example):An example commit
+        let message = "fix(example):An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_subject_not_separate_from_body(
             message,
             &Some(Problem::new(
@@ -246,42 +211,35 @@ mod tests {
 
     #[test]
     fn formatting() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = indoc!(
-            "
-            \u{1b}]8;;https://www.conventionalcommits.org/\u{1b}\\NotConventionalCommit (link)\u{1b}]8;;\u{1b}\\
-            
-              \u{d7} Your commit message isn't in conventional style
-               \u{256d}\u{2500}[1:1]
-             1 \u{2502} An example commit
-               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-               \u{b7}         \u{2570}\u{2500}\u{2500} Not conventional
-             2 \u{2502} 
-               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
-              help: It's important to follow the conventional commit style when creating
-                    your commit message. By using this style we can automatically
-                    calculate the version of software using deployment pipelines, and
-                    also generate changelogs and other useful information without human
-                    interaction.
-                    
-                    You can fix it by following style
-                    
-                    <type>[optional scope]: <description>
-                    
-                    [optional body]
-                    
-                    [optional footer(s)]
-            "
-        )
-        .to_string();
+        let expected = "\u{1b}]8;;https://www.conventionalcommits.org/\u{1b}\\NotConventionalCommit (link)\u{1b}]8;;\u{1b}\\
+
+  \u{d7} Your commit message isn't in conventional style
+   \u{256d}\u{2500}[1:1]
+ 1 \u{2502} An example commit
+   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+   \u{b7}         \u{2570}\u{2500}\u{2500} Not conventional
+ 2 \u{2502} 
+   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  help: It's important to follow the conventional commit style when creating
+        your commit message. By using this style we can automatically
+        calculate the version of software using deployment pipelines, and
+        also generate changelogs and other useful information without human
+        interaction.
+        
+        You can fix it by following style
+        
+        <type>[optional scope]: <description>
+        
+        [optional body]
+        
+        [optional footer(s)]
+"        .to_string();
         assert_eq!(
             actual, expected,
             "Message {:?} should have returned {:?}, found {:?}",

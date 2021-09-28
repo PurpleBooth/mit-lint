@@ -1,6 +1,5 @@
 use std::option::Option::None;
 
-use indoc::indoc;
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -9,22 +8,19 @@ use crate::model::{Code, Problem};
 pub(crate) const CONFIG: &str = "not-emoji-log";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = indoc!(
-    "
-    It's important to follow the emoji log style when creating your commit message. By using this \
-    style we can automatically generate changelogs.
+const HELP_MESSAGE: &str = "It's important to follow the emoji log style when creating your commit message. By using this \
+style we can automatically generate changelogs.
 
-    You can fix it using one of the prefixes:
+You can fix it using one of the prefixes:
 
-    
-    \u{1f4e6} NEW:
-    \u{1f44c} IMPROVE:
-    \u{1f41b} FIX:
-    \u{1f4d6} DOC:
-    \u{1f680} RELEASE:
-    \u{1f916} TEST:
-    \u{203c}\u{fe0f} BREAKING:"
-);
+
+\u{1f4e6} NEW:
+\u{1f44c} IMPROVE:
+\u{1f41b} FIX:
+\u{1f4d6} DOC:
+\u{1f680} RELEASE:
+\u{1f916} TEST:
+\u{203c}\u{fe0f} BREAKING:";
 /// Description of the problem
 const ERROR: &str = "Your commit message isn't in emoji log style";
 
@@ -64,21 +60,16 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
 #[cfg(test)]
 mod test {
 
-    use indoc::indoc;
-
     use super::*;
     use crate::model::{Code, Problem};
 
     #[test]
     fn new() {
         run_lint(
-            indoc!(
-                "
-                \u{1f4e6} NEW: An example commit
+            "\u{1f4e6} NEW: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -86,13 +77,10 @@ mod test {
     #[test]
     fn improve() {
         run_lint(
-            indoc!(
-                "
-                \u{1f44c} IMPROVE: An example commit
+            "\u{1f44c} IMPROVE: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -100,13 +88,10 @@ mod test {
     #[test]
     fn fix() {
         run_lint(
-            indoc!(
-                "
-                \u{1f41b} FIX: An example commit
+            "\u{1f41b} FIX: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -114,13 +99,10 @@ mod test {
     #[test]
     fn docs() {
         run_lint(
-            indoc!(
-                "
-                \u{1f4d6} DOC: An example commit
+            "\u{1f4d6} DOC: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -128,13 +110,10 @@ mod test {
     #[test]
     fn release() {
         run_lint(
-            indoc!(
-                "
-                \u{1f680} RELEASE: An example commit
+            "\u{1f680} RELEASE: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -142,13 +121,10 @@ mod test {
     #[test]
     fn test() {
         run_lint(
-            indoc!(
-                "
-                \u{1f916} TEST: An example commit
+            "\u{1f916} TEST: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
@@ -156,26 +132,20 @@ mod test {
     #[test]
     fn bc() {
         run_lint(
-            indoc!(
-                "
-                \u{203c}\u{fe0f} BREAKING: An example commit
+            "\u{203c}\u{fe0f} BREAKING: An example commit
 
-                This is an example commit
-                "
-            ),
+This is an example commit
+",
             &None,
         );
     }
 
     #[test]
     fn no_gap() {
-        let message = indoc!(
-            "
-            \u{203c}\u{fe0f} BREAKING:An example commit
+        let message = "\u{203c}\u{fe0f} BREAKING:An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         run_lint(
             message,
             &Some(Problem::new(
@@ -191,13 +161,10 @@ mod test {
 
     #[test]
     fn unknown_emoji() {
-        let message = indoc!(
-            "
-            \u{1f408} UNKNOWN: An example commit
+        let message = "\u{1f408} UNKNOWN: An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         run_lint(
             message,
             &Some(Problem::new(
@@ -213,13 +180,10 @@ mod test {
 
     #[test]
     fn not_emoji() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         run_lint(
             message,
             &Some(Problem::new(
@@ -239,13 +203,10 @@ mod test {
 
     #[test]
     fn formatting() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
         let expected = "\u{1b}]8;;https://github.com/ahmadawais/Emoji-Log\u{1b}\\NotEmojiLog (link)\u{1b}]8;;\u{1b}\\

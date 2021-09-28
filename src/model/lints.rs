@@ -187,8 +187,6 @@ mod tests {
         convert::{TryFrom, TryInto},
     };
 
-    use indoc::indoc;
-
     use crate::model::{
         lint::Lint::{
             BodyWiderThan72Characters,
@@ -306,22 +304,19 @@ mod tests {
         lints_on.insert(BodyWiderThan72Characters);
         lints_on.insert(PivotalTrackerIdMissing);
         let actual = String::try_from(Lints::new(lints_on)).expect("Failed to serialise");
-        let expected = indoc!(
-            "
-            [mit.lint]
-            body-wider-than-72-characters = true
-            duplicated-trailers = true
-            github-id-missing = false
-            jira-issue-key-missing = false
-            not-conventional-commit = false
-            not-emoji-log = false
-            pivotal-tracker-id-missing = true
-            subject-line-ends-with-period = false
-            subject-line-not-capitalized = false
-            subject-longer-than-72-characters = true
-            subject-not-separated-from-body = true
-            "
-        );
+        let expected = "[mit.lint]
+body-wider-than-72-characters = true
+duplicated-trailers = true
+github-id-missing = false
+jira-issue-key-missing = false
+not-conventional-commit = false
+not-emoji-log = false
+pivotal-tracker-id-missing = true
+subject-line-ends-with-period = false
+subject-line-not-capitalized = false
+subject-longer-than-72-characters = true
+subject-not-separated-from-body = true
+";
 
         assert_eq!(
             expected, actual,

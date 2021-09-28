@@ -1,6 +1,5 @@
 use std::{ops::Add, option::Option::None};
 
-use indoc::indoc;
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -9,23 +8,21 @@ use crate::model::{Code, Problem};
 pub(crate) const CONFIG: &str = "pivotal-tracker-id-missing";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = indoc!(
-    "
-    It's important to add the ID because it allows code to be linked back to the stories it was \
-    done for, it can provide a chain of custody for code for audit purposes, and it can give \
-    future explorers of the codebase insight into the wider organisational need behind the \
-    change. We may also use it for automation purposes, like generating changelogs or \
-    notification emails.
+const HELP_MESSAGE: &str =
+    "It's important to add the ID because it allows code to be linked back to the stories it was \
+done for, it can provide a chain of custody for code for audit purposes, and it can give \
+future explorers of the codebase insight into the wider organisational need behind the \
+change. We may also use it for automation purposes, like generating changelogs or \
+notification emails.
 
-    You can fix this by adding the Id in one of the styles below to the commit message
-    [Delivers #12345678]
-    [fixes #12345678]
-    [finishes #12345678]
-    [#12345884 #12345678]
-    [#12345884,#12345678]
-    [#12345678],[#12345884]
-    This will address [#12345884]"
-);
+You can fix this by adding the Id in one of the styles below to the commit message
+[Delivers #12345678]
+[fixes #12345678]
+[finishes #12345678]
+[#12345884 #12345678]
+[#12345884,#12345678]
+[#12345678],[#12345884]
+This will address [#12345884]";
 
 /// Description of the problem
 const ERROR: &str = "Your commit message is missing a Pivotal Tracker ID";
@@ -68,7 +65,6 @@ mod tests_has_missing_pivotal_tracker_id {
 
     use std::option::Option::None;
 
-    use indoc::indoc;
     use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     use super::*;
@@ -77,16 +73,13 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn with_id() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [#12345678]
-                # Some comment
-                "
-            ),
+[#12345678]
+# Some comment
+",
             &None,
         );
     }
@@ -103,42 +96,33 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn multiple_ids() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [#12345678,#87654321]
-                # some comment
-                "
-            ),
+[#12345678,#87654321]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [#12345678,#87654321,#11223344]
-                # some comment
-                "
-            ),
+[#12345678,#87654321,#11223344]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [#12345678 #87654321 #11223344]
-                # some comment
-                "
-            ),
+[#12345678 #87654321 #11223344]
+# some comment
+",
             &None,
         );
     }
@@ -146,68 +130,53 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_fixed_state_change() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [fix #12345678]
-                # some comment
-                "
-            ),
+[fix #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [FIX #12345678]
-                # some comment
-                "
-            ),
+[FIX #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [Fix #12345678]
-                # some comment
-                "
-            ),
+[Fix #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [fixed #12345678]
-                # some comment
-                "
-            ),
+[fixed #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [fixes #12345678]
-                # some comment
-                "
-            ),
+[fixes #12345678]
+# some comment
+",
             &None,
         );
     }
@@ -215,58 +184,46 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_complete_state_change() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [complete #12345678]
-                # some comment
-                "
-            ),
+[complete #12345678]
+# some comment
+",
             &None,
         );
 
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [completed #12345678]
-                # some comment
-                "
-            ),
+[completed #12345678]
+# some comment
+",
             &None,
         );
 
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [Completed #12345678]
-                # some comment
-                "
-            ),
+[Completed #12345678]
+# some comment
+",
             &None,
         );
 
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [completes #12345678]
-                # some comment
-                "
-            ),
+[completes #12345678]
+# some comment
+",
             &None,
         );
     }
@@ -274,43 +231,34 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_finished_state_change() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [finish #12345678]
-                # some comment
-                "
-            ),
+[finish #12345678]
+# some comment
+",
             &None,
         );
 
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [finished #12345678]
-                # some comment
-                "
-            ),
+[finished #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [finishes #12345678]
-                # some comment
-                "
-            ),
+[finishes #12345678]
+# some comment
+",
             &None,
         );
     }
@@ -318,43 +266,34 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_delivered_state_change() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [deliver #12345678]
-                # some comment
-                "
-            ),
+[deliver #12345678]
+# some comment
+",
             &None,
         );
 
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [delivered #12345678]
-                # some comment
-                "
-            ),
+[delivered #12345678]
+# some comment
+",
             &None,
         );
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [delivers #12345678]
-                # some comment
-                "
-            ),
+[delivers #12345678]
+# some comment
+",
             &None,
         );
     }
@@ -362,16 +301,13 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_state_change_and_multiple_ids() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                [fix #12345678 #12345678]
-                # some comment
-                "
-            ),
+[fix #12345678 #12345678]
+# some comment
+",
             &None,
         );
     }
@@ -379,31 +315,25 @@ mod tests_has_missing_pivotal_tracker_id {
     #[test]
     fn id_with_prefixed_text() {
         test_has_missing_pivotal_tracker_id(
-            indoc!(
-                "
-                An example commit
+            "An example commit
 
-                This is an example commit
+This is an example commit
 
-                Finally [fix #12345678 #12345678]
-                "
-            ),
+Finally [fix #12345678 #12345678]
+",
             &None,
         );
     }
 
     #[test]
     fn invalid_state_change() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
+This is an example commit
 
-            [fake #12345678]
-            # some comment
-            "
-        );
+[fake #12345678]
+# some comment
+";
         test_has_missing_pivotal_tracker_id(
             message,
             &Some(Problem::new(
@@ -419,13 +349,10 @@ mod tests_has_missing_pivotal_tracker_id {
 
     #[test]
     fn missing_id_with_square_brackets() {
-        let message_1 = indoc!(
-            "
-            An example commit
+        let message_1 = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         test_has_missing_pivotal_tracker_id(
             message_1,
             &Some(Problem::new(
@@ -438,16 +365,13 @@ mod tests_has_missing_pivotal_tracker_id {
             )),
         );
 
-        let message_2 = indoc!(
-            "
-            An example commit
+        let message_2 = "An example commit
 
-            This is an example commit
+This is an example commit
 
-            [#]
-            # some comment
-            "
-        );
+[#]
+# some comment
+";
         test_has_missing_pivotal_tracker_id(
             message_2,
             &Some(Problem::new(
@@ -463,45 +387,38 @@ mod tests_has_missing_pivotal_tracker_id {
 
     #[test]
     fn formatting() {
-        let message = indoc!(
-            "
-            An example commit
+        let message = "An example commit
 
-            This is an example commit
-            "
-        );
+This is an example commit
+";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = indoc!(
-            "
-            PivotalTrackerIdMissing
-            
-              \u{d7} Your commit message is missing a Pivotal Tracker ID
-               \u{256d}\u{2500}[2:1]
-             2 \u{2502} 
-             3 \u{2502} This is an example commit
-               \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-               \u{b7}              \u{2570}\u{2500}\u{2500} No Pivotal Tracker ID
-               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
-              help: It's important to add the ID because it allows code to be linked
-                    back to the stories it was done for, it can provide a chain
-                    of custody for code for audit purposes, and it can give future
-                    explorers of the codebase insight into the wider organisational need
-                    behind the change. We may also use it for automation purposes, like
-                    generating changelogs or notification emails.
-                    
-                    You can fix this by adding the Id in one of the styles below to the
-                    commit message
-                    [Delivers #12345678]
-                    [fixes #12345678]
-                    [finishes #12345678]
-                    [#12345884 #12345678]
-                    [#12345884,#12345678]
-                    [#12345678],[#12345884]
-                    This will address [#12345884]
-            "
-        )
-        .to_string();
+        let expected = "PivotalTrackerIdMissing
+
+  \u{d7} Your commit message is missing a Pivotal Tracker ID
+   \u{256d}\u{2500}[2:1]
+ 2 \u{2502} 
+ 3 \u{2502} This is an example commit
+   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
+   \u{b7}              \u{2570}\u{2500}\u{2500} No Pivotal Tracker ID
+   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  help: It's important to add the ID because it allows code to be linked
+        back to the stories it was done for, it can provide a chain
+        of custody for code for audit purposes, and it can give future
+        explorers of the codebase insight into the wider organisational need
+        behind the change. We may also use it for automation purposes, like
+        generating changelogs or notification emails.
+        
+        You can fix this by adding the Id in one of the styles below to the
+        commit message
+        [Delivers #12345678]
+        [fixes #12345678]
+        [finishes #12345678]
+        [#12345884 #12345678]
+        [#12345884,#12345678]
+        [#12345678],[#12345884]
+        This will address [#12345884]
+"        .to_string();
         assert_eq!(
             actual, expected,
             "Message {:?} should have returned {:?}, found {:?}",

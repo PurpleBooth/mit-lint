@@ -15,7 +15,6 @@ miette = { version = "3.0.0", features = ["fancy"] }
 thiserror = "1.0.29"
 mit-commit = "1.29.8"
 regex = "1.5.4"
-indoc = "1.0.3"
 toml = "0.5.8"
 futures = { version = "0.3.17" }
 lazy_static = "1.4.0"
