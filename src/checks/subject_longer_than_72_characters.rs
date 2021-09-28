@@ -1,3 +1,5 @@
+use std::option::Option::None;
+
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -14,13 +16,21 @@ const HELP_MESSAGE: &str = "It's important to keep the subject of the commit les
 /// Description of the problem
 const ERROR: &str = "Your subject is longer than 72 characters";
 
+const LIMIT: usize = 72;
+
 pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
-    if commit.get_subject().len() > 72 {
+    if commit.get_subject().len() > LIMIT {
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectLongerThan72Characters,
             commit,
+            Some(vec![(
+                "Too long".to_string(),
+                73_usize,
+                commit.get_subject().len() - LIMIT,
+            )]),
+            None,
         ))
     } else {
         None
@@ -187,6 +197,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
+                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                None,
             )),
         );
     }
@@ -201,6 +213,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
+                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                None,
             )),
         );
     }
@@ -273,6 +287,8 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
+                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                None,
             )),
         );
     }
@@ -341,6 +357,47 @@ mod tests {
             &None,
         );
     }
+
+    #[test]
+    fn formatting() {
+        let message = "x".repeat(73);
+        let problem = lint(&CommitMessage::from(message.to_string()));
+        let actual = fmt_report(&Report::new(problem.unwrap()));
+        let expected = indoc!(
+            "
+            SubjectLongerThan72Characters
+            
+              \u{d7} Your subject is longer than 72 characters
+               \u{256d}\u{2500}\u{2500}\u{2500}\u{2500}
+             1 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+               \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+              help: It's important to keep the subject of the commit less than 72
+                    characters because when you look at the git log, that's where it
+                    truncates the message. This means that people won't get the entirety
+                    of the information in your commit.
+                    
+                    Please keep the subject line 72 characters or under
+            "
+        )
+        .to_string();
+        assert_eq!(
+            actual, expected,
+            "Message {:?} should have returned {:?}, found {:?}",
+            message, expected, actual
+        );
+    }
+
+    fn fmt_report(diag: &Report) -> String {
+        let mut out = String::new();
+        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+            .with_width(80)
+            .render_report(&mut out, diag.as_ref())
+            .unwrap();
+        out
+    }
+    use std::option::Option::None;
+
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
     fn test_subject_longer_than_72_characters(message: &str, expected: &Option<Problem>) {
         let actual = &lint(&CommitMessage::from(message));
