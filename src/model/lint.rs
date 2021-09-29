@@ -60,7 +60,11 @@ pub enum Lint {
     ///         ("Duplicated `Co-authored-by`".to_string(), 231, 51),
     ///         ("Duplicated `Signed-off-by`".to_string(), 128, 50),
     ///     ]),
-    ///     None,
+    ///     Some(
+    ///         "https://git-scm.com/docs/githooks#_commit_msg"
+    ///             .parse()
+    ///             .unwrap(),
+    ///     ),
     /// ));
     /// let actual = Lint::DuplicatedTrailers.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -106,7 +110,7 @@ pub enum Lint {
     ///     Code::PivotalTrackerIdMissing,
     ///     &message.into(),
     ///     Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
-    ///     None,
+    ///     Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
     /// ));
     /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -151,7 +155,9 @@ pub enum Lint {
     ///     "Your commit message is missing a JIRA Issue Key".into(),
     ///     "It's important to add the issue key because it allows us to link code back to the motivations for doing it, and in some cases provide an audit trail for compliance purposes.\n\nYou can fix this by adding a key like `JRA-123` to the commit message"
     ///         .into(),
-    ///     Code::JiraIssueKeyMissing,&message.into(),Some(vec![("No JIRA Issue Key".to_string(), 19, 26)]),None,
+    ///     Code::JiraIssueKeyMissing,&message.into(),
+    ///     Some(vec![("No JIRA Issue Key".to_string(), 19, 26)]),
+    ///     Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
     /// ));
     /// let actual = Lint::JiraIssueKeyMissing.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -196,7 +202,8 @@ pub enum Lint {
     ///      "Your commit message is missing a GitHub ID".into(),
     ///     "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.\n\nYou can fix this by adding a ID like the following examples:\n\n#642\nGH-642\nAnUser/git-mit#642\nAnOrganisation/git-mit#642\nfixes #642\n\nBe careful just putting '#642' on a line by itself, as '#' is the default comment character"
     ///         .into(),
-    ///     Code::GitHubIdMissing,&message.into(),Some(vec![("No GitHub ID".to_string(), 19, 26)]),None,
+    ///     Code::GitHubIdMissing,&message.into(),Some(vec![("No GitHub ID".to_string(), 19, 26)]),
+    /// Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
     /// ));
     /// let actual = Lint::GitHubIdMissing.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -239,7 +246,9 @@ pub enum Lint {
     ///       "Your commit message is missing a blank line between the subject and the body".into(),
     ///     "Most tools that render and parse commit messages, expect commit messages to be in the form of subject and body. This includes git itself in tools like git-format-patch. If you don't include this you may see strange behaviour from git and any related tools.\n\nTo fix this separate subject from body with a blank line"
     ///         .into(),
-    ///     Code::SubjectNotSeparateFromBody,&message.into(),Some(vec![("Missing blank line".to_string(), 18, 25)]),None,
+    ///     Code::SubjectNotSeparateFromBody,&message.into(),
+    ///     Some(vec![("Missing blank line".to_string(), 18, 25)]),
+    ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
     /// ));
     /// let actual = Lint::SubjectNotSeparateFromBody.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -279,7 +288,9 @@ pub enum Lint {
     ///       "Your subject is longer than 72 characters".into(),
     ///     "It's important to keep the subject of the commit less than 72 characters because when you look at the git log, that's where it truncates the message. This means that people won't get the entirety of the information in your commit.\n\nPlease keep the subject line 72 characters or under"
     ///         .into(),
-    ///     Code::SubjectLongerThan72Characters,&message.clone().into(),Some(vec![("Too long".to_string(), 73, 1)]),None,
+    ///     Code::SubjectLongerThan72Characters,&message.clone().into(),
+    ///     Some(vec![("Too long".to_string(), 73, 1)]),
+    ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
     /// ));
     /// let actual = Lint::SubjectLongerThan72Characters.lint(&CommitMessage::from(message));
     /// assert_eq!(
@@ -317,8 +328,9 @@ pub enum Lint {
     ///     Problem::new(
     ///         "Your commit message is missing a capital letter".into(),
     ///         "The subject line is a title, and as such should be capitalised.\n\nYou can fix this by capitalising the first character in the subject".into(),
-    ///     Code::SubjectNotCapitalized,&message.into(),Some(vec![("Not capitalised".to_string(), 0, 1)]),
-    ///     None,
+    ///     Code::SubjectNotCapitalized,&message.into(),
+    ///     Some(vec![("Not capitalised".to_string(), 0, 1)]),
+    ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
     /// )
     /// );
     /// let actual = Lint::SubjectNotCapitalized.lint(&CommitMessage::from(message));
@@ -359,7 +371,7 @@ pub enum Lint {
     ///         .into(),
     ///     Code::SubjectEndsWithPeriod,&message.into(),
     ///     Some(vec![("Unneeded period".to_string(), 17, 1)]),
-    ///     None,
+    ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
     /// )
     /// );
     /// let actual = Lint::SubjectEndsWithPeriod.lint(&CommitMessage::from(message));
@@ -398,7 +410,7 @@ pub enum Lint {
     ///         .into(),
     ///     Code::BodyWiderThan72Characters,&message.clone().into(),
     ///     Some(vec![("Too long".parse().unwrap(), 81, 1)]),
-    /// None
+    /// Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap())
     /// ));
     /// let actual = Lint::BodyWiderThan72Characters.lint(&CommitMessage::from(message));
     /// assert_eq!(

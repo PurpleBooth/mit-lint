@@ -48,7 +48,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
                 last_line_location,
                 commit_text.len().saturating_sub(last_line_location),
             )]),
-            None,
+            Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".to_string()),
         ))
     }
 }
@@ -243,7 +243,7 @@ This is an example commit
                 Code::GitHubIdMissing,
                 &message.into(),
                 Some(vec![(String::from("No GitHub ID"), 19, 26)]),
-                None,
+                Some(String::from("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests")),
             )),
         );
     }
@@ -264,7 +264,7 @@ H-123
                 Code::GitHubIdMissing,
                 &message_1.into(),
                 Some(vec![("No GitHub ID".to_string(), 46, 6)]),
-                None,
+                Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
             )),
         );
         let message_2 = "An example commit
@@ -281,7 +281,7 @@ git-mit#123
                 Code::GitHubIdMissing,
                 &message_2.into(),
                 Some(vec![("No GitHub ID".to_string(), 46, 12)]),
-                None,
+                Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
             )),
         );
     }
@@ -294,15 +294,15 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "GitHubIdMissing
+        let expected = "GitHubIdMissing (https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests)
 
-  \u{d7} Your commit message is missing a GitHub ID
-   \u{256d}\u{2500}[2:1]
- 2 \u{2502} 
- 3 \u{2502} This is an example commit
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}              \u{2570}\u{2500}\u{2500} No GitHub ID
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message is missing a GitHub ID
+   ,-[2:1]
+ 2 | 
+ 3 | This is an example commit
+   : ^^^^^^^^^^^^^|^^^^^^^^^^^^
+   :              `-- No GitHub ID
+   `----
   help: It's important to add the issue ID because it allows us to link code
         back to the motivations for doing it, and because we can help people
         exploring the repository link their issues to specific bits of code.
@@ -327,8 +327,9 @@ This is an example commit
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

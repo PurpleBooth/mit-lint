@@ -50,7 +50,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
                     .take_while(|ch| ch == &'.')
                     .count(),
             )]),
-            None,
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
     } else {
         None
@@ -85,7 +85,7 @@ mod tests {
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
                 Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
     }
@@ -101,7 +101,7 @@ mod tests {
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
                 Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -117,7 +117,7 @@ mod tests {
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
                 Some(vec![("Unneeded period".to_string(), 13_usize, 3_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -134,15 +134,15 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "SubjectEndsWithPeriod
+        let expected = "SubjectEndsWithPeriod (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
-  \u{d7} Your commit message ends with a period
-   \u{256d}\u{2500}[1:1]
- 1 \u{2502} ... 
-   \u{b7} \u{2500}\u{252c}\u{2500}
-   \u{b7}  \u{2570}\u{2500}\u{2500} Unneeded period
- 2 \u{2502} 
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message ends with a period
+   ,-[1:1]
+ 1 | ... 
+   : ^|^
+   :  `-- Unneeded period
+ 2 | 
+   `----
   help: It's important to keep your commits short, because we only have a
         limited number of characters to use (72) before the subject line
         is truncated. Full stops aren't normally in subject lines, and take
@@ -161,8 +161,9 @@ This is an example commit
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

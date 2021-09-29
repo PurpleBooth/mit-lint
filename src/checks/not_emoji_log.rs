@@ -209,15 +209,15 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "\u{1b}]8;;https://github.com/ahmadawais/Emoji-Log\u{1b}\\NotEmojiLog (link)\u{1b}]8;;\u{1b}\\
+        let expected = "NotEmojiLog (https://github.com/ahmadawais/Emoji-Log)
 
-  \u{d7} Your commit message isn't in emoji log style
-   \u{256d}\u{2500}[1:1]
- 1 \u{2502} An example commit
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}         \u{2570}\u{2500}\u{2500} Not emoji log
- 2 \u{2502} 
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message isn't in emoji log style
+   ,-[1:1]
+ 1 | An example commit
+   : ^^^^^^^^|^^^^^^^^
+   :         `-- Not emoji log
+ 2 | 
+   `----
   help: It's important to follow the emoji log style when creating your
         commit message. By using this style we can automatically generate
         changelogs.
@@ -243,8 +243,9 @@ This is an example commit
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

@@ -38,7 +38,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
                 first_line_length,
                 gutter_line_length,
             )]),
-            None,
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
     } else {
         None
@@ -160,7 +160,7 @@ This is an example commit
 "
                 .into(),
                 Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
         test_subject_not_separate_from_body(
@@ -180,7 +180,7 @@ It has even more lines
 "
                 .into(),
                 Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -196,16 +196,16 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "SubjectNotSeparateFromBody
+        let expected = "SubjectNotSeparateFromBody (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
-  \u{d7} Your commit message is missing a blank line between the subject and the
-  \u{2502} body
-   \u{256d}\u{2500}[1:1]
- 1 \u{2502} An example commit
- 2 \u{2502} This is an example commit
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}             \u{2570}\u{2500}\u{2500} Missing blank line
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message is missing a blank line between the subject and the
+  | body
+   ,-[1:1]
+ 1 | An example commit
+ 2 | This is an example commit
+   : ^^^^^^^^^^^^|^^^^^^^^^^^^
+   :             `-- Missing blank line
+   `----
   help: Most tools that render and parse commit messages, expect commit
         messages to be in the form of subject and body. This includes git
         itself in tools like git-format-patch. If you don't include this you
@@ -222,8 +222,9 @@ This is an example commit
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

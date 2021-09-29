@@ -61,7 +61,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
                     })
                     .collect(),
             ),
-            None,
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
         ))
     } else {
         None
@@ -162,7 +162,7 @@ index 5a83784..ebaee48 100644
                 Code::BodyWiderThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 81, 1)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -178,7 +178,7 @@ index 5a83784..ebaee48 100644
                 Code::BodyWiderThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 83, 1)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -201,20 +201,20 @@ index 5a83784..ebaee48 100644
         );
         let problem = lint(&CommitMessage::from(message.clone()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "BodyWiderThan72Characters
+        let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
-  \u{d7} Your commit has a body wider than 72 characters
-   \u{256d}\u{2500}[3:1]
- 3 \u{2502} x
- 4 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   \u{b7}                                                                         \u{252c}
-   \u{b7}                                                                         \u{2570}\u{2500}\u{2500} Too long
- 5 \u{2502} x
- 6 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   \u{b7}                                                                         \u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}
-   \u{b7}                                                                             \u{2570}\u{2500}\u{2500} Too long
- 7 \u{2502} x
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit has a body wider than 72 characters
+   ,-[3:1]
+ 3 | x
+ 4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   :                                                                         |
+   :                                                                         `-- Too long
+ 5 | x
+ 6 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   :                                                                         ^^^^|^^^
+   :                                                                             `-- Too long
+ 7 | x
+   `----
   help: It's important to keep the body of the commit narrower than 72
         characters because when you look at the git log, that's where it
         truncates the message. This means that people won't get the entirety
@@ -232,8 +232,9 @@ index 5a83784..ebaee48 100644
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

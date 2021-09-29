@@ -30,7 +30,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
                 73_usize,
                 commit.get_subject().len() - LIMIT,
             )]),
-            None,
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
     } else {
         None
@@ -190,7 +190,7 @@ index 5a83784..ebaee48 100644
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
     }
@@ -206,7 +206,7 @@ index 5a83784..ebaee48 100644
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
     }
@@ -277,7 +277,7 @@ index 5a83784..ebaee48 100644
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -349,12 +349,12 @@ index 5a83784..ebaee48 100644
         let message = "x".repeat(73);
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "SubjectLongerThan72Characters
+        let expected = "SubjectLongerThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
-  \u{d7} Your subject is longer than 72 characters
-   \u{256d}\u{2500}\u{2500}\u{2500}\u{2500}
- 1 \u{2502} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your subject is longer than 72 characters
+   ,----
+ 1 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   `----
   help: It's important to keep the subject of the commit less than 72
         characters because when you look at the git log, that's where it
         truncates the message. This means that people won't get the entirety
@@ -372,8 +372,9 @@ index 5a83784..ebaee48 100644
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out
