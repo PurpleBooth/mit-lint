@@ -13,7 +13,7 @@ repository = "https://github.com/PurpleBooth/mit-lint"
 [dependencies]
 miette = { version = "3.0.0", features = ["fancy"] }
 thiserror = "1.0.29"
-mit-commit = "1.29.8"
+mit-commit = "1.29.10"
 regex = "1.5.4"
 toml = "0.5.8"
 futures = { version = "0.3.17" }

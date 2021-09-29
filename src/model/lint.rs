@@ -1,5 +1,6 @@
 use std::convert::TryInto;
 
+use miette::Diagnostic;
 use mit_commit::CommitMessage;
 use thiserror::Error;
 
@@ -739,8 +740,13 @@ impl std::fmt::Display for Lint {
 }
 
 /// Errors
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Diagnostic)]
 pub enum Error {
     #[error("Lint not found: {0}")]
+    #[diagnostic(
+        code(mit_lint::model::lint::error::LintNotFound),
+        url(docsrs),
+        help("check the list of available lints")
+    )]
     LintNotFound(String),
 }
