@@ -40,7 +40,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
                     .saturating_sub(2),
                 1_usize,
             )]),
-            None,
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
     } else {
         None
@@ -76,7 +76,7 @@ mod tests {
 "
                 .into(),
                 Some(vec![("Not capitalised".to_string(), 0_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
     }
@@ -91,7 +91,7 @@ mod tests {
                 Code::SubjectNotCapitalized,
                 &CommitMessage::from("  subject line"),
                 Some(vec![("Not capitalised".to_string(), 1_usize, 1_usize)]),
-                None,
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
     }
@@ -113,15 +113,15 @@ mod tests {
         let message = "  an example commit\n\nexample";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "SubjectNotCapitalized
+        let expected = "SubjectNotCapitalized (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
-  \u{d7} Your commit message is missing a capital letter
-   \u{256d}\u{2500}[1:1]
- 1 \u{2502} an example commit
-   \u{b7} \u{252c}
-   \u{b7} \u{2570}\u{2500}\u{2500} Not capitalised
- 2 \u{2502} 
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message is missing a capital letter
+   ,-[1:1]
+ 1 | an example commit
+   : |
+   : `-- Not capitalised
+ 2 | 
+   `----
   help: The subject line is a title, and as such should be capitalised.
         
         You can fix this by capitalising the first character in the subject
@@ -136,8 +136,9 @@ mod tests {
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

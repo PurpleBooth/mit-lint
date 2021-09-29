@@ -54,7 +54,7 @@ pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
                 last_line_location,
                 commit_text.len().saturating_sub(last_line_location),
             )]),
-            None,
+            Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".to_string()),
         ))
     }
 }
@@ -342,7 +342,7 @@ This is an example commit
                 Code::PivotalTrackerIdMissing,
                 &message.into(),
                 Some(vec![("No Pivotal Tracker ID".to_string(), 63, 15)]),
-                None,
+                Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
             )),
         );
     }
@@ -361,7 +361,7 @@ This is an example commit
                 Code::PivotalTrackerIdMissing,
                 &message_1.into(),
                 Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
-                None,
+                Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
             )),
         );
 
@@ -380,7 +380,7 @@ This is an example commit
                 Code::PivotalTrackerIdMissing,
                 &message_2.into(),
                 Some(vec![("No Pivotal Tracker ID".to_string(), 50, 15)]),
-                None,
+                Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
             )),
         );
     }
@@ -393,15 +393,15 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "PivotalTrackerIdMissing
+        let expected = "PivotalTrackerIdMissing (https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks)
 
-  \u{d7} Your commit message is missing a Pivotal Tracker ID
-   \u{256d}\u{2500}[2:1]
- 2 \u{2502} 
- 3 \u{2502} This is an example commit
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}              \u{2570}\u{2500}\u{2500} No Pivotal Tracker ID
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message is missing a Pivotal Tracker ID
+   ,-[2:1]
+ 2 | 
+ 3 | This is an example commit
+   : ^^^^^^^^^^^^^|^^^^^^^^^^^^
+   :              `-- No Pivotal Tracker ID
+   `----
   help: It's important to add the ID because it allows code to be linked
         back to the stories it was done for, it can provide a chain
         of custody for code for audit purposes, and it can give future
@@ -428,8 +428,9 @@ This is an example commit
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out

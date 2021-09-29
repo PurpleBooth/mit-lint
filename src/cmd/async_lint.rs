@@ -26,7 +26,6 @@ use crate::model::{Lints, Problem};
 /// use mit_commit::CommitMessage;
 /// use tokio::runtime::Runtime;
 /// use mit_lint::{Problem, Code, Lints, Lint, async_lint};
-/// use std::option::Option::None;
 ///
 /// let message:String = "x".repeat(73).into();
 /// let expected = vec![Problem::new(
@@ -34,7 +33,7 @@ use crate::model::{Lints, Problem};
 ///     "It's important to keep the subject of the commit less than 72 characters because when you look at the git log, that's where it truncates the message. This means that people won't get the entirety of the information in your commit.\n\nPlease keep the subject line 72 characters or under"
 ///         .into(),
 ///     Code::SubjectLongerThan72Characters,&message.clone().into(),
-/// Some(vec![("Too long".to_string(), 73, 1)]),None,
+/// Some(vec![("Too long".to_string(), 73, 1)]),Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
 /// )];
 /// let rt = Runtime::new().unwrap();
 /// let actual = rt.block_on(async {

@@ -78,7 +78,7 @@ pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
                     })
                     .collect(),
             ),
-            None,
+            Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
         ))
     }
 }
@@ -155,7 +155,11 @@ Co-authored-by: Billie Thompson <email@example.com>
                         50_usize,
                     ),
                 ]),
-                None,
+                Some(
+                    "https://git-scm.com/docs/githooks#_commit_msg"
+                        .parse()
+                        .unwrap(),
+                ),
             )),
         );
     }
@@ -180,7 +184,11 @@ Signed-off-by: Billie Thompson <email@example.com>
                 Code::DuplicatedTrailers,
                 &message.into(),
                 Some(vec![("Duplicated `Signed-off-by`".to_string(), 128, 50)]),
-                None,
+                Some(
+                    "https://git-scm.com/docs/githooks#_commit_msg"
+                        .parse()
+                        .unwrap(),
+                ),
             )),
         );
     }
@@ -205,7 +213,7 @@ Co-authored-by: Billie Thompson <email@example.com>
                 Code::DuplicatedTrailers,
                 &message.into(),
                 Some(vec![("Duplicated `Co-authored-by`".to_string(), 129, 51)]),
-                None,
+                Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
             )),
         );
     }
@@ -230,7 +238,7 @@ Relates-to: #315
                 Code::DuplicatedTrailers,
                 &message.into(),
                 Some(vec![("Duplicated `Relates-to`".to_string(), 94, 16)]),
-                None,
+                Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
             )),
         );
     }
@@ -310,19 +318,19 @@ Co-authored-by: Billie Thompson <email@example.com>
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "DuplicatedTrailers
+        let expected = "DuplicatedTrailers (https://git-scm.com/docs/githooks#_commit_msg)
 
-  \u{d7} Your commit message has duplicated trailers
-   \u{256d}\u{2500}[5:1]
- 5 \u{2502} Signed-off-by: Billie Thompson <email@example.com>
- 6 \u{2502} Signed-off-by: Billie Thompson <email@example.com>
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}                          \u{2570}\u{2500}\u{2500} Duplicated `Signed-off-by`
- 7 \u{2502} Co-authored-by: Billie Thompson <email@example.com>
- 8 \u{2502} Co-authored-by: Billie Thompson <email@example.com>
-   \u{b7} \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}
-   \u{b7}                          \u{2570}\u{2500}\u{2500} Duplicated `Co-authored-by`
-   \u{2570}\u{2500}\u{2500}\u{2500}\u{2500}
+  x Your commit message has duplicated trailers
+   ,-[5:1]
+ 5 | Signed-off-by: Billie Thompson <email@example.com>
+ 6 | Signed-off-by: Billie Thompson <email@example.com>
+   : ^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^
+   :                          `-- Duplicated `Signed-off-by`
+ 7 | Co-authored-by: Billie Thompson <email@example.com>
+ 8 | Co-authored-by: Billie Thompson <email@example.com>
+   : ^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^
+   :                          `-- Duplicated `Co-authored-by`
+   `----
   help: These are normally added accidentally when you're rebasing or
         amending to a commit, sometimes in the text editor, but often by
         git hooks.
@@ -340,8 +348,9 @@ Co-authored-by: Billie Thompson <email@example.com>
 
     fn fmt_report(diag: &Report) -> String {
         let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        GraphicalReportHandler::new_themed(GraphicalTheme::none())
             .with_width(80)
+            .with_links(false)
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out
