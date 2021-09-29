@@ -512,7 +512,7 @@ impl std::convert::TryFrom<&str> for Lint {
             .collect::<Vec<Lint>>()
             .first()
             .copied()
-            .ok_or_else(|| Error::LintNotFound(from.into()))
+            .ok_or_else(|| Error::new_lint_not_found(from.into()))
     }
 }
 
@@ -760,5 +760,12 @@ pub enum Error {
         url(docsrs),
         help("check the list of available lints")
     )]
-    LintNotFound(String),
+    LintNotFound(#[source_code] String, #[label("Not found")] (usize, usize)),
+}
+
+impl Error {
+    fn new_lint_not_found(missing_lint: String) -> Error {
+        let length = missing_lint.len();
+        Error::LintNotFound(missing_lint, (0, length))
+    }
 }
