@@ -4,6 +4,7 @@ use std::{
     vec::IntoIter,
 };
 
+use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::model::{lint, Lint};
@@ -403,12 +404,19 @@ subject-not-separated-from-body = true
     }
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Diagnostic)]
 pub enum Error {
-    #[error("{0}")]
+    #[error(transparent)]
+    #[diagnostic(transparent)]
     LintNameUnknown(#[from] lint::Error),
     #[error("Failed to parse lint config file: {0}")]
+    #[diagnostic(
+        code(mit_lint::model::lints::error::toml_parse),
+        url(docsrs),
+        help("is it valid toml?")
+    )]
     TomlParse(#[from] toml::de::Error),
-    #[error("Failed to read lint config file: {0}")]
+    #[error("Failed to convert config to toml: {0}")]
+    #[diagnostic(code(mit_lint::model::lints::error::toml_serialize), url(docsrs))]
     TomlSerialize(#[from] toml::ser::Error),
 }
