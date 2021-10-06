@@ -138,9 +138,9 @@ This is an example commit
 
   x Your commit message ends with a period
    ,-[1:1]
- 1 | ... 
-   : ^|^
-   :  `-- Unneeded period
+ 1 | An example commit... 
+   :                  ^|^
+   :                   `-- Unneeded period
  2 | 
    `----
   help: It's important to keep your commits short, because we only have a
