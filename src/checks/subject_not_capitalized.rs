@@ -117,9 +117,9 @@ mod tests {
 
   x Your commit message is missing a capital letter
    ,-[1:1]
- 1 | an example commit
-   : |
-   : `-- Not capitalised
+ 1 |   an example commit
+   :   |
+   :   `-- Not capitalised
  2 | 
    `----
   help: The subject line is a title, and as such should be capitalised.
