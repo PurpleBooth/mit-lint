@@ -1,13 +1,9 @@
 queue_rules:
   - name: default
     conditions:
-      - check-success=lint-markdown
-      - check-success=security-audit
-      - check-success=version
-      - check-success=check
-      - check-success=test
-      - check-success=lints
-      - check-success=bench
+      - check-success~=^commit-checks /
+      - check-success~=^lint-markdown /
+      - check-success~=^rust-checks /
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
 
@@ -22,13 +18,9 @@ pull_request_rules:
 
   - name: automatic rebase for dependencies
     conditions:
-      - check-success=lint-markdown
-      - check-success=security-audit
-      - check-success=version
-      - check-success=check
-      - check-success=test
-      - check-success=lints
-      - check-success=bench
+      - check-success~=^commit-checks /
+      - check-success~=^lint-markdown /
+      - check-success~=^rust-checks /
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
     actions:
