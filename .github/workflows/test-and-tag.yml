@@ -78,22 +78,11 @@ jobs:
           tag: v${{ needs.release.outputs.current_version }}
 
   publish-to-cargo:
+    if: needs.release.outputs.version_bump
     needs:
       - release
-    if: needs.release.outputs.version_bump
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-        name: Checkout the repository
-        with:
-          ref: v${{ needs.release.outputs.current_version }}
-          fetch-depth: 0
-      - uses: actions-rs/toolchain@v1.0.7
-        with:
-          toolchain: stable
-          profile: default
-      - env:
-          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
-        run: |
-          cargo login "$CARGO_TOKEN"
-          cargo publish
+    uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
+    with:
+      current_version: ${{ needs.release.outputs.current_version }}
+    secrets:
+      cargo_token: ${{ secrets.CARGO_TOKEN }}
