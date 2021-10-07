@@ -4,6 +4,8 @@ on:
     branches:
       - "*"
   pull_request:
+  workflow_dispatch:
+
 jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
