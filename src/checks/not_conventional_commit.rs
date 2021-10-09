@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "not-conventional-commit";
+pub const CONFIG: &str = "not-conventional-commit";
 
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str =
@@ -33,7 +33,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
     !RE.is_match(&subject)
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
         let commit_text = String::from(commit_message.clone());
         Some(Problem::new(

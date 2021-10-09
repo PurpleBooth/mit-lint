@@ -26,17 +26,16 @@ bench:
 .PHONY: lint
 ## Lint it
 lint:
-	cargo +nightly  fmt --all -- --check
-	cargo +nightly clippy --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
-	cargo check
-	cargo audit
-	npx prettier --check **.yml
+	cargo +nightly fmt --all -- --check
+	cargo +nightly clippy --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo
+	cargo +nightly check
+	cargo +nightly audit
 
 .PHONY: fmt
 ## Format what can be formatted
 fmt:
 	cargo +nightly fix --allow-dirty --allow-staged
-	cargo +nightly clippy --allow-staged --allow-dirty --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
+	cargo +nightly clippy --allow-dirty --allow-staged --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo -D clippy::nursery
 	cargo +nightly fmt --all
 	npx prettier --write **.yml
 

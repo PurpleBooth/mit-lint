@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "subject-not-separated-from-body";
+pub const CONFIG: &str = "subject-not-separated-from-body";
 /// Description of the problem
 const ERROR: &str = "Your commit message is missing a blank line between the subject and the body";
 /// Advice on how to correct the problem
@@ -22,7 +22,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
         .any(|char| '\n' == char)
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
         let commit_text = String::from(commit_message.clone());
         let mut lines = commit_text.lines();

@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "not-emoji-log";
+pub const CONFIG: &str = "not-emoji-log";
 
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "It's important to follow the emoji log style when creating your commit message. By using this \
@@ -34,7 +34,7 @@ const PREFIXES: &[&str] = &[
     "\u{203c}\u{fe0f} BREAKING: ",
 ];
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if PREFIXES
         .iter()
         .any(|x| commit_message.get_subject().to_string().starts_with(x))

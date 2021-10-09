@@ -35,8 +35,8 @@ impl Lints {
     /// Lints::new(BTreeSet::new());
     /// ```
     #[must_use]
-    pub fn new(lints: BTreeSet<Lint>) -> Lints {
-        Lints { lints }
+    pub const fn new(lints: BTreeSet<Lint>) -> Self {
+        Self { lints }
     }
 
     /// Get the available lints
@@ -50,7 +50,7 @@ impl Lints {
     /// assert!(lints.into_iter().count() > 0);
     /// ```
     #[must_use]
-    pub fn available() -> &'static Lints {
+    pub fn available() -> &'static Self {
         &AVAILABLE
     }
 
@@ -96,8 +96,8 @@ impl Lints {
     /// assert!(actual.contains(&Lint::NotEmojiLog.name()));
     /// ```
     #[must_use]
-    pub fn merge(&self, other: &Lints) -> Lints {
-        Lints::new(self.lints.union(&other.lints).copied().collect())
+    pub fn merge(&self, other: &Self) -> Self {
+        Self::new(self.lints.union(&other.lints).copied().collect())
     }
 
     /// Get the lints that are in self, but not in other
@@ -112,8 +112,8 @@ impl Lints {
     /// assert!(!actual.contains(&Lint::SubjectNotSeparateFromBody.name()));
     /// ```
     #[must_use]
-    pub fn subtract(&self, other: &Lints) -> Lints {
-        Lints::new(self.lints.difference(&other.lints).copied().collect())
+    pub fn subtract(&self, other: &Self) -> Self {
+        Self::new(self.lints.difference(&other.lints).copied().collect())
     }
 }
 
@@ -132,17 +132,16 @@ impl TryFrom<Lints> for String {
     fn try_from(lints: Lints) -> Result<Self, Self::Error> {
         let enabled: Vec<_> = lints.into();
 
-        let config: BTreeMap<String, bool> = Lint::all_lints()
+        let config: BTreeMap<Self, bool> = Lint::all_lints()
             .map(|x| (x, enabled.contains(&x)))
             .fold(BTreeMap::new(), |mut acc, (lint, state)| {
                 acc.insert(lint.to_string(), state);
                 acc
             });
 
-        let mut inner: BTreeMap<String, BTreeMap<String, bool>> = BTreeMap::new();
+        let mut inner: BTreeMap<Self, BTreeMap<Self, bool>> = BTreeMap::new();
         inner.insert("lint".into(), config);
-        let mut output: BTreeMap<String, BTreeMap<String, BTreeMap<String, bool>>> =
-            BTreeMap::new();
+        let mut output: BTreeMap<Self, BTreeMap<Self, BTreeMap<Self, bool>>> = BTreeMap::new();
         output.insert("mit".into(), inner);
 
         Ok(toml::to_string(&output)?)
@@ -151,7 +150,7 @@ impl TryFrom<Lints> for String {
 
 impl From<Vec<Lint>> for Lints {
     fn from(lints: Vec<Lint>) -> Self {
-        Lints::new(lints.into_iter().collect())
+        Self::new(lints.into_iter().collect())
     }
 }
 
@@ -177,7 +176,7 @@ impl TryFrom<Vec<&str>> for Lints {
             )
             .map(Vec::into_iter)?;
 
-        Ok(Lints::new(lints.collect()))
+        Ok(Self::new(lints.collect()))
     }
 }
 

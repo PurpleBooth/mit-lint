@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "jira-issue-key-missing";
+pub const CONFIG: &str = "jira-issue-key-missing";
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "It's important to add the issue key because it allows us to link code back to the motivations \
 for doing it, and in some cases provide an audit trail for compliance purposes.
@@ -18,7 +18,7 @@ lazy_static! {
     static ref RE: regex::Regex = regex::Regex::new(r"(?m)(^| )[A-Z]{2,}-[0-9]+( |$)").unwrap();
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if commit_message.matches_pattern(&*RE) {
         None
     } else {

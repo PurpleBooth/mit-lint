@@ -5,7 +5,7 @@ use mit_commit::{CommitMessage, Trailer};
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "duplicated-trailers";
+pub const CONFIG: &str = "duplicated-trailers";
 
 const TRAILERS_TO_CHECK_FOR_DUPLICATES: [&str; 3] =
     ["Signed-off-by", "Co-authored-by", "Relates-to"];
@@ -44,7 +44,7 @@ fn get_duplicated_trailers(commit_message: &CommitMessage) -> Vec<String> {
         .collect::<Vec<_>>()
 }
 
-pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit: &CommitMessage) -> Option<Problem> {
     let duplicated_trailers = get_duplicated_trailers(commit);
     if duplicated_trailers.is_empty() {
         None
