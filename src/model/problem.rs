@@ -86,8 +86,8 @@ impl Problem {
         commit_message: &CommitMessage,
         labels: Option<Vec<(String, usize, usize)>>,
         url: Option<String>,
-    ) -> Problem {
-        Problem {
+    ) -> Self {
+        Self {
             error,
             tip,
             code,
@@ -117,7 +117,7 @@ impl Problem {
     /// assert_eq!(problem.code(), &Code::BodyWiderThan72Characters)
     /// ```
     #[must_use]
-    pub fn code(&self) -> &Code {
+    pub const fn code(&self) -> &Code {
         &self.code
     }
 

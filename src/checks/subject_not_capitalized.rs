@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "subject-line-not-capitalized";
+pub const CONFIG: &str = "subject-line-not-capitalized";
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "The subject line is a title, and as such should be \
                             capitalised.\n\nYou can fix this by capitalising the first character \
@@ -23,7 +23,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
         .unwrap_or(false)
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
         Some(Problem::new(
             ERROR.into(),

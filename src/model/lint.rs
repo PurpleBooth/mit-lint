@@ -506,10 +506,10 @@ impl std::convert::TryFrom<&str> for Lint {
     type Error = Error;
 
     fn try_from(from: &str) -> Result<Self, Self::Error> {
-        Lint::all_lints()
-            .zip(Lint::all_lints().map(|lint| format!("{}", lint)))
-            .filter_map(|(lint, name): (Lint, String)| if name == from { Some(lint) } else { None })
-            .collect::<Vec<Lint>>()
+        Self::all_lints()
+            .zip(Self::all_lints().map(|lint| format!("{}", lint)))
+            .filter_map(|(lint, name): (Self, String)| if name == from { Some(lint) } else { None })
+            .collect::<Vec<Self>>()
             .first()
             .copied()
             .ok_or_else(|| Error::new_lint_not_found(from.into()))
@@ -531,7 +531,7 @@ impl From<Lint> for &str {
 impl Lint {
     /// Get an lint's unique name
     #[must_use]
-    pub fn name(self) -> &'static str {
+    pub const fn name(self) -> &'static str {
         match self {
             Lint::DuplicatedTrailers => checks::duplicate_trailers::CONFIG,
             Lint::PivotalTrackerIdMissing => checks::missing_pivotal_tracker_id::CONFIG,
@@ -582,7 +582,7 @@ impl Lint {
     /// use mit_lint::Lint;
     /// assert!(Lint::all_lints().next().is_some())
     /// ```
-    pub fn all_lints() -> impl Iterator<Item = Lint> {
+    pub fn all_lints() -> impl Iterator<Item = Self> {
         ALL_LINTS.iter().copied()
     }
 
@@ -595,8 +595,8 @@ impl Lint {
     /// assert!(Lint::iterator().next().is_some())
     /// ```
     #[deprecated(since = "0.1.5", note = "iterator was an unusual name. Use all_lints")]
-    pub fn iterator() -> impl Iterator<Item = Lint> {
-        Lint::all_lints()
+    pub fn iterator() -> impl Iterator<Item = Self> {
+        Self::all_lints()
     }
 
     /// Check if a lint is enabled by default
@@ -682,7 +682,7 @@ impl Lint {
     ///
     /// # Errors
     /// If the lint does not exist
-    pub fn from_names(names: Vec<&str>) -> Result<Vec<Lint>, model::lints::Error> {
+    pub fn from_names(names: Vec<&str>) -> Result<Vec<Self>, model::lints::Error> {
         let lints: Lints = names.try_into()?;
         Ok(lints.into_iter().collect())
     }
@@ -764,8 +764,8 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_lint_not_found(missing_lint: String) -> Error {
+    fn new_lint_not_found(missing_lint: String) -> Self {
         let length = missing_lint.len();
-        Error::LintNotFound(missing_lint, (0, length))
+        Self::LintNotFound(missing_lint, (0, length))
     }
 }

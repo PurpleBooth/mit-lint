@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "pivotal-tracker-id-missing";
+pub const CONFIG: &str = "pivotal-tracker-id-missing";
 
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str =
@@ -34,7 +34,7 @@ lazy_static! {
     .unwrap();
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if commit_message.matches_pattern(&*RE) {
         None
     } else {

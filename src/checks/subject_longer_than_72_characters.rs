@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "subject-longer-than-72-characters";
+pub const CONFIG: &str = "subject-longer-than-72-characters";
 
 /// Advice on how to correct the problem
 const HELP_MESSAGE: &str = "It's important to keep the subject of the commit less than 72 \
@@ -18,7 +18,7 @@ const ERROR: &str = "Your subject is longer than 72 characters";
 
 const LIMIT: usize = 72;
 
-pub(crate) fn lint(commit: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit: &CommitMessage) -> Option<Problem> {
     if commit.get_subject().len() > LIMIT {
         Some(Problem::new(
             ERROR.into(),

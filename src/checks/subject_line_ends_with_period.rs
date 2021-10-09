@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
-pub(crate) const CONFIG: &str = "subject-line-ends-with-period";
+pub const CONFIG: &str = "subject-line-ends-with-period";
 /// Description of the problem
 const ERROR: &str = "Your commit message ends with a period";
 /// Advice on how to correct the problem
@@ -26,7 +26,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
     )
 }
 
-pub(crate) fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
     if has_problem(commit_message) {
         let subject = commit_message.get_subject().to_string();
         Some(Problem::new(
