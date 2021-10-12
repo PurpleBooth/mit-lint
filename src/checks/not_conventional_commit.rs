@@ -8,7 +8,7 @@ use crate::model::{Code, Problem};
 pub const CONFIG: &str = "not-conventional-commit";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str =
+pub const HELP_MESSAGE: &str =
     "It's important to follow the conventional commit style when creating your commit message. By \
 using this style we can automatically calculate the version of software using deployment \
 pipelines, and also generate changelogs and other useful information without human interaction.
@@ -21,7 +21,7 @@ You can fix it by following style
 
 [optional footer(s)]";
 /// Description of the problem
-const ERROR: &str = "Your commit message isn't in conventional style";
+pub const ERROR: &str = "Your commit message isn't in conventional style";
 
 lazy_static! {
     static ref RE: regex::Regex = regex::Regex::new("^[^()\\s]+(\\(\\w+\\))?!?: ").unwrap();
@@ -44,7 +44,7 @@ pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
             Some(vec![(
                 "Not conventional".to_string(),
                 0_usize,
-                commit_text.lines().next().map(str::len).unwrap(),
+                commit_text.lines().next().map(str::len).unwrap_or_default(),
             )]),
             Some("https://www.conventionalcommits.org/".to_string()),
         ))

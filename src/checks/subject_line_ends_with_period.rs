@@ -7,23 +7,24 @@ use crate::model::{Code, Problem};
 /// Canonical lint ID
 pub const CONFIG: &str = "subject-line-ends-with-period";
 /// Description of the problem
-const ERROR: &str = "Your commit message ends with a period";
+pub const ERROR: &str = "Your commit message ends with a period";
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = "It's important to keep your commits short, because we only have a \
+pub const HELP_MESSAGE: &str = "It's important to keep your commits short, because we only have a \
                             limited number of characters to use (72) before the subject line is \
                             truncated. Full stops aren't normally in subject lines, and take up \
                             an extra character, so we shouldn't use them in commit message \
                             subjects.\n\nYou can fix this by removing the period";
 
 fn has_problem(commit_message: &CommitMessage) -> bool {
-    matches!(
-        commit_message
-            .get_subject()
-            .chars()
-            .rev()
-            .find(|ch| !ch.is_whitespace()),
-        Some('.')
-    )
+    commit_message
+        .get_subject()
+        .to_string()
+        .trim_end()
+        .chars()
+        .rev()
+        .next()
+        .filter(|x| *x == '.')
+        .is_some()
 }
 
 pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
@@ -54,127 +55,5 @@ pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
         ))
     } else {
         None
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #![allow(clippy::wildcard_imports)]
-
-    use super::*;
-    use crate::model::{Code, Problem};
-
-    #[test]
-    fn subject_does_not_end_with_period() {
-        run_test(
-            "Subject Line
-",
-            &None,
-        );
-    }
-
-    #[test]
-    fn subject_ends_with_period() {
-        let message = "Subject Line.
-";
-        run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
-        );
-    }
-
-    #[test]
-    fn subject_has_period_then_whitespace() {
-        let message = "Subject Line. ";
-        run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )),
-        );
-    }
-
-    #[test]
-    fn subject_has_multiple_periods() {
-        let message = "Subject Line... ";
-        run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 3_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )),
-        );
-    }
-
-    use std::option::Option::None;
-
-    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
-
-    #[test]
-    fn formatting() {
-        let message = "An example commit... 
-
-This is an example commit
-";
-        let problem = lint(&CommitMessage::from(message.to_string()));
-        let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "SubjectEndsWithPeriod (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
-
-  x Your commit message ends with a period
-   ,-[1:1]
- 1 | An example commit... 
-   :                  ^|^
-   :                   `-- Unneeded period
- 2 | 
-   `----
-  help: It's important to keep your commits short, because we only have a
-        limited number of characters to use (72) before the subject line
-        is truncated. Full stops aren't normally in subject lines, and take
-        up an extra character, so we shouldn't use them in commit message
-        subjects.
-        
-        You can fix this by removing the period
-"
-        .to_string();
-        assert_eq!(
-            actual, expected,
-            "Message {:?} should have returned {:?}, found {:?}",
-            message, expected, actual
-        );
-    }
-
-    fn fmt_report(diag: &Report) -> String {
-        let mut out = String::new();
-        GraphicalReportHandler::new_themed(GraphicalTheme::none())
-            .with_width(80)
-            .with_links(false)
-            .render_report(&mut out, diag.as_ref())
-            .unwrap();
-        out
-    }
-
-    fn run_test(message: &str, expected: &Option<Problem>) {
-        let actual = &lint(&CommitMessage::from(message));
-        assert_eq!(
-            actual, expected,
-            "Message {:?} should have returned {:?}, found {:?}",
-            message, expected, actual
-        );
     }
 }
