@@ -8,7 +8,7 @@ use crate::model::{Code, Problem};
 pub const CONFIG: &str = "github-id-missing";
 
 /// Advice on how to correct the problem
-const HELP_MESSAGE: &str = "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.
+pub const HELP_MESSAGE: &str = "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.
 
 You can fix this by adding a ID like the following examples:
 
@@ -20,7 +20,7 @@ fixes #642
 
 Be careful just putting '#642' on a line by itself, as '#' is the default comment character" ;
 /// Description of the problem
-const ERROR: &str = "Your commit message is missing a GitHub ID";
+pub const ERROR: &str = "Your commit message is missing a GitHub ID";
 
 lazy_static! {
     static ref RE: regex::Regex =

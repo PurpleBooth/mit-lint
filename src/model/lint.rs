@@ -2,6 +2,8 @@ use std::convert::TryInto;
 
 use miette::Diagnostic;
 use mit_commit::CommitMessage;
+use quickcheck::{Arbitrary, Gen};
+use strum_macros::EnumIter;
 use thiserror::Error;
 
 use crate::{
@@ -11,7 +13,7 @@ use crate::{
 };
 
 /// The lints that are supported
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Ord, PartialOrd)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Ord, PartialOrd, EnumIter)]
 pub enum Lint {
     /// Check for duplicated trailers
     ///
@@ -573,6 +575,7 @@ lazy_static! {
         Lint::BodyWiderThan72Characters,
     ];
 }
+
 impl Lint {
     /// Iterator over all the lints
     ///
@@ -688,60 +691,23 @@ impl Lint {
     }
 }
 
-#[cfg(test)]
-mod tests_lints {
-    use std::convert::TryInto;
-
-    use crate::model::Lint;
-
-    #[test]
-    fn it_is_convertible_to_string() {
-        let string: String = Lint::PivotalTrackerIdMissing.into();
-        assert_eq!("pivotal-tracker-id-missing".to_string(), string);
+impl Arbitrary for Lint {
+    fn arbitrary(g: &mut Gen) -> Self {
+        *g.choose(&ALL_LINTS.iter().copied().collect::<Vec<_>>())
+            .unwrap()
     }
 
-    #[test]
-    fn it_can_be_created_from_string() {
-        let lint: Lint = "pivotal-tracker-id-missing".try_into().unwrap();
-        assert_eq!(Lint::PivotalTrackerIdMissing, lint);
-    }
+    fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
+        let index = ALL_LINTS.iter().position(|other| self.eq(other));
 
-    #[test]
-    fn it_is_printable() {
-        assert_eq!(
-            "pivotal-tracker-id-missing",
-            &format!("{}", Lint::PivotalTrackerIdMissing)
-        );
-    }
-
-    #[test]
-    fn i_can_get_all_the_lints() {
-        let all: Vec<Lint> = Lint::all_lints().collect();
-        assert_eq!(
-            all,
-            vec![
-                Lint::DuplicatedTrailers,
-                Lint::PivotalTrackerIdMissing,
-                Lint::JiraIssueKeyMissing,
-                Lint::SubjectNotSeparateFromBody,
-                Lint::GitHubIdMissing,
-                Lint::SubjectLongerThan72Characters,
-                Lint::SubjectNotCapitalized,
-                Lint::SubjectEndsWithPeriod,
-                Lint::BodyWiderThan72Characters,
-                Lint::NotConventionalCommit,
-                Lint::NotEmojiLog,
-            ]
-        );
-    }
-
-    #[test]
-    fn i_can_get_if_a_lint_is_enabled_by_default() {
-        assert!(Lint::DuplicatedTrailers.enabled_by_default());
-        assert!(!Lint::PivotalTrackerIdMissing.enabled_by_default());
-        assert!(!Lint::JiraIssueKeyMissing.enabled_by_default());
-        assert!(Lint::SubjectNotSeparateFromBody.enabled_by_default());
-        assert!(!Lint::GitHubIdMissing.enabled_by_default());
+        match index {
+            None | Some(0) => quickcheck::empty_shrinker(),
+            Some(index) => ALL_LINTS
+                .get(index - 1)
+                .map_or(quickcheck::empty_shrinker(), |item| {
+                    quickcheck::single_shrinker(*item)
+                }),
+        }
     }
 }
 
