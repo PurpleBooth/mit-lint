@@ -271,7 +271,7 @@ fn fail_check(
     let message = CommitMessage::from(format!(
         "{}\n\n{}",
         commit,
-        format!("{}: {}\n", trailer_tag, trailer_text).repeat(2 + repeats)
+        format!("{}: {}\n", trailer_tag, trailer_text).repeat(repeats.saturating_add(2))
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_some())

@@ -21,13 +21,9 @@ fn has_problem(commit: &CommitMessage) -> bool {
     commit
         .get_body()
         .iter()
-        .flat_map(|body| {
-            String::from(body.clone())
-                .lines()
-                .map(String::from)
-                .collect::<Vec<String>>()
-        })
-        .any(|line| line.chars().count() > 72)
+        .map(Clone::clone)
+        .map(String::from)
+        .any(|body| body.lines().any(|line| line.chars().count() > LIMIT))
 }
 
 const LIMIT: usize = 72;
