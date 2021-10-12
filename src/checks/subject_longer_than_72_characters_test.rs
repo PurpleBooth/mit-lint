@@ -348,7 +348,7 @@ fn test_subject_longer_than_72_characters(message: &str, expected: &Option<Probl
 fn failure_check(commit_message_body: String) -> TestResult {
     if commit_message_body
         .chars()
-        .take_while(|x| *x != '\n')
+        .take_while(|x| *x != '\n' && *x != '\r')
         .count()
         <= 72
     {

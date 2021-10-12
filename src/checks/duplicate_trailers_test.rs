@@ -261,10 +261,16 @@ fn fail_check(
     trailer_text: String,
     repeats: usize,
 ) -> TestResult {
-    if trailer_tag.is_empty() || trailer_tag.chars().any(|x| !x.is_ascii_alphanumeric()) {
+    if trailer_tag.len() > 10000
+        || trailer_tag.is_empty()
+        || trailer_tag.chars().any(|x| !x.is_ascii_alphanumeric())
+    {
         return TestResult::discard();
     }
-    if trailer_text.is_empty() || trailer_text.chars().any(|x| !x.is_ascii_alphanumeric()) {
+    if trailer_text.len() > 10000
+        || trailer_text.is_empty()
+        || trailer_text.chars().any(|x| !x.is_ascii_alphanumeric())
+    {
         return TestResult::discard();
     }
 
