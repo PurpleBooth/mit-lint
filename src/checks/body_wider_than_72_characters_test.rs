@@ -173,11 +173,12 @@ fn fmt_report(diag: &Report) -> String {
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn success_check(commit: String) -> TestResult {
-    if commit
-        .lines()
-        .skip(1)
-        .filter(|x| x.starts_with('#'))
-        .any(|x| x.chars().count() > 72)
+    if commit.starts_with('\n')
+        || commit
+            .lines()
+            .skip(1)
+            .filter(|x| x.starts_with('#'))
+            .any(|x| x.chars().count() > 72)
     {
         return TestResult::discard();
     }
