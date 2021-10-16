@@ -1,7 +1,7 @@
 use std::option::Option::None;
 
 use miette::{GraphicalReportHandler, GraphicalTheme, Report};
-use mit_commit::CommitMessage;
+use mit_commit::{CommitMessage, Trailer};
 use quickcheck::TestResult;
 
 use super::not_conventional_commit::{lint, ERROR, HELP_MESSAGE};
@@ -238,22 +238,25 @@ fn success_check(
         }
     }
 
-    let commit = format!(
-        "{}{}{}: {}{}{}\n# comment",
+    let mut commit = CommitMessage::default().with_subject(&format!(
+        "{}{}{}: {}",
         type_slug,
         scope.map(|x| format!("({})", x)).unwrap_or_default(),
         bc_break
             .clone()
             .map(|_| "!".to_string())
             .unwrap_or_default(),
-        description,
-        body.map(|x| format!("\n\n{}", x)).unwrap_or_default(),
-        bc_break
-            .map(|x| format!("\n\nBC BREAK: {}", x))
-            .unwrap_or_default()
-    );
+        description
+    ));
 
-    let message = CommitMessage::from(commit);
-    let result = lint(&message);
+    if let Some(body_contents) = body {
+        commit = commit.with_body_contents(&body_contents);
+    }
+
+    if let Some(_bc_contents) = bc_break {
+        commit = commit.add_trailer(Trailer::new("BC BREAK", "bc_contents"));
+    }
+
+    let result = lint(&commit);
     TestResult::from_bool(result.is_none())
 }
