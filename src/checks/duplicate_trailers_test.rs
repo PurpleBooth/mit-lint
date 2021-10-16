@@ -274,6 +274,10 @@ fn fail_check(
         return TestResult::discard();
     }
 
+    if repeats > 50 {
+        return TestResult::discard();
+    }
+
     let message = CommitMessage::from(format!(
         "{}\n\n{}",
         commit,
