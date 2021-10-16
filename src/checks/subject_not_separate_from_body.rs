@@ -17,23 +17,8 @@ pub const HELP_MESSAGE: &str = "Most tools that render and parse commit messages
                             this separate subject from body with a blank line";
 
 fn has_problem(commit_message: &CommitMessage) -> bool {
-    let message = String::from(commit_message.clone());
-    let comment_char = commit_message
-        .get_comments()
-        .iter()
-        .next()
-        .and_then(|x| String::from(x.clone()).chars().next());
-
-    let second_line = message
-        .lines()
-        .filter(|line| match comment_char {
-            None => true,
-            Some(comment_char) => !line.starts_with(comment_char),
-        })
-        .nth(1)
-        .unwrap_or_default();
-
-    !second_line.is_empty()
+    let subject: String = commit_message.get_subject().into();
+    subject.lines().count() > 1
 }
 
 pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
