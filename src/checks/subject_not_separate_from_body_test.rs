@@ -176,11 +176,13 @@ This is an example commit
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn failure_check(subject: String, commit_message_body: String) -> TestResult {
-    if subject.is_empty() || subject.lines().any(|x| x.is_empty())  || subject.lines().count() < 2 {
+    if subject.is_empty() || subject.lines().any(str::is_empty) || subject.lines().count() < 2 {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::default().with_subject(&subject).with_body_contents(&commit_message_body);
+    let message = CommitMessage::default()
+        .with_subject(&subject)
+        .with_body_contents(&commit_message_body);
 
     let result = lint(&message);
     TestResult::from_bool(result.is_some())
