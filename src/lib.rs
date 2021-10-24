@@ -38,3 +38,15 @@ pub use model::{Code, Error, Lint, LintError, Lints, Problem, CONFIG_KEY_PREFIX}
 mod checks;
 mod cmd;
 mod model;
+
+#[cfg(doctest)]
+mod test_readme {
+    macro_rules! external_doc_test {
+        ($x:expr) => {
+            #[doc = $x]
+            extern "C" {}
+        };
+    }
+
+    external_doc_test!(include_str!("../README.md"));
+}
