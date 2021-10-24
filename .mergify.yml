@@ -6,6 +6,8 @@ queue_rules:
       - check-success~=^commit-checks /
       - check-success~=^lint-markdown /
       - check-success~=^rust-checks /
+      - "#check-pending=0"
+      - "#check-success>=3"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
 
@@ -23,6 +25,8 @@ pull_request_rules:
       - check-success~=^commit-checks /
       - check-success~=^lint-markdown /
       - check-success~=^rust-checks /
+      - "#check-pending=0"
+      - "#check-success>=3"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
     actions:
