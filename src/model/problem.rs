@@ -83,7 +83,7 @@ impl Problem {
         error: String,
         tip: String,
         code: Code,
-        commit_message: &CommitMessage,
+        commit_message: &CommitMessage<'_>,
         labels: Option<Vec<(String, usize, usize)>>,
         url: Option<String>,
     ) -> Self {
@@ -145,7 +145,7 @@ impl Problem {
     /// )
     /// ```
     #[must_use]
-    pub fn commit_message(&self) -> CommitMessage {
+    pub fn commit_message(&self) -> CommitMessage<'_> {
         self.commit_message.clone().into()
     }
 

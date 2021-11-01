@@ -17,7 +17,7 @@ pub const HELP_MESSAGE: &str = "It's important to keep the body of the commit na
 /// Description of the problem
 pub const ERROR: &str = "Your commit has a body wider than 72 characters";
 
-fn has_problem(commit: &CommitMessage) -> bool {
+fn has_problem(commit: &CommitMessage<'_>) -> bool {
     commit
         .get_body()
         .iter()
@@ -28,7 +28,7 @@ fn has_problem(commit: &CommitMessage) -> bool {
 
 const LIMIT: usize = 72;
 
-pub fn lint(commit: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if has_problem(commit) {
         let commit_text = String::from(commit.clone());
 

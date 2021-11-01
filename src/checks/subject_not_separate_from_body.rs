@@ -16,12 +16,12 @@ pub const HELP_MESSAGE: &str = "Most tools that render and parse commit messages
                             may see strange behaviour from git and any related tools.\n\nTo fix \
                             this separate subject from body with a blank line";
 
-fn has_problem(commit_message: &CommitMessage) -> bool {
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     let subject: String = commit_message.get_subject().into();
     subject.lines().count() > 1
 }
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if has_problem(commit_message) {
         let commit_text = String::from(commit_message.clone());
         let mut lines = commit_text.lines();

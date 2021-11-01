@@ -27,13 +27,13 @@ lazy_static! {
     static ref RE: regex::Regex = regex::Regex::new("^[^()\\s]+(\\(\\w+\\))?!?: ").unwrap();
 }
 
-fn has_problem(commit_message: &CommitMessage) -> bool {
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     let subject: String = commit_message.get_subject().into();
 
     !RE.is_match(&subject)
 }
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if has_problem(commit_message) {
         let commit_text = String::from(commit_message.clone());
         Some(Problem::new(

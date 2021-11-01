@@ -27,7 +27,7 @@ You can fix it using one of the prefixes:
 /// Description of the problem
 pub const ERROR: &str = "Your commit message isn't in emoji log style";
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if Prefix::iter().any(|x| {
         commit_message
             .get_subject()
