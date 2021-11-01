@@ -238,23 +238,31 @@ fn success_check(
         }
     }
 
-    let mut commit = CommitMessage::default().with_subject(&format!(
-        "{}{}{}: {}",
-        type_slug,
-        scope.map(|x| format!("({})", x)).unwrap_or_default(),
-        bc_break
-            .clone()
-            .map(|_| "!".to_string())
-            .unwrap_or_default(),
-        description
-    ));
+    let mut commit: CommitMessage<'_> = CommitMessage::default().with_subject(
+        format!(
+            "{}{}{}: {}",
+            type_slug,
+            scope.map(|x| format!("({})", x)).unwrap_or_default(),
+            bc_break
+                .clone()
+                .map(|_| "!".to_string())
+                .unwrap_or_default(),
+            description
+        )
+        .into(),
+    );
 
-    if let Some(body_contents) = body {
+    let body_contents = body.clone().unwrap_or_default();
+
+    if body.is_some() {
         commit = commit.with_body_contents(&body_contents);
     }
 
     if let Some(_bc_contents) = bc_break {
-        commit = commit.add_trailer(Trailer::new("BC BREAK", "bc_contents"));
+        commit = commit.add_trailer(Trailer::new(
+            "BC BREAK".to_string(),
+            "bc_contents".to_string(),
+        ));
     }
 
     let result = lint(&commit);

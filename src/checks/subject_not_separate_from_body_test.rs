@@ -181,7 +181,7 @@ fn failure_check(subject: String, commit_message_body: String) -> TestResult {
     }
 
     let message = CommitMessage::default()
-        .with_subject(&subject)
+        .with_subject(subject.into())
         .with_body_contents(&commit_message_body);
 
     let result = lint(&message);
