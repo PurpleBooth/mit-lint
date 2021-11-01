@@ -13,7 +13,7 @@ pub const HELP_MESSAGE: &str = "The subject line is a title, and as such should 
 /// Description of the problem
 pub const ERROR: &str = "Your commit message is missing a capital letter";
 
-fn has_problem(commit_message: &CommitMessage) -> bool {
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     commit_message
         .get_subject()
         .chars()
@@ -23,7 +23,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
         .unwrap_or(false)
 }
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if has_problem(commit_message) {
         Some(Problem::new(
             ERROR.into(),

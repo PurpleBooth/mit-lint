@@ -15,13 +15,13 @@ pub const ERROR: &str = "Your commit message has duplicated trailers";
 
 const FIELD_PLURAL: &str = "fields";
 
-fn get_duplicated_trailers(commit_message: &CommitMessage) -> Vec<String> {
+fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
     commit_message
         .get_trailers()
         .iter()
         .fold(
             BTreeMap::new(),
-            |acc: BTreeMap<&Trailer, usize>, trailer| {
+            |acc: BTreeMap<&Trailer<'_>, usize>, trailer| {
                 let mut next = acc.clone();
                 match acc.get(trailer) {
                     Some(count) => next.insert(trailer, count.add(1)),
@@ -44,7 +44,7 @@ fn get_duplicated_trailers(commit_message: &CommitMessage) -> Vec<String> {
         .collect::<Vec<_>>()
 }
 
-pub fn lint(commit: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     let duplicated_trailers = get_duplicated_trailers(commit);
     if duplicated_trailers.is_empty() {
         None

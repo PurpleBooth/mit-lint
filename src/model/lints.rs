@@ -180,11 +180,14 @@ impl TryFrom<Vec<&str>> for Lints {
     }
 }
 
+/// General lint related errors
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
+    /// Lint name unknown
     #[error(transparent)]
     #[diagnostic(transparent)]
     LintNameUnknown(#[from] lint::Error),
+    /// Failed to parse lint config file
     #[error("Failed to parse lint config file: {0}")]
     #[diagnostic(
         code(mit_lint::model::lints::error::toml_parse),
@@ -192,6 +195,7 @@ pub enum Error {
         help("is it valid toml?")
     )]
     TomlParse(#[from] toml::de::Error),
+    /// Failed to convert config to toml
     #[error("Failed to convert config to toml: {0}")]
     #[diagnostic(code(mit_lint::model::lints::error::toml_serialize), url(docsrs))]
     TomlSerialize(#[from] toml::ser::Error),

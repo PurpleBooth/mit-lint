@@ -18,7 +18,7 @@ pub const ERROR: &str = "Your subject is longer than 72 characters";
 
 const LIMIT: usize = 72;
 
-pub fn lint(commit: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if commit.get_subject().chars().count() > LIMIT {
         Some(Problem::new(
             ERROR.into(),

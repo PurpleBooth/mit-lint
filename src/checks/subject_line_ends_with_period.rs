@@ -15,7 +15,7 @@ pub const HELP_MESSAGE: &str = "It's important to keep your commits short, becau
                             an extra character, so we shouldn't use them in commit message \
                             subjects.\n\nYou can fix this by removing the period";
 
-fn has_problem(commit_message: &CommitMessage) -> bool {
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     commit_message
         .get_subject()
         .to_string()
@@ -27,7 +27,7 @@ fn has_problem(commit_message: &CommitMessage) -> bool {
         .is_some()
 }
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if has_problem(commit_message) {
         let subject = commit_message.get_subject().to_string();
         Some(Problem::new(

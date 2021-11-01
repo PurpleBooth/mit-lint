@@ -28,7 +28,7 @@ lazy_static! {
             .unwrap();
 }
 
-pub fn lint(commit_message: &CommitMessage) -> Option<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&*RE) {
         None
     } else {

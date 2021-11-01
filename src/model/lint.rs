@@ -644,7 +644,7 @@ impl Lint {
     /// assert!(actual.is_some());
     /// ```
     #[must_use]
-    pub fn lint(self, commit_message: &CommitMessage) -> Option<Problem> {
+    pub fn lint(self, commit_message: &CommitMessage<'_>) -> Option<Problem> {
         match self {
             Lint::DuplicatedTrailers => checks::duplicate_trailers::lint(commit_message),
             Lint::PivotalTrackerIdMissing => {
@@ -712,7 +712,7 @@ impl Arbitrary for Lint {
 }
 
 impl std::fmt::Display for Lint {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name())
     }
 }
@@ -720,6 +720,7 @@ impl std::fmt::Display for Lint {
 /// Errors
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
+    /// Lint not found
     #[error("Lint not found: {0}")]
     #[diagnostic(
         code(mit_lint::model::lint::error::LintNotFound),
