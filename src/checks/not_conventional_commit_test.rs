@@ -259,10 +259,7 @@ fn success_check(
     }
 
     if let Some(_bc_contents) = bc_break {
-        commit = commit.add_trailer(Trailer::new(
-            "BC BREAK".to_string(),
-            "bc_contents".to_string(),
-        ));
+        commit = commit.add_trailer(Trailer::new("BC BREAK".into(), "bc_contents".into()));
     }
 
     let result = lint(&commit);
