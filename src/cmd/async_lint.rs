@@ -45,7 +45,7 @@ use crate::model::{Lints, Problem};
 ///     expected, actual
 /// );
 /// ```
-pub async fn async_lint(commit_message: &CommitMessage, lints: Lints) -> Vec<Problem> {
+pub async fn async_lint(commit_message: &CommitMessage<'_>, lints: Lints) -> Vec<Problem> {
     stream::iter(lints.into_iter())
         .filter_map(|lint| future::ready(lint.lint(commit_message)))
         .collect::<Vec<Problem>>()
