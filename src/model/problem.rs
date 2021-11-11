@@ -35,10 +35,18 @@ impl Diagnostic for Problem {
     }
 
     fn source_code(&self) -> Option<&dyn SourceCode> {
-        Some(&self.commit_message)
+        if self.commit_message.is_empty() {
+            None
+        } else {
+            Some(&self.commit_message)
+        }
     }
 
     fn labels(&self) -> Option<Box<dyn Iterator<Item = LabeledSpan> + '_>> {
+        if self.commit_message.is_empty() {
+            return None
+        }
+        
         match &self.labels {
             None => None,
             Some(labels) => {

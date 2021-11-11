@@ -18,6 +18,32 @@ fn examples_has_error() {
     assert_eq!(problem.error(), "Some error");
 }
 
+#[test]
+fn labels_are_none_if_commit_empty() {
+    let problem = Problem::new(
+        "".into(),
+        "".into(),
+        Code::NotConventionalCommit,
+        &"".into(),
+        Some(vec![("String".to_string(), 10_usize, 20_usize)]),
+        None,
+    );
+    assert!(problem.labels().is_none());
+}
+
+#[test]
+fn commit_message_is_none_when_it_is_empty() {
+    let problem = Problem::new(
+        "".into(),
+        "".into(),
+        Code::NotConventionalCommit,
+        &"".into(),
+        Some(vec![("String".to_string(), 10_usize, 20_usize)]),
+        None,
+    );
+    assert!(problem.source_code().is_none());
+}
+
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn test_has_error(error: String) -> bool {
