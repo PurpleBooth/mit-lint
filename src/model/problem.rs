@@ -44,9 +44,9 @@ impl Diagnostic for Problem {
 
     fn labels(&self) -> Option<Box<dyn Iterator<Item = LabeledSpan> + '_>> {
         if self.commit_message.is_empty() {
-            return None
+            return None;
         }
-        
+
         match &self.labels {
             None => None,
             Some(labels) => {
