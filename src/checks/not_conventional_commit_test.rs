@@ -226,7 +226,7 @@ fn success_check(
 ) -> TestResult {
     if type_slug.starts_with('#')
         || type_slug.is_empty()
-        || type_slug.chars().any(|x| !x.is_alphanumeric())
+        || type_slug.chars().any(|x| !x.is_ascii_alphanumeric())
     {
         return TestResult::discard();
     }

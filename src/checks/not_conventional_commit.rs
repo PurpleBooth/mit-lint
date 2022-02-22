@@ -24,7 +24,7 @@ You can fix it by following style
 pub const ERROR: &str = "Your commit message isn't in conventional style";
 
 lazy_static! {
-    static ref RE: regex::Regex = regex::Regex::new("^[^()\\s]+(\\(\\w+\\))?!?: ").unwrap();
+    static ref RE: regex::Regex = regex::Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap();
 }
 
 fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
