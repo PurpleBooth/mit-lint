@@ -13,6 +13,8 @@ jobs:
     uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
   rust-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
+    with:
+      run_minimal_version_check: true
 
   release:
     if: github.ref == 'refs/heads/main'
