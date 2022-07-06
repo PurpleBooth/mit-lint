@@ -535,19 +535,19 @@ impl Lint {
     #[must_use]
     pub const fn name(self) -> &'static str {
         match self {
-            Lint::DuplicatedTrailers => checks::duplicate_trailers::CONFIG,
-            Lint::PivotalTrackerIdMissing => checks::missing_pivotal_tracker_id::CONFIG,
-            Lint::JiraIssueKeyMissing => checks::missing_jira_issue_key::CONFIG,
-            Lint::GitHubIdMissing => checks::missing_github_id::CONFIG,
-            Lint::SubjectNotSeparateFromBody => checks::subject_not_separate_from_body::CONFIG,
-            Lint::SubjectLongerThan72Characters => {
+            Self::DuplicatedTrailers => checks::duplicate_trailers::CONFIG,
+            Self::PivotalTrackerIdMissing => checks::missing_pivotal_tracker_id::CONFIG,
+            Self::JiraIssueKeyMissing => checks::missing_jira_issue_key::CONFIG,
+            Self::GitHubIdMissing => checks::missing_github_id::CONFIG,
+            Self::SubjectNotSeparateFromBody => checks::subject_not_separate_from_body::CONFIG,
+            Self::SubjectLongerThan72Characters => {
                 checks::subject_longer_than_72_characters::CONFIG
             }
-            Lint::SubjectNotCapitalized => checks::subject_not_capitalized::CONFIG,
-            Lint::SubjectEndsWithPeriod => checks::subject_line_ends_with_period::CONFIG,
-            Lint::BodyWiderThan72Characters => checks::body_wider_than_72_characters::CONFIG,
-            Lint::NotConventionalCommit => checks::not_conventional_commit::CONFIG,
-            Lint::NotEmojiLog => checks::not_emoji_log::CONFIG,
+            Self::SubjectNotCapitalized => checks::subject_not_capitalized::CONFIG,
+            Self::SubjectEndsWithPeriod => checks::subject_line_ends_with_period::CONFIG,
+            Self::BodyWiderThan72Characters => checks::body_wider_than_72_characters::CONFIG,
+            Self::NotConventionalCommit => checks::not_conventional_commit::CONFIG,
+            Self::NotEmojiLog => checks::not_emoji_log::CONFIG,
         }
     }
 }
@@ -646,27 +646,27 @@ impl Lint {
     #[must_use]
     pub fn lint(self, commit_message: &CommitMessage<'_>) -> Option<Problem> {
         match self {
-            Lint::DuplicatedTrailers => checks::duplicate_trailers::lint(commit_message),
-            Lint::PivotalTrackerIdMissing => {
+            Self::DuplicatedTrailers => checks::duplicate_trailers::lint(commit_message),
+            Self::PivotalTrackerIdMissing => {
                 checks::missing_pivotal_tracker_id::lint(commit_message)
             }
-            Lint::JiraIssueKeyMissing => checks::missing_jira_issue_key::lint(commit_message),
-            Lint::GitHubIdMissing => checks::missing_github_id::lint(commit_message),
-            Lint::SubjectNotSeparateFromBody => {
+            Self::JiraIssueKeyMissing => checks::missing_jira_issue_key::lint(commit_message),
+            Self::GitHubIdMissing => checks::missing_github_id::lint(commit_message),
+            Self::SubjectNotSeparateFromBody => {
                 checks::subject_not_separate_from_body::lint(commit_message)
             }
-            Lint::SubjectLongerThan72Characters => {
+            Self::SubjectLongerThan72Characters => {
                 checks::subject_longer_than_72_characters::lint(commit_message)
             }
-            Lint::SubjectNotCapitalized => checks::subject_not_capitalized::lint(commit_message),
-            Lint::SubjectEndsWithPeriod => {
+            Self::SubjectNotCapitalized => checks::subject_not_capitalized::lint(commit_message),
+            Self::SubjectEndsWithPeriod => {
                 checks::subject_line_ends_with_period::lint(commit_message)
             }
-            Lint::BodyWiderThan72Characters => {
+            Self::BodyWiderThan72Characters => {
                 checks::body_wider_than_72_characters::lint(commit_message)
             }
-            Lint::NotConventionalCommit => checks::not_conventional_commit::lint(commit_message),
-            Lint::NotEmojiLog => checks::not_emoji_log::lint(commit_message),
+            Self::NotConventionalCommit => checks::not_conventional_commit::lint(commit_message),
+            Self::NotEmojiLog => checks::not_emoji_log::lint(commit_message),
         }
     }
 
