@@ -19,7 +19,7 @@ lazy_static! {
 }
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    if commit_message.matches_pattern(&*RE) {
+    if commit_message.matches_pattern(&RE) {
         None
     } else {
         let commit_text = String::from(commit_message.clone());
