@@ -15,7 +15,8 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 lazy_static! {
-    static ref RE: regex::Regex = regex::Regex::new(r"(?m)(^| )[A-Z]{2,}-[0-9]+( |$)").unwrap();
+    static ref RE: regex::Regex =
+        regex::Regex::new(r"(?m)(^| )\[?[A-Z]{2,}-[0-9]+\]?(| |$)").unwrap();
 }
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
