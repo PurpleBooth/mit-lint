@@ -52,6 +52,29 @@ JR-123
 ",
         &None,
     );
+    test_has_missing_jira_issue_key(
+        "An example commit
+
+This is an example commit
+
+Relates-to: [JRA-123]
+",
+        &None,
+    );
+    test_has_missing_jira_issue_key(
+        "[JRA-123] An example commit
+
+This is an example commit
+",
+        &None,
+    );
+    test_has_missing_jira_issue_key(
+        "An example commit
+
+This is an [JRA-123] example commit
+",
+        &None,
+    );
 }
 
 #[test]
