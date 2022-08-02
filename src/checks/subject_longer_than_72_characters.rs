@@ -19,7 +19,8 @@ pub const ERROR: &str = "Your subject is longer than 72 characters";
 const LIMIT: usize = 72;
 
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    if commit.get_subject().chars().count() > LIMIT {
+    let subject_till_newline = subject_length(commit);
+    if subject_till_newline > LIMIT {
         Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
@@ -27,14 +28,26 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
             commit,
             Some(vec![(
                 "Too long".to_string(),
-                73_usize,
-                commit.get_subject().len() - LIMIT,
+                LIMIT + 1,
+                subject_till_newline - LIMIT,
             )]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
     } else {
         None
     }
+}
+
+fn subject_length(commit: &CommitMessage<'_>) -> usize {
+    commit
+        .get_subject()
+        .chars()
+        .position(is_newline)
+        .unwrap_or_else(|| commit.get_subject().chars().count())
+}
+
+const fn is_newline(character: char) -> bool {
+    character == '\n'
 }
 
 #[cfg(test)]
@@ -52,6 +65,14 @@ mod tests {
     #[test]
     fn shorter_than_72_characters_with_a_new_line() {
         test_subject_longer_than_72_characters(&format!("{}\n", "x".repeat(72)), &None);
+    }
+
+    #[test]
+    fn shorter_than_72_characters_with_a_new_line_then_characters_directly_afterwards() {
+        test_subject_longer_than_72_characters(
+            &format!("{}\nsome more content", "x".repeat(72)),
+            &None,
+        );
     }
 
     #[test]
@@ -198,6 +219,22 @@ index 5a83784..ebaee48 100644
     #[test]
     fn longer_than_72_characters_and_a_newline() {
         let message = format!("{}\n", "x".repeat(73));
+        test_subject_longer_than_72_characters(
+            &message.clone(),
+            &Some(Problem::new(
+                ERROR.into(),
+                HELP_MESSAGE.into(),
+                Code::SubjectLongerThan72Characters,
+                &message.into(),
+                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
+            )),
+        );
+    }
+
+    #[test]
+    fn longer_than_72_characters_and_a_trailer_right_next_to_the_subject() {
+        let message = format!("{}\nSome-Trailer: This is a trailer", "x".repeat(73));
         test_subject_longer_than_72_characters(
             &message.clone(),
             &Some(Problem::new(

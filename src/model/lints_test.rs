@@ -53,7 +53,7 @@ fn example_it_returns_an_error_if_one_of_the_names_is_wrong() {
     ];
     let actual: Result<Lints, Error> = lints.try_into();
 
-    assert!(actual.is_err());
+    actual.unwrap_err();
 }
 
 #[quickcheck]
