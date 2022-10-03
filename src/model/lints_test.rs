@@ -1,7 +1,8 @@
 use std::{
     collections::{BTreeMap, BTreeSet},
-    convert::{TryFrom, TryInto},
+    convert::{identity, TryFrom, TryInto},
 };
+use std::borrow::Borrow;
 
 use quickcheck::TestResult;
 
@@ -28,7 +29,7 @@ fn it_returns_an_error_if_one_of_the_names_is_wrong(lints: Vec<String>) -> TestR
 
     let actual: Result<Lints, Error> = lints
         .iter()
-        .map(std::borrow::Borrow::borrow)
+        .map(Borrow::borrow)
         .collect::<Vec<&str>>()
         .try_into();
 
@@ -231,7 +232,7 @@ fn get_toml(expected: BTreeMap<Lint, bool>) -> bool {
                     expected_enabled == actual_enabled
                 })
         })
-        .all(|x| x)
+        .all(identity)
 }
 
 #[test]
