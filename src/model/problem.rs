@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, fmt::Display};
+use std::fmt::Display;
 
 use miette::{Diagnostic, LabeledSpan, SourceCode};
 use mit_commit::CommitMessage;
@@ -47,22 +47,19 @@ impl Diagnostic for Problem {
             return None;
         }
 
-        match &self.labels {
-            None => None,
-            Some(labels) => {
-                Some(Box::new(labels.iter().map(|(label, offset, len)| {
+        self.labels.as_ref().map(|labels| {
+            Box::new(
+                labels.iter().map(|(label, offset, len)| {
                     LabeledSpan::new(Some(label.clone()), *offset, *len)
-                }))
-                    as Box<dyn Iterator<Item = LabeledSpan> + '_>)
-            }
-        }
+                }),
+            ) as Box<dyn Iterator<Item = LabeledSpan> + '_>
+        })
     }
 
     fn url<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
-        match self.url.borrow() {
-            None => None,
-            Some(url) => Some(Box::new(url)),
-        }
+        self.url
+            .as_deref()
+            .map(|x| Box::new(x) as Box<dyn Display + 'a>)
     }
 }
 
