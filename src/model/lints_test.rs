@@ -224,12 +224,13 @@ fn get_toml(expected: BTreeMap<Lint, bool>) -> bool {
 
     actual
         .iter()
-        .map(
-            |(actual_key, actual_enabled)| match expected.get(actual_key) {
-                None => !*actual_enabled,
-                Some(expected_enabled) => expected_enabled == actual_enabled,
-            },
-        )
+        .map(|(actual_key, actual_enabled)| {
+            expected
+                .get(actual_key)
+                .map_or(!*actual_enabled, |expected_enabled| {
+                    expected_enabled == actual_enabled
+                })
+        })
         .all(|x| x)
 }
 

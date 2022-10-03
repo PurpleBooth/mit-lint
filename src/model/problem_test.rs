@@ -9,7 +9,7 @@ use crate::model::{code::Code, Problem};
 fn examples_has_error() {
     let problem = Problem::new(
         "Some error".into(),
-        "".into(),
+        String::new(),
         Code::NotConventionalCommit,
         &"".into(),
         None,
@@ -21,8 +21,8 @@ fn examples_has_error() {
 #[test]
 fn labels_are_none_if_commit_empty() {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &"".into(),
         Some(vec![("String".to_string(), 10_usize, 20_usize)]),
@@ -34,8 +34,8 @@ fn labels_are_none_if_commit_empty() {
 #[test]
 fn commit_message_is_none_when_it_is_empty() {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &"".into(),
         Some(vec![("String".to_string(), 10_usize, 20_usize)]),
@@ -49,7 +49,7 @@ fn commit_message_is_none_when_it_is_empty() {
 fn test_has_error(error: String) -> bool {
     let problem = Problem::new(
         error.clone(),
-        "".into(),
+        String::new(),
         Code::NotConventionalCommit,
         &"".into(),
         None,
@@ -61,7 +61,7 @@ fn test_has_error(error: String) -> bool {
 #[test]
 fn examples_has_has_tip() {
     let problem = Problem::new(
-        "".into(),
+        String::new(),
         "Some tip".into(),
         Code::NotConventionalCommit,
         &"".into(),
@@ -75,7 +75,7 @@ fn examples_has_has_tip() {
 #[quickcheck]
 fn test_has_has_tip(tip: String) -> bool {
     let problem = Problem::new(
-        "".into(),
+        String::new(),
         tip.clone(),
         Code::NotConventionalCommit,
         &"".into(),
@@ -88,8 +88,8 @@ fn test_has_has_tip(tip: String) -> bool {
 #[test]
 fn examples_has_has_code() {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &"".into(),
         None,
@@ -100,15 +100,15 @@ fn examples_has_has_code() {
 
 #[quickcheck]
 fn test_has_has_code(code: Code) {
-    let problem = Problem::new("".into(), "".into(), code, &"".into(), None, None);
+    let problem = Problem::new(String::new(), String::new(), code, &"".into(), None, None);
     let _ = problem.code() == &code;
 }
 
 #[test]
 fn examples_it_contains_the_triggering_message() {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &CommitMessage::from("Commit message"),
         None,
@@ -123,8 +123,8 @@ fn examples_it_contains_the_triggering_message() {
 #[quickcheck]
 fn test_it_contains_the_triggering_message(message: String) {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &CommitMessage::from(message.clone()),
         None,
@@ -136,8 +136,8 @@ fn test_it_contains_the_triggering_message(message: String) {
 #[test]
 fn examples_it_contains_the_labels() {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &CommitMessage::from("Commit message"),
         Some(vec![("String".to_string(), 10_usize, 20_usize)]),
@@ -155,8 +155,8 @@ fn examples_it_contains_the_labels() {
 #[quickcheck]
 fn test_it_contains_the_labels(start: usize, offset: usize) {
     let problem = Problem::new(
-        "".into(),
-        "".into(),
+        String::new(),
+        String::new(),
         Code::NotConventionalCommit,
         &CommitMessage::from("Commit message"),
         Some(vec![("String".to_string(), start, offset)]),
