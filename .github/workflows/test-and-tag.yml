@@ -43,7 +43,7 @@ jobs:
           versio release
       - run: echo ::set-output "name=current_version::$( versio get --id 1 -v )"
         id: current_version
-      - run: echo ::set-output "name=version_bump::true"
+      - run: echo "version_bump=true" >> "$GITHUB_OUTPUT"
         if: steps.current_version.outputs.current_version != steps.previous_version.outputs.previous_version
         id: version_bump
 
