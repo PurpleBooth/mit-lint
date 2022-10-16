@@ -1,4 +1,7 @@
-use std::convert::TryInto;
+use std::{
+    convert::{TryFrom, TryInto},
+    str::FromStr,
+};
 
 use miette::Diagnostic;
 use mit_commit::CommitMessage;
@@ -509,7 +512,7 @@ impl std::convert::TryFrom<&str> for Lint {
 
     fn try_from(from: &str) -> Result<Self, Self::Error> {
         Self::all_lints()
-            .zip(Self::all_lints().map(|lint| format!("{}", lint)))
+            .zip(Self::all_lints().map(|lint| format!("{lint}")))
             .filter_map(|(lint, name): (Self, String)| if name == from { Some(lint) } else { None })
             .collect::<Vec<Self>>()
             .first()
@@ -520,7 +523,7 @@ impl std::convert::TryFrom<&str> for Lint {
 
 impl std::convert::From<Lint> for String {
     fn from(from: Lint) -> Self {
-        format!("{}", from)
+        format!("{from}")
     }
 }
 
@@ -629,7 +632,7 @@ impl Lint {
     /// ```
     #[must_use]
     pub fn config_key(self) -> String {
-        format!("{}.{}", CONFIG_KEY_PREFIX, self)
+        format!("{CONFIG_KEY_PREFIX}.{self}")
     }
 
     /// Run this lint on a commit message
@@ -714,6 +717,14 @@ impl Arbitrary for Lint {
 impl std::fmt::Display for Lint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name())
+    }
+}
+
+impl FromStr for Lint {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::try_from(s)
     }
 }
 
