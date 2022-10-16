@@ -113,6 +113,36 @@ fn first_line_ok_but_second_line_too_long() {
     );
 }
 
+#[test]
+fn last_line_included() {
+    let message = format!("Subject\n\n{}", "x".repeat(73));
+    test_body_wider_than_72_characters(
+        &message.clone(),
+        &Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::BodyWiderThan72Characters,
+            &message.into(),
+            Some(vec![("Too long".to_string(), 81, 1)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+        )),
+    );
+}
+
+#[test]
+fn lines_after_scissors_and_comments_are_not_included() {
+    let message = vec![
+        "Subject",
+        "",
+        "x",
+        &"x".repeat(72),
+        "# ------------------------ >8 ------------------------",
+        &"x".repeat(73),
+    ]
+    .join("\n");
+    test_body_wider_than_72_characters(&message, &None);
+}
+
 fn test_body_wider_than_72_characters(message: &str, expected: &Option<Problem>) {
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
@@ -144,6 +174,85 @@ fn formatting() {
    :                                                                         ^^^^|^^^
    :                                                                             `-- Too long
  7 | x
+   `----
+  help: It's important to keep the body of the commit narrower than 72
+        characters because when you look at the git log, that's where it
+        truncates the message. This means that people won't get the entirety
+        of the information in your commit.
+        
+        You can fix this by making the lines in your body no more than 72
+        characters
+".to_string();
+    assert_eq!(
+        actual, expected,
+        "Message {:?} should have returned {:?}, found {:?}",
+        message, expected, actual
+    );
+}
+
+#[test]
+fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
+    let message = vec![
+        "Subject",
+        "",
+        "x",
+        &"x".repeat(73),
+        "# ------------------------ >8 ------------------------",
+        &"x".repeat(73),
+    ]
+    .join("\n");
+
+    let problem = lint(&CommitMessage::from(message.clone()));
+    let actual = fmt_report(&Report::new(problem.unwrap()));
+    let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
+
+  x Your commit has a body wider than 72 characters
+   ,-[3:1]
+ 3 | x
+ 4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   :                                                                         |
+   :                                                                         `-- Too long
+ 5 | # ------------------------ >8 ------------------------
+   `----
+  help: It's important to keep the body of the commit narrower than 72
+        characters because when you look at the git log, that's where it
+        truncates the message. This means that people won't get the entirety
+        of the information in your commit.
+        
+        You can fix this by making the lines in your body no more than 72
+        characters
+".to_string();
+    assert_eq!(
+        actual, expected,
+        "Message {:?} should have returned {:?}, found {:?}",
+        message, expected, actual
+    );
+}
+
+#[test]
+fn comments_are_not_included_in_highlights() {
+    let message = vec![
+        "Subject",
+        "",
+        "x",
+        &"x".repeat(73),
+        &format!("# {}", "x".repeat(71)),
+        "# ------------------------ >8 ------------------------",
+        &"x".repeat(73),
+    ]
+    .join("\n");
+
+    let problem = lint(&CommitMessage::from(message.clone()));
+    let actual = fmt_report(&Report::new(problem.unwrap()));
+    let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
+
+  x Your commit has a body wider than 72 characters
+   ,-[3:1]
+ 3 | x
+ 4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   :                                                                         |
+   :                                                                         `-- Too long
+ 5 | # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    `----
   help: It's important to keep the body of the commit narrower than 72
         characters because when you look at the git log, that's where it
