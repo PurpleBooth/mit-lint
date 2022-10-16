@@ -206,10 +206,10 @@ fn success_check(
 
     let message = CommitMessage::from(format!(
         "{}{}-{}{}\n# comment",
-        before.map(|x| format!("{} ", x)).unwrap_or_default(),
+        before.map(|x| format!("{x} ")).unwrap_or_default(),
         characters,
         numbers,
-        after.map(|x| format!(" {} ", x)).unwrap_or_default(),
+        after.map(|x| format!(" {x} ")).unwrap_or_default(),
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())

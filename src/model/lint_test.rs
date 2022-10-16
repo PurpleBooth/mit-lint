@@ -3,6 +3,12 @@ use std::convert::TryInto;
 use crate::model::Lint;
 
 #[quickcheck]
+fn it_is_creatable_from_string(expected: Lint) -> bool {
+    let lint: String = expected.into();
+    expected == lint.parse().unwrap()
+}
+
+#[quickcheck]
 fn it_is_convertible_to_string(expected: Lint) -> bool {
     let lint: String = expected.into();
     expected.name() == lint
@@ -16,7 +22,7 @@ fn it_can_be_created_from_string(expected: Lint) -> bool {
 
 #[quickcheck]
 fn it_is_printable(lint: Lint) -> bool {
-    lint.name() == format!("{}", lint)
+    lint.name() == format!("{lint}")
 }
 
 #[quickcheck]

@@ -201,11 +201,11 @@ fn success_check(subject: String, commit_message_body: Option<String>) -> TestRe
         "{}{}",
         subject,
         commit_message_body
-            .map(|x| format!("\n\n{}", x))
+            .map(|x| format!("\n\n{x}"))
             .unwrap_or_default()
     );
 
-    let message = CommitMessage::from(format!("{}\n# commit", text));
+    let message = CommitMessage::from(format!("{text}\n# commit"));
     let result = lint(&message);
     let actual = result.is_none();
     TestResult::from_bool(actual)

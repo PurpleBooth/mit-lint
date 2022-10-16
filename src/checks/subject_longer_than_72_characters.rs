@@ -132,10 +132,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(
-            &format!("{}\n\n{}", "x".repeat(72), message),
-            &None,
-        );
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
     }
 
     #[test]
@@ -194,10 +191,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(
-            &format!("{}\n\n{}", "x".repeat(72), message),
-            &None,
-        );
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
     }
 
     #[test]
@@ -305,7 +299,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        let message = format!("{}\n\n{}", "x".repeat(73), message);
+        let message = format!("{}\n\n{message}", "x".repeat(73));
         test_subject_longer_than_72_characters(
             &message.clone(),
             &Some(Problem::new(
@@ -375,10 +369,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(
-            &format!("{}\n\n{}", "x".repeat(72), message),
-            &None,
-        );
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
     }
 
     #[test]
