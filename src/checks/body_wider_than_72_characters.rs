@@ -48,8 +48,8 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
                             "Too long".to_string(),
                             SourceOffset::from_location(
                                 commit_text.clone(),
-                                line_index.add(1),
-                                LIMIT.add(2),
+                                line_index,
+                                LIMIT.add(1),
                             )
                             .offset(),
                             line.len() - (LIMIT),
