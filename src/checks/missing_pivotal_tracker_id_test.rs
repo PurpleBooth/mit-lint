@@ -417,7 +417,7 @@ fn success_check(
         .unwrap_or_default();
     let id_str: String = ids
         .iter()
-        .map(|x| format!("#{}", x))
+        .map(|x| format!("#{x}"))
         .collect::<Vec<_>>()
         .join(",");
 

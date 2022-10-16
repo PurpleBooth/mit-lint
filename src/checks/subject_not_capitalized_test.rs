@@ -95,7 +95,7 @@ fn failure_check(commit_message_body: String) -> TestResult {
         }
     }
 
-    let message = CommitMessage::from(format!("{}\n# commit", commit_message_body));
+    let message = CommitMessage::from(format!("{commit_message_body}\n# commit"));
     let result = lint(&message);
     let b = result.is_some();
     TestResult::from_bool(b)
@@ -121,7 +121,7 @@ fn success_check(commit_message_body: String) -> TestResult {
         }
     }
 
-    let message = CommitMessage::from(format!("{}\n# commit", commit_message_body));
+    let message = CommitMessage::from(format!("{commit_message_body}\n# commit"));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
 }

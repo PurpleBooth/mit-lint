@@ -316,9 +316,9 @@ fn success_with_gh_key_check(
 
     let message = CommitMessage::from(format!(
         "{}GH-{}{}\n# comment",
-        commit.map(|x| format!("{} ", x)).unwrap_or_default(),
+        commit.map(|x| format!("{x} ")).unwrap_or_default(),
         id,
-        commit_suffix.map(|x| format!(" {}", x)).unwrap_or_default()
+        commit_suffix.map(|x| format!(" {x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
@@ -339,9 +339,9 @@ fn success_with_id_key_check(
 
     let message = CommitMessage::from(format!(
         "{}#{}{}\n! comment",
-        commit.map(|x| format!("{} ", x)).unwrap_or_default(),
+        commit.map(|x| format!("{x} ")).unwrap_or_default(),
         id,
-        commit_suffix.map(|x| format!(" {}", x)).unwrap_or_default()
+        commit_suffix.map(|x| format!(" {x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
@@ -370,11 +370,11 @@ fn success_with_with_org_id_key_check(
 
     let message = CommitMessage::from(format!(
         "{}{}/{}#{}{}",
-        commit.map(|x| format!("{} ", x)).unwrap_or_default(),
+        commit.map(|x| format!("{x} ")).unwrap_or_default(),
         org,
         repo,
         id,
-        commit_suffix.map(|x| format!(" {}", x)).unwrap_or_default()
+        commit_suffix.map(|x| format!(" {x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())

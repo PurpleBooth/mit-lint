@@ -145,7 +145,7 @@ fn success_check(subject: String, body: Option<String>) -> TestResult {
     let message = CommitMessage::from(format!(
         "{}{}",
         subject,
-        body.map(|x| format!("\n\n{}", x)).unwrap_or_default()
+        body.map(|x| format!("\n\n{x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
@@ -166,7 +166,7 @@ fn failure_check(subject: String, body: Option<String>) -> TestResult {
     let message = CommitMessage::from(format!(
         "{}{}\n# bla",
         subject,
-        body.map(|x| format!("\n\n{}", x)).unwrap_or_default()
+        body.map(|x| format!("\n\n{x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_some())

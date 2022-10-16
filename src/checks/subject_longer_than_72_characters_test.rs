@@ -74,7 +74,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    test_subject_longer_than_72_characters(&format!("{}\n\n{}", "x".repeat(72), message), &None);
+    test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
 }
 
 #[test]
@@ -133,7 +133,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    test_subject_longer_than_72_characters(&format!("{}\n\n{}", "x".repeat(72), message), &None);
+    test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
 }
 
 #[test]
@@ -225,7 +225,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    let message = format!("{}\n\n{}", "x".repeat(73), message);
+    let message = format!("{}\n\n{message}", "x".repeat(73));
     test_subject_longer_than_72_characters(
             &message.clone(),
             &Some(Problem::new(
@@ -295,7 +295,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    test_subject_longer_than_72_characters(&format!("{}\n\n{}", "x".repeat(72), message), &None);
+    test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
 }
 
 #[test]
@@ -358,7 +358,7 @@ fn failure_check(commit_message_body: String) -> TestResult {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::from(format!("{}\n# comment", commit_message_body));
+    let message = CommitMessage::from(format!("{commit_message_body}\n# comment"));
     let result = lint(&message);
     TestResult::from_bool(result.is_some())
 }
@@ -374,7 +374,7 @@ fn success_check(subject: String, commit_message_body: Option<String>) -> TestRe
         "{}{}\n# comment",
         subject,
         commit_message_body
-            .map(|x| format!("\n\n{}", x))
+            .map(|x| format!("\n\n{x}"))
             .unwrap_or_default()
     ));
     let result = lint(&message);

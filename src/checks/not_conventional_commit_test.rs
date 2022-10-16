@@ -210,7 +210,7 @@ fn fail_check(commit: String) -> TestResult {
     if has_non_alpha_type {
         return TestResult::discard();
     }
-    let message = CommitMessage::from(format!("{}\n# comment", commit));
+    let message = CommitMessage::from(format!("{commit}\n# comment"));
     let result = lint(&message);
     TestResult::from_bool(result.is_some())
 }
@@ -240,7 +240,7 @@ fn success_check(
         format!(
             "{}{}{}: {}",
             type_slug,
-            scope.map(|x| format!("({})", x)).unwrap_or_default(),
+            scope.map(|x| format!("({x})")).unwrap_or_default(),
             bc_break
                 .clone()
                 .map(|_| "!".to_string())

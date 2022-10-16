@@ -65,7 +65,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
                             .skip(1)
                             .map(|x| {
                                 (
-                                    format!("Duplicated `{}`", trailer),
+                                    format!("Duplicated `{trailer}`"),
                                     x.0,
                                     commit_text
                                         .chars()

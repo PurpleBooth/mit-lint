@@ -273,7 +273,7 @@ fn success_check(prefix: Prefix, subject: String, body: Option<String>) -> TestR
         "{}{}{}\n# Comment",
         String::from(prefix),
         subject,
-        body.map(|x| format!("\n\n{}", x)).unwrap_or_default()
+        body.map(|x| format!("\n\n{x}")).unwrap_or_default()
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())

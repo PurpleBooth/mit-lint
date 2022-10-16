@@ -78,7 +78,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    test_body_wider_than_72_characters(&format!("{}\n\n{}", "x".repeat(72), message), &None);
+    test_body_wider_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
 }
 
 #[test]
@@ -183,7 +183,7 @@ fn success_check(commit: String) -> TestResult {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::from(format!("{}\n# comment", commit));
+    let message = CommitMessage::from(format!("{commit}\n# comment"));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
 }
@@ -199,7 +199,7 @@ fn fail_check(commit: String) -> TestResult {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::from(format!("{}\n# comment", commit));
+    let message = CommitMessage::from(format!("{commit}\n# comment"));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
 }

@@ -1,8 +1,8 @@
 use std::{
+    borrow::Borrow,
     collections::{BTreeMap, BTreeSet},
     convert::{identity, TryFrom, TryInto},
 };
-use std::borrow::Borrow;
 
 use quickcheck::TestResult;
 
