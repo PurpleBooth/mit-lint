@@ -37,7 +37,7 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
             Some(vec![(
                 "No JIRA Issue Key".to_string(),
                 last_line_location,
-                commit_text.len().saturating_sub(last_line_location),
+                commit_text.len().saturating_sub(last_line_location+1),
             )]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".to_string()),
         ))

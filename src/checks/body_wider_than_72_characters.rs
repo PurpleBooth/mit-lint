@@ -72,7 +72,7 @@ fn label_line_over_limit(
 ) -> (String, ByteOffset, usize) {
     (
         "Too long".to_string(),
-        SourceOffset::from_location(commit_text, line_index, LIMIT.add(1)).offset(),
+        SourceOffset::from_location(commit_text, line_index + 1, LIMIT.add(1)).offset(),
         line.len() - (LIMIT),
     )
 }

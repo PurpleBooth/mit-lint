@@ -90,7 +90,7 @@ This is an example commit
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_1.into(),
-            Some(vec![("No JIRA Issue Key".to_string(), 19_usize, 26_usize)]),
+            Some(vec![("No JIRA Issue Key".to_string(), 19_usize, 25_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
         )),
     );
@@ -107,7 +107,7 @@ A-123
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_2.into(),
-            Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 6_usize)]),
+            Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
         )),
     );
@@ -124,7 +124,7 @@ JRA-
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_3.into(),
-            Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
+            Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 4_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
         )),
     );
@@ -144,8 +144,8 @@ This is an example commit
    ,-[2:1]
  2 | 
  3 | This is an example commit
-   : ^^^^^^^^^^^^^|^^^^^^^^^^^^
-   :              `-- No JIRA Issue Key
+   : ^^^^^^^^^^^^|^^^^^^^^^^^^
+   :             `-- No JIRA Issue Key
    `----
   help: It's important to add the issue key because it allows us to link
         code back to the motivations for doing it, and in some cases provide

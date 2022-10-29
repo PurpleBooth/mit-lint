@@ -52,7 +52,7 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
             Some(vec![(
                 "No Pivotal Tracker ID".to_string(),
                 last_line_location,
-                commit_text.len().saturating_sub(last_line_location),
+                commit_text.len().saturating_sub(last_line_location+1),
             )]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".to_string()),
         ))

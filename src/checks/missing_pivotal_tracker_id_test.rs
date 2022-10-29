@@ -278,7 +278,7 @@ This is an example commit
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
             &message.into(),
-            Some(vec![("No Pivotal Tracker ID".to_string(), 63, 15)]),
+            Some(vec![("No Pivotal Tracker ID".to_string(), 63, 14)]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
         )),
     );
@@ -297,7 +297,7 @@ This is an example commit
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
             &message_1.into(),
-            Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
+            Some(vec![("No Pivotal Tracker ID".to_string(), 19, 25)]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
         )),
     );
@@ -316,7 +316,7 @@ This is an example commit
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
             &message_2.into(),
-            Some(vec![("No Pivotal Tracker ID".to_string(), 50, 15)]),
+            Some(vec![("No Pivotal Tracker ID".to_string(), 50, 14)]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
         )),
     );
@@ -336,8 +336,8 @@ This is an example commit
    ,-[2:1]
  2 | 
  3 | This is an example commit
-   : ^^^^^^^^^^^^^|^^^^^^^^^^^^
-   :              `-- No Pivotal Tracker ID
+   : ^^^^^^^^^^^^|^^^^^^^^^^^^
+   :             `-- No Pivotal Tracker ID
    `----
   help: It's important to add the ID because it allows code to be linked
         back to the stories it was done for, it can provide a chain

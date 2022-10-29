@@ -146,7 +146,7 @@ fn longer_than_72_characters() {
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
-                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
@@ -162,7 +162,7 @@ fn longer_than_72_characters_and_a_newline() {
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
-                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )),
         );
@@ -233,7 +233,7 @@ index 5a83784..ebaee48 100644
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
-                Some(vec![("Too long".to_string(), 73_usize, 1_usize)]),
+                Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )),
         );
@@ -308,6 +308,8 @@ fn formatting() {
   x Your subject is longer than 72 characters
    ,----
  1 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   :                                                                         |
+   :                                                                         `-- Too long
    `----
   help: It's important to keep the subject of the commit less than 72
         characters because when you look at the git log, that's where it

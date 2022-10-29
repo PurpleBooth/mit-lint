@@ -11,26 +11,26 @@ readme = "README.md"
 repository = "https://github.com/PurpleBooth/mit-lint"
 
 [dependencies]
-miette = { version = "5.1.0", features = ["fancy"] }
-thiserror = "1.0.31"
-mit-commit = "3.1.1"
+miette = { version = "5.4.1", features = ["fancy"] }
+thiserror = "1.0.37"
+mit-commit = "3.1.4"
 regex = "1.6.0"
 strum = { version = "0.24.1", features = ["derive"] }
 toml = "0.5.9"
-futures = "0.3.21"
+futures = "0.3.25"
 lazy_static = "1.4.0"
 quickcheck = "1.0.3"
-strum_macros = "0.24.2"
+strum_macros = "0.24.3"
 
 [dependencies.serde]
-version = "1.0.138"
+version = "1.0.147"
 features = ["derive"]
 
 [dev-dependencies]
 criterion = { version = "0.4.0", features = ["async_tokio"] }
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
-tokio = { version = "1.19.2", features = ["full"] }
+tokio = { version = "1.21.2", features = ["full"] }
 
 [[bench]]
 name = "linting"
