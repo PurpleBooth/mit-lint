@@ -46,7 +46,7 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
             Some(vec![(
                 "No GitHub ID".to_string(),
                 last_line_location,
-                commit_text.len().saturating_sub(last_line_location),
+                commit_text.len().saturating_sub(last_line_location+1),
             )]),
             Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".to_string()),
         ))
@@ -242,7 +242,7 @@ This is an example commit
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message.into(),
-                Some(vec![(String::from("No GitHub ID"), 19, 26)]),
+                Some(vec![(String::from("No GitHub ID"), 19, 25)]),
                 Some(String::from("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests")),
             )),
         );
@@ -263,7 +263,7 @@ H-123
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message_1.into(),
-                Some(vec![("No GitHub ID".to_string(), 46, 6)]),
+                Some(vec![("No GitHub ID".to_string(), 46, 5)]),
                 Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
             )),
         );
@@ -280,7 +280,7 @@ git-mit#123
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message_2.into(),
-                Some(vec![("No GitHub ID".to_string(), 46, 12)]),
+                Some(vec![("No GitHub ID".to_string(), 46, 11)]),
                 Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
             )),
         );
@@ -300,8 +300,8 @@ This is an example commit
    ,-[2:1]
  2 | 
  3 | This is an example commit
-   : ^^^^^^^^^^^^^|^^^^^^^^^^^^
-   :              `-- No GitHub ID
+   : ^^^^^^^^^^^^|^^^^^^^^^^^^
+   :             `-- No GitHub ID
    `----
   help: It's important to add the issue ID because it allows us to link code
         back to the motivations for doing it, and because we can help people

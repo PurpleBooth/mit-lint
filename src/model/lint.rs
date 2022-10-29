@@ -114,7 +114,7 @@ pub enum Lint {
     ///         .into(),
     ///     Code::PivotalTrackerIdMissing,
     ///     &message.into(),
-    ///     Some(vec![("No Pivotal Tracker ID".to_string(), 19, 26)]),
+    ///     Some(vec![("No Pivotal Tracker ID".to_string(), 19, 25)]),
     ///     Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
     /// ));
     /// let actual = Lint::PivotalTrackerIdMissing.lint(&CommitMessage::from(message));
@@ -161,7 +161,7 @@ pub enum Lint {
     ///     "It's important to add the issue key because it allows us to link code back to the motivations for doing it, and in some cases provide an audit trail for compliance purposes.\n\nYou can fix this by adding a key like `JRA-123` to the commit message"
     ///         .into(),
     ///     Code::JiraIssueKeyMissing,&message.into(),
-    ///     Some(vec![("No JIRA Issue Key".to_string(), 19, 26)]),
+    ///     Some(vec![("No JIRA Issue Key".to_string(), 19, 25)]),
     ///     Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
     /// ));
     /// let actual = Lint::JiraIssueKeyMissing.lint(&CommitMessage::from(message));
@@ -207,7 +207,7 @@ pub enum Lint {
     ///      "Your commit message is missing a GitHub ID".into(),
     ///     "It's important to add the issue ID because it allows us to link code back to the motivations for doing it, and because we can help people exploring the repository link their issues to specific bits of code.\n\nYou can fix this by adding a ID like the following examples:\n\n#642\nGH-642\nAnUser/git-mit#642\nAnOrganisation/git-mit#642\nfixes #642\n\nBe careful just putting '#642' on a line by itself, as '#' is the default comment character"
     ///         .into(),
-    ///     Code::GitHubIdMissing,&message.into(),Some(vec![("No GitHub ID".to_string(), 19, 26)]),
+    ///     Code::GitHubIdMissing,&message.into(),Some(vec![("No GitHub ID".to_string(), 19, 25)]),
     /// Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
     /// ));
     /// let actual = Lint::GitHubIdMissing.lint(&CommitMessage::from(message));
@@ -294,7 +294,7 @@ pub enum Lint {
     ///     "It's important to keep the subject of the commit less than 72 characters because when you look at the git log, that's where it truncates the message. This means that people won't get the entirety of the information in your commit.\n\nPlease keep the subject line 72 characters or under"
     ///         .into(),
     ///     Code::SubjectLongerThan72Characters,&message.clone().into(),
-    ///     Some(vec![("Too long".to_string(), 73, 1)]),
+    ///     Some(vec![("Too long".to_string(), 72, 1)]),
     ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
     /// ));
     /// let actual = Lint::SubjectLongerThan72Characters.lint(&CommitMessage::from(message));
