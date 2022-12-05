@@ -147,8 +147,7 @@ fn test_body_wider_than_72_characters(message: &str, expected: &Option<Problem>)
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -185,8 +184,7 @@ fn formatting() {
 ".to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -224,8 +222,7 @@ fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
 ".to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -264,8 +261,7 @@ fn comments_are_not_included_in_highlights() {
 ".to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 

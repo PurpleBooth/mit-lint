@@ -184,8 +184,7 @@ fn can_get_all() {
 
     assert_eq!(
         expected, actual,
-        "Expected all the lints to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected all the lints to be {expected:?}, instead got {actual:?}"
     );
 }
 
@@ -197,8 +196,7 @@ fn example_can_get_all() {
 
     assert_eq!(
         expected, actual,
-        "Expected all the lints to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected all the lints to be {expected:?}, instead got {actual:?}"
     );
 }
 
@@ -260,8 +258,7 @@ subject-not-separated-from-body = true
 
     assert_eq!(
         expected, actual,
-        "Expected the list of lint identifiers to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected the list of lint identifiers to be {expected:?}, instead got {actual:?}"
     );
 }
 
@@ -301,8 +298,7 @@ fn example_two_sets_of_lints_can_be_merged() {
 
     assert_eq!(
         expected, actual,
-        "Expected the list of lint identifiers to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected the list of lint identifiers to be {expected:?}, instead got {actual:?}"
     );
 }
 
@@ -342,8 +338,7 @@ fn example_we_can_subtract_lints_from_the_lint_list() {
 
     assert_eq!(
         expected, actual,
-        "Expected the list of lint identifiers to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected the list of lint identifiers to be {expected:?}, instead got {actual:?}"
     );
 }
 
@@ -368,7 +363,6 @@ fn example_when_merging_overlapping_does_not_lead_to_duplication() {
 
     assert_eq!(
         expected, actual,
-        "Expected the list of lint identifiers to be {:?}, instead got {:?}",
-        expected, actual
+        "Expected the list of lint identifiers to be {expected:?}, instead got {actual:?}"
     );
 }

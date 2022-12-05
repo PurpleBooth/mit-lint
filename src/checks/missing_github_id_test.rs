@@ -263,8 +263,7 @@ This is an example commit
 ".to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -282,8 +281,7 @@ fn test_has_missing_github_id(message: &str, expected: &Option<Problem>) {
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 

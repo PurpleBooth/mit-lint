@@ -25,8 +25,7 @@ fn test_has_missing_pivotal_tracker_id(message: &str, expected: &Option<Problem>
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -358,8 +357,7 @@ This is an example commit
 "        .to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -422,8 +420,7 @@ fn success_check(
         .join(",");
 
     let message = CommitMessage::from(format!(
-        "{}\n[{}{}]\n{}\n# comment",
-        commit, prefix, id_str, commit_suffix
+        "{commit}\n[{prefix}{id_str}]\n{commit_suffix}\n# comment"
     ));
     let result = lint(&message);
     TestResult::from_bool(result.is_none())

@@ -321,8 +321,7 @@ fn formatting() {
         .to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
@@ -340,8 +339,7 @@ fn test_subject_longer_than_72_characters(message: &str, expected: &Option<Probl
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
