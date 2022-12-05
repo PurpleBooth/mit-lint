@@ -195,11 +195,7 @@ Anything: Billie Thompson <email@example.com>
 
 fn test_lint_duplicated_trailers(message: String, expected: &Option<Problem>) {
     let actual = &lint(&CommitMessage::from(message));
-    assert_eq!(
-        actual, expected,
-        "Expected {:?}, found {:?}",
-        expected, actual
-    );
+    assert_eq!(actual, expected, "Expected {expected:?}, found {actual:?}");
 }
 
 #[test]
@@ -238,8 +234,7 @@ Co-authored-by: Billie Thompson <email@example.com>
     .to_string();
     assert_eq!(
         actual, expected,
-        "Message {:?} should have returned {:?}, found {:?}",
-        message, expected, actual
+        "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
 
