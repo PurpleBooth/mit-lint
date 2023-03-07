@@ -101,7 +101,8 @@ fn examples_has_has_code() {
 #[quickcheck]
 fn test_has_has_code(code: Code) {
     let problem = Problem::new(String::new(), String::new(), code, &"".into(), None, None);
-    let _ = problem.code() == &code;
+
+    assert_eq!(problem.code(), &code);
 }
 
 #[test]
