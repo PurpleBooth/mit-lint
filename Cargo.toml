@@ -20,7 +20,7 @@ toml = "0.7.2"
 futures = "0.3.26"
 lazy_static = "1.4.0"
 quickcheck = "1.0.3"
-strum_macros = "0.24.3"
+strum_macros = "0.25.0"
 
 [dependencies.serde]
 version = "1.0.153"
