@@ -131,7 +131,7 @@ fn last_line_included() {
 
 #[test]
 fn lines_after_scissors_and_comments_are_not_included() {
-    let message = vec![
+    let message = [
         "Subject",
         "",
         "x",
@@ -190,7 +190,7 @@ fn formatting() {
 
 #[test]
 fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
-    let message = vec![
+    let message = [
         "Subject",
         "",
         "x",
@@ -228,7 +228,7 @@ fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
 
 #[test]
 fn comments_are_not_included_in_highlights() {
-    let message = vec![
+    let message = [
         "Subject",
         "",
         "x",

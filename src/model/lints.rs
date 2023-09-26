@@ -171,7 +171,7 @@ impl TryFrom<Vec<&str>> for Lints {
                 |lints: Vec<Lint>, item_name| -> Result<Vec<Lint>, Error> {
                     let lint = Lint::try_from(item_name)?;
 
-                    Ok(vec![lints, vec![lint]].concat())
+                    Ok([lints, vec![lint]].concat())
                 },
             )
             .map(Vec::into_iter)?;
