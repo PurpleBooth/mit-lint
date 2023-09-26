@@ -15,9 +15,6 @@ queue_rules:
       - check-success=rust-checks / bench (macos-latest)
       - check-success=rust-checks / bench (ubuntu-latest)
       - check-success=rust-checks / bench (windows-latest)
-      - check-success="rust-checks / builds-with-minimal-deps (macos-latest)"
-      - check-success="rust-checks / builds-with-minimal-deps (ubuntu-latest)"
-      - check-success="rust-checks / builds-with-minimal-deps (windows-latest)"
       - check-success="rust-checks / security-audit-minimal"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
