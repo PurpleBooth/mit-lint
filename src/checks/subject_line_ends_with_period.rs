@@ -21,8 +21,7 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
         .to_string()
         .trim_end()
         .chars()
-        .rev()
-        .next()
+        .next_back()
         .filter(|x| *x == '.')
         .is_some()
 }
