@@ -16,7 +16,7 @@ thiserror = "1.0.48"
 mit-commit = "3.1.8"
 regex = "1.9.5"
 strum = { version = "0.24.1", features = ["derive"] }
-toml = "0.7.8"
+toml = "0.8.0"
 futures = "0.3.28"
 lazy_static = "1.4.0"
 quickcheck = "1.0.3"
