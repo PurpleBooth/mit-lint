@@ -7,6 +7,9 @@ pre_bump_hooks = [
     "cargo build --release",
 ]
 post_bump_hooks = [
+    "git rm CHANGELOG.md",
+    "git commit --am --no-e",
+    "git tag -f v{{version}} -m 'chore(version): v{{version}}'",
     "git push",
     "git push origin v{{version}}",
 ]
