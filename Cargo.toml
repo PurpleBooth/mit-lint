@@ -27,7 +27,7 @@ version = "1.0.188"
 features = ["derive"]
 
 [dev-dependencies]
-criterion = { version = "0.4.0", features = ["async_tokio"] }
+criterion = { version = "0.5.1", features = ["async_tokio"] }
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
 tokio = { version = "1.32.0", features = ["full"] }
