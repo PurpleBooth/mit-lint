@@ -15,7 +15,7 @@ queue_rules:
       - check-success=rust-checks / bench (macos-latest)
       - check-success=rust-checks / bench (ubuntu-latest)
       - check-success=rust-checks / bench (windows-latest)
-      - check-success="rust-checks / security-audit-minimal"
+      - check-success="rust-checks / security-audit"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
 
@@ -42,7 +42,7 @@ pull_request_rules:
       - check-success=rust-checks / bench (macos-latest)
       - check-success=rust-checks / bench (ubuntu-latest)
       - check-success=rust-checks / bench (windows-latest)
-      - check-success="rust-checks / security-audit-minimal"
+      - check-success="rust-checks / security-audit"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
     actions:
