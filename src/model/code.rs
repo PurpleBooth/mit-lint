@@ -51,7 +51,7 @@ impl Arbitrary for Code {
             None | Some(0) => quickcheck::empty_shrinker(),
             Some(index) => codes
                 .get(index - 1)
-                .map_or(quickcheck::empty_shrinker(), |item| {
+                .map_or_else(quickcheck::empty_shrinker, |item| {
                     quickcheck::single_shrinker(*item)
                 }),
         }

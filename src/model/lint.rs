@@ -707,7 +707,7 @@ impl Arbitrary for Lint {
             None | Some(0) => quickcheck::empty_shrinker(),
             Some(index) => ALL_LINTS
                 .get(index - 1)
-                .map_or(quickcheck::empty_shrinker(), |item| {
+                .map_or_else(quickcheck::empty_shrinker, |item| {
                     quickcheck::single_shrinker(*item)
                 }),
         }
