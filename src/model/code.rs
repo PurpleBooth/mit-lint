@@ -7,33 +7,33 @@ use strum_macros::EnumIter;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, EnumIter)]
 #[repr(i32)]
 pub enum Code {
-    /// Unique ID for InitialNotMatchedToAuthor failure
+    /// Unique ID for `InitialNotMatchedToAuthor` failure
     InitialNotMatchedToAuthor = 3,
-    /// Unique ID for UnparsableAuthorFile failure
+    /// Unique ID for `UnparsableAuthorFile` failure
     UnparsableAuthorFile,
-    /// Unique ID for StaleAuthor failure
+    /// Unique ID for `StaleAuthor` failure
     StaleAuthor,
-    /// Unique ID for DuplicatedTrailers failure
+    /// Unique ID for `DuplicatedTrailers` failure
     DuplicatedTrailers,
-    /// Unique ID for PivotalTrackerIdMissing failure
+    /// Unique ID for `PivotalTrackerIdMissing` failure
     PivotalTrackerIdMissing,
-    /// Unique ID for JiraIssueKeyMissing failure
+    /// Unique ID for `JiraIssueKeyMissing` failure
     JiraIssueKeyMissing,
-    /// Unique ID for GitHubIdMissing failure
+    /// Unique ID for `GitHubIdMissing` failure
     GitHubIdMissing,
-    /// Unique ID for SubjectNotSeparateFromBody failure
+    /// Unique ID for `SubjectNotSeparateFromBody` failure
     SubjectNotSeparateFromBody,
-    /// Unique ID for SubjectLongerThan72Characters failure
+    /// Unique ID for `SubjectLongerThan72Characters` failure
     SubjectLongerThan72Characters,
-    /// Unique ID for SubjectNotCapitalized failure
+    /// Unique ID for `SubjectNotCapitalized` failure
     SubjectNotCapitalized,
-    /// Unique ID for SubjectEndsWithPeriod failure
+    /// Unique ID for `SubjectEndsWithPeriod` failure
     SubjectEndsWithPeriod,
-    /// Unique ID for BodyWiderThan72Characters failure
+    /// Unique ID for `BodyWiderThan72Characters` failure
     BodyWiderThan72Characters,
-    /// Unique ID for NotConventionalCommit failure
+    /// Unique ID for `NotConventionalCommit` failure
     NotConventionalCommit,
-    /// Unique ID for NotEmojiLog failure
+    /// Unique ID for `NotEmojiLog` failure
     NotEmojiLog,
 }
 
