@@ -141,7 +141,7 @@ This is an example commit
     let expected = "JiraIssueKeyMissing (https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys)
 
   x Your commit message is missing a JIRA Issue Key
-   ,-[2:1]
+   ,-[3:1]
  2 | 
  3 | This is an example commit
    : ^^^^^^^^^^^^|^^^^^^^^^^^^

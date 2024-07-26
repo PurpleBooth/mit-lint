@@ -240,7 +240,7 @@ This is an example commit
     let expected = "GitHubIdMissing (https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests)
 
   x Your commit message is missing a GitHub ID
-   ,-[2:1]
+   ,-[3:1]
  2 | 
  3 | This is an example commit
    : ^^^^^^^^^^^^|^^^^^^^^^^^^

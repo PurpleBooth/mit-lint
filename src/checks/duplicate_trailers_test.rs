@@ -214,7 +214,7 @@ Co-authored-by: Billie Thompson <email@example.com>
     let expected = "DuplicatedTrailers (https://git-scm.com/docs/githooks#_commit_msg)
 
   x Your commit message has duplicated trailers
-   ,-[5:1]
+   ,-[6:1]
  5 | Signed-off-by: Billie Thompson <email@example.com>
  6 | Signed-off-by: Billie Thompson <email@example.com>
    : ^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^

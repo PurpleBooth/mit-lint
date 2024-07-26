@@ -153,7 +153,7 @@ This is an example commit
 
   x Your commit message is missing a blank line between the subject and the
   | body
-   ,-[1:1]
+   ,-[2:1]
  1 | An example commit
  2 | This is an example commit
    : ^^^^^^^^^^^^|^^^^^^^^^^^^
