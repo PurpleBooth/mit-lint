@@ -332,7 +332,7 @@ This is an example commit
     let expected = "PivotalTrackerIdMissing (https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks)
 
   x Your commit message is missing a Pivotal Tracker ID
-   ,-[2:1]
+   ,-[3:1]
  2 | 
  3 | This is an example commit
    : ^^^^^^^^^^^^|^^^^^^^^^^^^

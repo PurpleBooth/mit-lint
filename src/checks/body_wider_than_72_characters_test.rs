@@ -163,7 +163,7 @@ fn formatting() {
     let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
   x Your commit has a body wider than 72 characters
-   ,-[3:1]
+   ,-[4:73]
  3 | x
  4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    :                                                                         |
@@ -205,7 +205,7 @@ fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
     let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
   x Your commit has a body wider than 72 characters
-   ,-[3:1]
+   ,-[4:73]
  3 | x
  4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    :                                                                         |
@@ -244,7 +244,7 @@ fn comments_are_not_included_in_highlights() {
     let expected = "BodyWiderThan72Characters (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
   x Your commit has a body wider than 72 characters
-   ,-[3:1]
+   ,-[4:73]
  3 | x
  4 | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    :                                                                         |

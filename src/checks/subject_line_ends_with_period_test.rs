@@ -92,7 +92,7 @@ This is an example commit
     let expected = "SubjectEndsWithPeriod (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
   x Your commit message ends with a period
-   ,-[1:1]
+   ,-[1:18]
  1 | An example commit... 
    :                  ^|^
    :                   `-- Unneeded period

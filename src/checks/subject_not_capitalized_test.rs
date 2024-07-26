@@ -61,7 +61,7 @@ fn formatting() {
     let expected = "SubjectNotCapitalized (https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines)
 
   x Your commit message is missing a capital letter
-   ,-[1:1]
+   ,-[1:3]
  1 |   an example commit
    :   |
    :   `-- Not capitalised
