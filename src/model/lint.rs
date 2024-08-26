@@ -535,10 +535,7 @@ impl From<Lint> for &str {
     /// ```
     /// use mit_lint::Lint;
     /// let actual: &str = Lint::NotConventionalCommit.into();
-    /// assert_eq!(
-    ///     actual,
-    ///     Lint::NotConventionalCommit.name(),
-    /// );
+    /// assert_eq!(actual, Lint::NotConventionalCommit.name());
     /// ```
     fn from(lint: Lint) -> Self {
         lint.name()
@@ -713,16 +710,7 @@ impl Arbitrary for Lint {
     }
 
     fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
-        let index = ALL_LINTS.iter().position(|other| self.eq(other));
-
-        match index {
-            None | Some(0) => quickcheck::empty_shrinker(),
-            Some(index) => ALL_LINTS
-                .get(index - 1)
-                .map_or_else(quickcheck::empty_shrinker, |item| {
-                    quickcheck::single_shrinker(*item)
-                }),
-        }
+        quickcheck::empty_shrinker()
     }
 }
 

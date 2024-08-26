@@ -43,18 +43,7 @@ impl Arbitrary for Code {
     }
 
     fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
-        let codes = Self::get_codes();
-
-        let index = codes.iter().position(|other| self.eq(other));
-
-        match index {
-            None | Some(0) => quickcheck::empty_shrinker(),
-            Some(index) => codes
-                .get(index - 1)
-                .map_or_else(quickcheck::empty_shrinker, |item| {
-                    quickcheck::single_shrinker(*item)
-                }),
-        }
+        quickcheck::empty_shrinker()
     }
 }
 
