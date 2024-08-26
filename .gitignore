@@ -2,3 +2,4 @@
 Cargo.lock
 /.versio-paused
 ./CHANGELOG.md
+mutants.out*

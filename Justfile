@@ -31,3 +31,7 @@ fmt:
 # Clean the build directory
 clean:
 	cargo clean
+
+# Check tests
+mutate:
+  cargo mutants
