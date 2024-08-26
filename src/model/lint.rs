@@ -528,6 +528,18 @@ impl std::convert::From<Lint> for String {
 }
 
 impl From<Lint> for &str {
+    /// Get an lint's unique name
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_lint::Lint;
+    /// let actual: &str = Lint::NotConventionalCommit.into();
+    /// assert_eq!(
+    ///     actual,
+    ///     Lint::NotConventionalCommit.name(),
+    /// );
+    /// ```
     fn from(lint: Lint) -> Self {
         lint.name()
     }
