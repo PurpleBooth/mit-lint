@@ -1,7 +1,7 @@
 use std::{
     borrow::Borrow,
     collections::{BTreeMap, BTreeSet},
-    convert::{identity, TryFrom, TryInto},
+    convert::{TryFrom, TryInto},
 };
 
 use quickcheck::TestResult;
@@ -221,16 +221,13 @@ fn get_toml(expected: BTreeMap<Lint, bool>) -> bool {
         .map(|(lint, enabled)| (Lint::try_from(lint.as_str()).unwrap(), *enabled))
         .collect();
 
-    actual
-        .iter()
-        .map(|(actual_key, actual_enabled)| {
-            expected
-                .get(actual_key)
-                .map_or(!*actual_enabled, |expected_enabled| {
-                    expected_enabled == actual_enabled
-                })
-        })
-        .all(identity)
+    actual.iter().all(|(actual_key, actual_enabled)| {
+        expected
+            .get(actual_key)
+            .map_or(!*actual_enabled, |expected_enabled| {
+                expected_enabled == actual_enabled
+            })
+    })
 }
 
 #[test]

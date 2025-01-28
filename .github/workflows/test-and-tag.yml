@@ -16,8 +16,6 @@ jobs:
     with:
       mutation_testing: true
 
-
-
   release:
     if: github.ref == 'refs/heads/main'
     needs:

@@ -170,8 +170,8 @@ This is an example commit
    `----
   help: It's important to follow the conventional commit style when creating
         your commit message. By using this style we can automatically
-        calculate the version of software using deployment pipelines, and
-        also generate changelogs and other useful information without human
+        calculate the version of software using deployment pipelines, and also
+        generate changelogs and other useful information without human
         interaction.
         
         You can fix it by following style

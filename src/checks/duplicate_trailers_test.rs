@@ -224,12 +224,11 @@ Co-authored-by: Billie Thompson <email@example.com>
    : ^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^^^^^^^^^^^^^^^^^^^^^
    :                          `-- Duplicated `Co-authored-by`
    `----
-  help: These are normally added accidentally when you're rebasing or
-        amending to a commit, sometimes in the text editor, but often by
-        git hooks.
+  help: These are normally added accidentally when you're rebasing or amending
+        to a commit, sometimes in the text editor, but often by git hooks.
         
-        You can fix this by deleting the duplicated \"Co-authored-by\",
-        \"Signed-off-by\" fields
+        You can fix this by deleting the duplicated \"Co-authored-by\", \"Signed-
+        off-by\" fields
 "
     .to_string();
     assert_eq!(
