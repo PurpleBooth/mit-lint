@@ -99,10 +99,9 @@ This is an example commit
  2 | 
    `----
   help: It's important to keep your commits short, because we only have a
-        limited number of characters to use (72) before the subject line
-        is truncated. Full stops aren't normally in subject lines, and take
-        up an extra character, so we shouldn't use them in commit message
-        subjects.
+        limited number of characters to use (72) before the subject line is
+        truncated. Full stops aren't normally in subject lines, and take up an
+        extra character, so we shouldn't use them in commit message subjects.
         
         You can fix this by removing the period
 "

@@ -147,12 +147,11 @@ This is an example commit
    : ^^^^^^^^^^^^|^^^^^^^^^^^^
    :             `-- No JIRA Issue Key
    `----
-  help: It's important to add the issue key because it allows us to link
-        code back to the motivations for doing it, and in some cases provide
-        an audit trail for compliance purposes.
+  help: It's important to add the issue key because it allows us to link code
+        back to the motivations for doing it, and in some cases provide an
+        audit trail for compliance purposes.
         
-        You can fix this by adding a key like `JRA-123` to the commit
-        message
+        You can fix this by adding a key like `JRA-123` to the commit message
 " .to_string();
     assert_eq!(
         actual, expected,

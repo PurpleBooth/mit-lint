@@ -46,7 +46,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         .filter(|(_, line)| {
             comment_char
                 .as_ref()
-                .map_or(true, |comment_char| !line.starts_with(comment_char))
+                .is_none_or(|comment_char| !line.starts_with(comment_char))
         })
         .filter(|(line_index, _)| *line_index < scissors_start_line)
         .filter(|(line_index, line)| line_index > &0 && line.len() > LIMIT)

@@ -162,9 +162,8 @@ This is an example commit
    :         `-- Not emoji log
  2 | 
    `----
-  help: It's important to follow the emoji log style when creating your
-        commit message. By using this style we can automatically generate
-        changelogs.
+  help: It's important to follow the emoji log style when creating your commit
+        message. By using this style we can automatically generate changelogs.
         
         You can fix it using one of the prefixes:
         
