@@ -22,10 +22,6 @@ lazy_static = "1.5.0"
 quickcheck = "1.0.3"
 strum_macros = "0.26.4"
 
-[dependencies.serde]
-version = "1.0.204"
-features = ["derive"]
-
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["async_tokio"] }
 quickcheck = "1.0.3"

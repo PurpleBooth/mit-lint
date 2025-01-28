@@ -9,7 +9,7 @@ use crate::{Code, Problem};
 
 #[test]
 fn capitalised() {
-    run_test("Subject Line", &None);
+    run_test("Subject Line", None);
 }
 
 #[test]
@@ -17,7 +17,7 @@ fn lower_case() {
     run_test(
         "subject line
 ",
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotCapitalized,
@@ -26,7 +26,7 @@ fn lower_case() {
                 .into(),
             Some(vec![("Not capitalised".to_string(), 0_usize, 1_usize)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -34,14 +34,14 @@ fn lower_case() {
 fn space_first() {
     run_test(
         "  subject line",
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotCapitalized,
             &CommitMessage::from("  subject line"),
             Some(vec![("Not capitalised".to_string(), 1_usize, 1_usize)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -49,7 +49,7 @@ fn space_first() {
 fn numbers_are_fine() {
     run_test(
         "1234567
-", &None,
+", None,
     );
 }
 
@@ -135,10 +135,11 @@ fn fmt_report(diag: &Report) -> String {
     out
 }
 
-fn run_test(message: &str, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
+fn run_test(message: &str, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }

@@ -11,12 +11,12 @@ use crate::{model::Code, Problem};
 
 #[test]
 fn narrower_than_72_characters() {
-    test_body_wider_than_72_characters(&format!("Subject\n\n{}", "x".repeat(72)), &None);
+    test_body_wider_than_72_characters(&format!("Subject\n\n{}", "x".repeat(72)), None);
 }
 
 #[test]
 fn no_body() {
-    test_body_wider_than_72_characters("Subject", &None);
+    test_body_wider_than_72_characters("Subject", None);
 }
 
 #[test]
@@ -78,7 +78,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-    test_body_wider_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
+    test_body_wider_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), None);
 }
 
 #[test]
@@ -86,14 +86,14 @@ fn longer_than_72_characters() {
     let message = format!("Subject\n\n{}", "x".repeat(73));
     test_body_wider_than_72_characters(
         &message.clone(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.into(),
             Some(vec![("Too long".to_string(), 81, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -102,14 +102,14 @@ fn longer_than_73_still_fails() {
     let message = format!("Subject\n\n{}", "x".repeat(75));
     test_body_wider_than_72_characters(
         &message.clone(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.into(),
             Some(vec![("Too long".to_string(), 81, 3)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -118,14 +118,14 @@ fn multiple_long_lines_fails() {
     let message = format!("Subject\n\n{}\n{}", "x".repeat(73), "y".repeat(73));
     test_body_wider_than_72_characters(
         &message.clone(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.into(),
             Some(vec![("Too long".to_string(), 81, 1), ("Too long".to_string(), 155, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -134,14 +134,14 @@ fn first_line_ok_but_second_line_too_long() {
     let message = format!("Subject\n\nx\n{}\nx\n", "x".repeat(73));
     test_body_wider_than_72_characters(
         &message.clone(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.into(),
             Some(vec![("Too long".to_string(), 83, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -150,14 +150,14 @@ fn last_line_included() {
     let message = format!("Subject\n\n{}", "x".repeat(73));
     test_body_wider_than_72_characters(
         &message.clone(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.into(),
             Some(vec![("Too long".to_string(), 81, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -172,13 +172,14 @@ fn lines_after_scissors_and_comments_are_not_included() {
         &"x".repeat(73),
     ]
     .join("\n");
-    test_body_wider_than_72_characters(&message, &None);
+    test_body_wider_than_72_characters(&message, None);
 }
 
-fn test_body_wider_than_72_characters(message: &str, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
+fn test_body_wider_than_72_characters(message: &str, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }

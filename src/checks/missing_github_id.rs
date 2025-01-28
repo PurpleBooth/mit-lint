@@ -73,7 +73,7 @@ This is an example commit
 
 close #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -82,7 +82,7 @@ This is an example commit
 
 closes: #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -91,7 +91,7 @@ This is an example commit
 
 Closed GH-642
 ",
-            &None,
+            None,
         );
     }
 
@@ -104,7 +104,7 @@ This is an example commit
 
 fix #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -113,7 +113,7 @@ This is an example commit
 
 This fixes #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -122,7 +122,7 @@ This is an example commit
 
 fixed #642
 ",
-            &None,
+            None,
         );
     }
 
@@ -135,7 +135,7 @@ This is an example commit
 
 fixed #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -144,7 +144,7 @@ This is an example commit
 
 resolve #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -153,7 +153,7 @@ This is an example commit
 
 resolves #642
 ",
-            &None,
+            None,
         );
     }
 
@@ -166,7 +166,7 @@ This is an example commit
 
 resolved #642
 ",
-            &None,
+            None,
         );
         test_has_missing_github_id(
             "An example commit
@@ -175,7 +175,7 @@ This is an example commit
 
 Issue #642
 ",
-            &None,
+            None,
         );
     }
 
@@ -188,7 +188,7 @@ This is an example commit
 
 GH-642
 ",
-            &None,
+            None,
         );
     }
 
@@ -202,7 +202,7 @@ This is an example commit
 #642
 ; Comment character is set to something else like ';'
 ",
-            &None,
+            None,
         );
     }
 
@@ -215,7 +215,7 @@ This is an example commit
 
 AnUser/git-mit#642
 ",
-            &None,
+            None,
         );
 
         test_has_missing_github_id(
@@ -225,7 +225,7 @@ This is an example commit
 
 AnOrganisation/git-mit#642
 ",
-            &None,
+            None,
         );
     }
 
@@ -237,14 +237,14 @@ This is an example commit
 ";
         test_has_missing_github_id(
             message,
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message.into(),
                 Some(vec![(String::from("No GitHub ID"), 19, 25)]),
                 Some(String::from("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests")),
-            )),
+            )).as_ref(),
         );
     }
 
@@ -258,14 +258,14 @@ H-123
 ";
         test_has_missing_github_id(
             message_1,
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message_1.into(),
                 Some(vec![("No GitHub ID".to_string(), 46, 5)]),
                 Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
-            )),
+            )).as_ref(),
         );
         let message_2 = "An example commit
 
@@ -275,14 +275,14 @@ git-mit#123
 ";
         test_has_missing_github_id(
             message_2,
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::GitHubIdMissing,
                 &message_2.into(),
                 Some(vec![("No GitHub ID".to_string(), 46, 11)]),
                 Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".parse().unwrap()),
-            )),
+            )).as_ref(),
         );
     }
 
@@ -334,10 +334,11 @@ This is an example commit
         out
     }
 
-    fn test_has_missing_github_id(message: &str, expected: &Option<Problem>) {
+    fn test_has_missing_github_id(message: &str, expected: Option<&Problem>) {
         let actual = &lint(&CommitMessage::from(message));
         assert_eq!(
-            actual, expected,
+            actual.as_ref(),
+            expected,
             "Message {message:?} should have returned {expected:?}, found {actual:?}"
         );
     }

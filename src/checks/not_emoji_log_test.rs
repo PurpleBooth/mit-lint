@@ -18,7 +18,7 @@ fn new() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -29,7 +29,7 @@ fn improve() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -40,7 +40,7 @@ fn fix() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -51,7 +51,7 @@ fn docs() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -62,7 +62,7 @@ fn release() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -73,7 +73,7 @@ fn test() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -84,7 +84,7 @@ fn bc() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -96,7 +96,7 @@ This is an example commit
 ";
     run_lint(
         message,
-        &Some(Problem::new(
+        Some(&Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotEmojiLog,
@@ -115,14 +115,15 @@ This is an example commit
 ";
     run_lint(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotEmojiLog,
             &message.into(),
             Some(vec![("Not emoji log".to_string(), 0_usize, 31_usize)]),
             Some("https://github.com/ahmadawais/Emoji-Log".to_string()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -134,14 +135,15 @@ This is an example commit
 ";
     run_lint(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotEmojiLog,
             &message.into(),
             Some(vec![("Not emoji log".to_string(), 0_usize, 17_usize)]),
             Some("https://github.com/ahmadawais/Emoji-Log".to_string()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -193,10 +195,11 @@ fn fmt_report(diag: &Report) -> String {
     out
 }
 
-fn run_lint(message: &str, expected: &Option<Problem>) {
+fn run_lint(message: &str, expected: Option<&Problem>) {
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }

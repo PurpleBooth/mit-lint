@@ -70,7 +70,7 @@ mod tests {
 BREAKING CHANGE: `extends` key in config file is now used for extending other \
  config files
 ",
-            &None,
+            None,
         );
     }
 
@@ -79,7 +79,7 @@ BREAKING CHANGE: `extends` key in config file is now used for extending other \
         test_subject_not_separate_from_body(
             "refactor!: drop support for Node 6
 ",
-            &None,
+            None,
         );
     }
 
@@ -90,7 +90,7 @@ BREAKING CHANGE: `extends` key in config file is now used for extending other \
 
 BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
 ",
-            &None,
+            None,
         );
     }
 
@@ -99,7 +99,7 @@ BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
         test_subject_not_separate_from_body(
             "docs: correct spelling of CHANGELOG
 ",
-            &None,
+            None,
         );
     }
 
@@ -108,7 +108,7 @@ BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
         test_subject_not_separate_from_body(
             "feat(lang): add polish language
 ",
-            &None,
+            None,
         );
     }
 
@@ -124,7 +124,7 @@ on typos fixed.
 Reviewed-by: Z
 Refs #133
 ",
-            &None,
+            None,
         );
     }
 
@@ -135,7 +135,7 @@ Refs #133
 
 Refs: 676104e, a215868
 ",
-            &None,
+            None,
         );
     }
 
@@ -147,7 +147,7 @@ This is an example commit
 ";
         test_subject_not_separate_from_body(
             message,
-            &Some(Problem::new(
+            Some(&Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
@@ -166,14 +166,15 @@ This is an example commit
 ";
         test_subject_not_separate_from_body(
             message,
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
                 &message.into(),
                 Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
                 Some("https://www.conventionalcommits.org/".parse().unwrap()),
-            )),
+            ))
+            .as_ref(),
         );
     }
 
@@ -185,21 +186,23 @@ This is an example commit
 ";
         test_subject_not_separate_from_body(
             message,
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::NotConventionalCommit,
                 &message.into(),
                 Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
                 Some("https://www.conventionalcommits.org/".parse().unwrap()),
-            )),
+            ))
+            .as_ref(),
         );
     }
 
-    fn test_subject_not_separate_from_body(message: &str, expected: &Option<Problem>) {
+    fn test_subject_not_separate_from_body(message: &str, expected: Option<&Problem>) {
         let actual = &lint(&CommitMessage::from(message));
         assert_eq!(
-            actual, expected,
+            actual.as_ref(),
+            expected,
             "Message {message:?} should have returned {expected:?}, found {actual:?}"
         );
     }

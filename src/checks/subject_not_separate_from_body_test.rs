@@ -16,7 +16,7 @@ fn with_gutter() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
     test_subject_not_separate_from_body(
         "Another example
@@ -26,13 +26,13 @@ Disabling this specific lint - Co-authored
 Co-authored-by: Someone Else <someone@example.com>
 Co-authored-by: Someone Else <someone@example.com>
 ",
-        &None,
+        None,
     );
 }
 
 #[test]
 fn single_line_with_trailing_newline() {
-    test_subject_not_separate_from_body("An example commit\n", &None);
+    test_subject_not_separate_from_body("An example commit\n", None);
 }
 
 #[test]
@@ -93,52 +93,52 @@ index 5a83784..ebaee48 100644
 
 
 ",
-        &None,
+        None,
     );
 }
 
 #[test]
 fn single_line() {
-    test_subject_not_separate_from_body("An example commit", &None);
+    test_subject_not_separate_from_body("An example commit", None);
 }
 
 #[test]
 fn gutter_missing() {
     test_subject_not_separate_from_body(
-            "An example commit
+        "An example commit
 This is an example commit
 ",
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectNotSeparateFromBody,
-                &"An example commit
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::SubjectNotSeparateFromBody,
+            &"An example commit
 This is an example commit
 "
-                .into(),
-                Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
+            .into(),
+            Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
+        )).as_ref(),
         );
     test_subject_not_separate_from_body(
-            "An example commit
+        "An example commit
 This is an example commit
 It has more lines
 It has even more lines
 ",
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectNotSeparateFromBody,
-                &"An example commit
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::SubjectNotSeparateFromBody,
+            &"An example commit
 This is an example commit
 It has more lines
 It has even more lines
 "
-                .into(),
-                Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )),
+            .into(),
+            Some(vec![("Missing blank line".to_string(), 18_usize, 25_usize)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+        )).as_ref(),
         );
 }
 
@@ -220,10 +220,11 @@ fn fmt_report(diag: &Report) -> String {
     out
 }
 
-fn test_subject_not_separate_from_body(message: &str, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
+fn test_subject_not_separate_from_body(message: &str, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
