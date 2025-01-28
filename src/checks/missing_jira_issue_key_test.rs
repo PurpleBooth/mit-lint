@@ -16,14 +16,14 @@ fn id_present() {
 
 This is an example commit
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
 
 This is an JRA-123 example commit
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
@@ -32,7 +32,7 @@ JRA-123
 
 This is an example commit
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
@@ -41,7 +41,7 @@ This is an example commit
 
 JRA-123
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
@@ -50,7 +50,7 @@ This is an example commit
 
 JR-123
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
@@ -59,21 +59,21 @@ This is an example commit
 
 Relates-to: [JRA-123]
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "[JRA-123] An example commit
 
 This is an example commit
 ",
-        &None,
+        None,
     );
     test_has_missing_jira_issue_key(
         "An example commit
 
 This is an [JRA-123] example commit
 ",
-        &None,
+        None,
     );
 }
 
@@ -85,14 +85,14 @@ This is an example commit
 ";
     test_has_missing_jira_issue_key(
         message_1,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_1.into(),
             Some(vec![("No JIRA Issue Key".to_string(), 19_usize, 25_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
     let message_2 = "An example commit
 
@@ -102,14 +102,14 @@ A-123
 ";
     test_has_missing_jira_issue_key(
         message_2,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_2.into(),
             Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
     let message_3 = "An example commit
 
@@ -119,14 +119,14 @@ JRA-
 ";
     test_has_missing_jira_issue_key(
         message_3,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &message_3.into(),
             Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 4_usize)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -169,10 +169,11 @@ fn fmt_report(diag: &Report) -> String {
     out
 }
 
-fn test_has_missing_jira_issue_key(message: &str, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
+fn test_has_missing_jira_issue_key(message: &str, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }

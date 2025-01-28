@@ -17,7 +17,7 @@ fn commit_message_with_description_and_breaking_change_footer() {
 BREAKING CHANGE: `extends` key in config file is now used for extending other \
  config files
 ",
-        &None,
+        None,
     );
 }
 
@@ -26,7 +26,7 @@ fn commit_message_with_bang_to_draw_attention_to_breaking_change() {
     test_subject_not_separate_from_body(
         "refactor!: drop support for Node 6
 ",
-        &None,
+        None,
     );
 }
 
@@ -37,7 +37,7 @@ fn commit_message_with_both_bang_and_breaking_change_footer() {
 
 BREAKING CHANGE: refactor to use JavaScript features not available in Node 6.
 ",
-        &None,
+        None,
     );
 }
 
@@ -46,7 +46,7 @@ fn commit_message_with_no_body() {
     test_subject_not_separate_from_body(
         "docs: correct spelling of CHANGELOG
 ",
-        &None,
+        None,
     );
 }
 
@@ -55,7 +55,7 @@ fn commit_message_with_scope() {
     test_subject_not_separate_from_body(
         "feat(lang): add polish language
 ",
-        &None,
+        None,
     );
 }
 
@@ -71,7 +71,7 @@ on typos fixed.
 Reviewed-by: Z
 Refs #133
 ",
-        &None,
+        None,
     );
 }
 
@@ -82,7 +82,7 @@ fn revert_example() {
 
 Refs: 676104e, a215868
 ",
-        &None,
+        None,
     );
 }
 
@@ -94,14 +94,15 @@ This is an example commit
 ";
     test_subject_not_separate_from_body(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotConventionalCommit,
             &message.into(),
             Some(vec![("Not conventional".to_string(), 0_usize, 17_usize)]),
             Some("https://www.conventionalcommits.org/".parse().unwrap()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -113,14 +114,15 @@ This is an example commit
 ";
     test_subject_not_separate_from_body(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotConventionalCommit,
             &message.into(),
             Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
             Some("https://www.conventionalcommits.org/".parse().unwrap()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -132,21 +134,23 @@ This is an example commit
 ";
     test_subject_not_separate_from_body(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::NotConventionalCommit,
             &message.into(),
             Some(vec![("Not conventional".to_string(), 0_usize, 30_usize)]),
             Some("https://www.conventionalcommits.org/".parse().unwrap()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
-fn test_subject_not_separate_from_body(message: &str, expected: &Option<Problem>) {
+fn test_subject_not_separate_from_body(message: &str, expected: Option<&Problem>) {
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
@@ -202,9 +206,10 @@ fn fmt_report(diag: &Report) -> String {
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn fail_check(commit: String) -> TestResult {
-    let has_non_alpha_type = commit.chars().position(|x| x == ':').map_or(false, |x| {
-        commit.chars().take(x).any(|x| !x.is_ascii_alphanumeric())
-    });
+    let has_non_alpha_type = commit
+        .chars()
+        .position(|x| x == ':')
+        .is_some_and(|x| commit.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
     if has_non_alpha_type {
         return TestResult::discard();
     }

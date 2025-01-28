@@ -59,19 +59,19 @@ mod tests {
 
     #[test]
     fn shorter_than_72_characters() {
-        test_subject_longer_than_72_characters(&"x".repeat(72), &None);
+        test_subject_longer_than_72_characters(&"x".repeat(72), None);
     }
 
     #[test]
     fn shorter_than_72_characters_with_a_new_line() {
-        test_subject_longer_than_72_characters(&format!("{}\n", "x".repeat(72)), &None);
+        test_subject_longer_than_72_characters(&format!("{}\n", "x".repeat(72)), None);
     }
 
     #[test]
     fn shorter_than_72_characters_with_a_new_line_then_characters_directly_afterwards() {
         test_subject_longer_than_72_characters(
             &format!("{}\nsome more content", "x".repeat(72)),
-            &None,
+            None,
         );
     }
 
@@ -132,7 +132,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), None);
     }
 
     #[test]
@@ -191,7 +191,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), None);
     }
 
     #[test]
@@ -199,14 +199,14 @@ index 5a83784..ebaee48 100644
         let message = "x".repeat(73);
         test_subject_longer_than_72_characters(
             &message.clone(),
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
+            )).as_ref(),
         );
     }
 
@@ -215,14 +215,14 @@ index 5a83784..ebaee48 100644
         let message = format!("{}\n", "x".repeat(73));
         test_subject_longer_than_72_characters(
             &message.clone(),
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
+            )).as_ref(),
         );
     }
 
@@ -231,14 +231,14 @@ index 5a83784..ebaee48 100644
         let message = format!("{}\nSome-Trailer: This is a trailer", "x".repeat(73));
         test_subject_longer_than_72_characters(
             &message.clone(),
-            &Some(Problem::new(
+            Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
+            )).as_ref(),
         );
     }
 
@@ -302,7 +302,7 @@ index 5a83784..ebaee48 100644
         let message = format!("{}\n\n{message}", "x".repeat(73));
         test_subject_longer_than_72_characters(
             &message.clone(),
-            &Some(Problem::new(
+            Some(&Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
                 Code::SubjectLongerThan72Characters,
@@ -369,7 +369,7 @@ index 5a83784..ebaee48 100644
 
 
 ";
-        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), &None);
+        test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), None);
     }
 
     #[test]
@@ -412,10 +412,11 @@ index 5a83784..ebaee48 100644
 
     use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 
-    fn test_subject_longer_than_72_characters(message: &str, expected: &Option<Problem>) {
+    fn test_subject_longer_than_72_characters(message: &str, expected: Option<&Problem>) {
         let actual = &lint(&CommitMessage::from(message));
         assert_eq!(
-            actual, expected,
+            actual.as_ref(),
+            expected,
             "Message {message:?} should have returned {expected:?}, found {actual:?}"
         );
     }

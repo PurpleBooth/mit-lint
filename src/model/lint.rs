@@ -507,7 +507,7 @@ pub enum Lint {
 /// The prefix we put in front of the lint when serialising
 pub const CONFIG_KEY_PREFIX: &str = "mit.lint";
 
-impl std::convert::TryFrom<&str> for Lint {
+impl TryFrom<&str> for Lint {
     type Error = Error;
 
     fn try_from(from: &str) -> Result<Self, Self::Error> {
@@ -521,7 +521,7 @@ impl std::convert::TryFrom<&str> for Lint {
     }
 }
 
-impl std::convert::From<Lint> for String {
+impl From<Lint> for String {
     fn from(from: Lint) -> Self {
         format!("{from}")
     }

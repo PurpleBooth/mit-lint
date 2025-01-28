@@ -17,14 +17,15 @@ This is an example commit
 [#12345678]
 # Some comment
 ",
-        &None,
+        None,
     );
 }
 
-fn test_has_missing_pivotal_tracker_id(message: &str, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
+fn test_has_missing_pivotal_tracker_id(message: &str, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }
@@ -39,7 +40,7 @@ This is an example commit
 [#12345678,#87654321]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -49,7 +50,7 @@ This is an example commit
 [#12345678,#87654321,#11223344]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -59,7 +60,7 @@ This is an example commit
 [#12345678 #87654321 #11223344]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -73,7 +74,7 @@ This is an example commit
 [fix #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -83,7 +84,7 @@ This is an example commit
 [FIX #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -93,7 +94,7 @@ This is an example commit
 [Fix #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -103,7 +104,7 @@ This is an example commit
 [fixed #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -113,7 +114,7 @@ This is an example commit
 [fixes #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -127,7 +128,7 @@ This is an example commit
 [complete #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 
     test_has_missing_pivotal_tracker_id(
@@ -138,7 +139,7 @@ This is an example commit
 [completed #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 
     test_has_missing_pivotal_tracker_id(
@@ -149,7 +150,7 @@ This is an example commit
 [Completed #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 
     test_has_missing_pivotal_tracker_id(
@@ -160,7 +161,7 @@ This is an example commit
 [completes #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -174,7 +175,7 @@ This is an example commit
 [finish #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 
     test_has_missing_pivotal_tracker_id(
@@ -185,7 +186,7 @@ This is an example commit
 [finished #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -195,7 +196,7 @@ This is an example commit
 [finishes #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -209,7 +210,7 @@ This is an example commit
 [deliver #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 
     test_has_missing_pivotal_tracker_id(
@@ -220,7 +221,7 @@ This is an example commit
 [delivered #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
     test_has_missing_pivotal_tracker_id(
         "An example commit
@@ -230,7 +231,7 @@ This is an example commit
 [delivers #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -244,7 +245,7 @@ This is an example commit
 [fix #12345678 #12345678]
 # some comment
 ",
-        &None,
+        None,
     );
 }
 
@@ -257,7 +258,7 @@ This is an example commit
 
 Finally [fix #12345678 #12345678]
 ",
-        &None,
+        None,
     );
 }
 
@@ -272,14 +273,14 @@ This is an example commit
 ";
     test_has_missing_pivotal_tracker_id(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
             &message.into(),
             Some(vec![("No Pivotal Tracker ID".to_string(), 63, 14)]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -291,7 +292,7 @@ This is an example commit
 ";
     test_has_missing_pivotal_tracker_id(
         message_1,
-        &Some(Problem::new(
+        Some(&Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
@@ -310,14 +311,14 @@ This is an example commit
 ";
     test_has_missing_pivotal_tracker_id(
         message_2,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::PivotalTrackerIdMissing,
             &message_2.into(),
             Some(vec![("No Pivotal Tracker ID".to_string(), 50, 14)]),
             Some("https://www.pivotaltracker.com/help/api?version=v5#Tracker_Updates_in_SCM_Post_Commit_Hooks".parse().unwrap()),
-        )),
+        )).as_ref(),
     );
 }
 

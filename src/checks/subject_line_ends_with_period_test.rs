@@ -12,7 +12,7 @@ fn subject_does_not_end_with_period() {
     run_test(
         "Subject Line
 ",
-        &None,
+        None,
     );
 }
 
@@ -21,15 +21,15 @@ fn subject_ends_with_period() {
     let message = "Subject Line.
 ";
     run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-            )),
+        message,
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::SubjectEndsWithPeriod,
+            &message.into(),
+            Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
+        )).as_ref(),
         );
 }
 
@@ -37,15 +37,15 @@ fn subject_ends_with_period() {
 fn subject_has_period_then_whitespace() {
     let message = "Subject Line. ";
     run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )),
+        message,
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::SubjectEndsWithPeriod,
+            &message.into(),
+            Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+        )).as_ref(),
         );
 }
 
@@ -53,15 +53,15 @@ fn subject_has_period_then_whitespace() {
 fn subject_has_multiple_periods() {
     let message = "Subject Line... ";
     run_test(
-            message,
-            &Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::SubjectEndsWithPeriod,
-                &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 3_usize)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )),
+        message,
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::SubjectEndsWithPeriod,
+            &message.into(),
+            Some(vec![("Unneeded period".to_string(), 13_usize, 3_usize)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+        )).as_ref(),
         );
 }
 
@@ -70,14 +70,14 @@ fn subject_is_just_a_period() {
     let message = ".\n# bla";
     run_test(
         message,
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectEndsWithPeriod,
             &message.into(),
             Some(vec![("Unneeded period".to_string(), 1_usize, 1_usize)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )),
+        )).as_ref(),
     );
 }
 
@@ -122,10 +122,11 @@ fn fmt_report(diag: &Report) -> String {
     out
 }
 
-fn run_test(message: &str, expected: &Option<Problem>) {
+fn run_test(message: &str, expected: Option<&Problem>) {
     let actual = &lint(&CommitMessage::from(message));
     assert_eq!(
-        actual, expected,
+        actual.as_ref(),
+        expected,
         "Message {message:?} should have returned {expected:?}, found {actual:?}"
     );
 }

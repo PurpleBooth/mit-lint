@@ -117,7 +117,7 @@ impl Lints {
     }
 }
 
-impl std::iter::IntoIterator for Lints {
+impl IntoIterator for Lints {
     type IntoIter = IntoIter<Lint>;
     type Item = Lint;
 

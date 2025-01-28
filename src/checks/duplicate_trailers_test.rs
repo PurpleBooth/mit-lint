@@ -15,7 +15,7 @@ fn commit_without_trailers() {
 This is an example commit without any duplicate trailers
 "
         .into(),
-        &None,
+        None,
     );
 }
 
@@ -32,7 +32,7 @@ Co-authored-by: Billie Thompson <email@example.com>
 ";
     test_lint_duplicated_trailers(
         message.into(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             "These are normally added accidentally when you\'re rebasing or amending to a \
                  commit, sometimes in the text editor, but often by git hooks.\n\nYou can fix \
@@ -57,7 +57,8 @@ Co-authored-by: Billie Thompson <email@example.com>
                     .parse()
                     .unwrap(),
             ),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -72,7 +73,7 @@ Signed-off-by: Billie Thompson <email@example.com>
 ";
     test_lint_duplicated_trailers(
         message.into(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             "These are normally added accidentally when you\'re rebasing or amending to a \
                  commit, sometimes in the text editor, but often by git hooks.\n\nYou can fix \
@@ -86,7 +87,8 @@ Signed-off-by: Billie Thompson <email@example.com>
                     .parse()
                     .unwrap(),
             ),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -101,7 +103,7 @@ Co-authored-by: Billie Thompson <email@example.com>
 ";
     test_lint_duplicated_trailers(
         message.into(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             "These are normally added accidentally when you\'re rebasing or amending to a \
                  commit, sometimes in the text editor, but often by git hooks.\n\nYou can fix \
@@ -111,7 +113,8 @@ Co-authored-by: Billie Thompson <email@example.com>
             &message.into(),
             Some(vec![("Duplicated `Co-authored-by`".to_string(), 129, 51)]),
             Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -126,7 +129,7 @@ Relates-to: #315
 ";
     test_lint_duplicated_trailers(
         message.into(),
-        &Some(Problem::new(
+        Some(Problem::new(
             ERROR.into(),
             "These are normally added accidentally when you\'re rebasing or amending to a \
                  commit, sometimes in the text editor, but often by git hooks.\n\nYou can fix \
@@ -136,7 +139,8 @@ Relates-to: #315
             &message.into(),
             Some(vec![("Duplicated `Relates-to`".to_string(), 94, 16)]),
             Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
-        )),
+        ))
+        .as_ref(),
     );
 }
 
@@ -174,7 +178,7 @@ index 0d3fc98..38a2784 100644
 +
 "
         .into(),
-        &None,
+        None,
     );
 }
 
@@ -189,13 +193,17 @@ Anything: Billie Thompson <email@example.com>
 Anything: Billie Thompson <email@example.com>
 "
         .into(),
-        &None,
+        None,
     );
 }
 
-fn test_lint_duplicated_trailers(message: String, expected: &Option<Problem>) {
-    let actual = &lint(&CommitMessage::from(message));
-    assert_eq!(actual, expected, "Expected {expected:?}, found {actual:?}");
+fn test_lint_duplicated_trailers(message: String, expected: Option<&Problem>) {
+    let actual = lint(&CommitMessage::from(message));
+    assert_eq!(
+        actual.as_ref(),
+        expected,
+        "Expected {expected:?}, found {actual:?}"
+    );
 }
 
 #[test]
