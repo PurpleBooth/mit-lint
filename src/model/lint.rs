@@ -1,6 +1,7 @@
 use std::{
     convert::{TryFrom, TryInto},
     str::FromStr,
+    sync::LazyLock,
 };
 
 use miette::Diagnostic;
@@ -563,29 +564,28 @@ impl Lint {
     }
 }
 
-lazy_static! {
-    /// All the available lints
-    static ref ALL_LINTS: [Lint; 11] = [
-        Lint::DuplicatedTrailers,
-        Lint::PivotalTrackerIdMissing,
-        Lint::JiraIssueKeyMissing,
-        Lint::SubjectNotSeparateFromBody,
-        Lint::GitHubIdMissing,
-        Lint::SubjectLongerThan72Characters,
-        Lint::SubjectNotCapitalized,
-        Lint::SubjectEndsWithPeriod,
-        Lint::BodyWiderThan72Characters,
-        Lint::NotConventionalCommit,
-        Lint::NotEmojiLog,
-    ];
-    /// The ones that are enabled by default
-    static ref DEFAULT_ENABLED_LINTS: [Lint; 4] = [
-        Lint::DuplicatedTrailers,
-        Lint::SubjectNotSeparateFromBody,
-        Lint::SubjectLongerThan72Characters,
-        Lint::BodyWiderThan72Characters,
-    ];
-}
+/// All the available lints
+static ALL_LINTS: LazyLock<[Lint; 11]> = LazyLock::new(|| [
+    Lint::DuplicatedTrailers,
+    Lint::PivotalTrackerIdMissing,
+    Lint::JiraIssueKeyMissing,
+    Lint::SubjectNotSeparateFromBody,
+    Lint::GitHubIdMissing,
+    Lint::SubjectLongerThan72Characters,
+    Lint::SubjectNotCapitalized,
+    Lint::SubjectEndsWithPeriod,
+    Lint::BodyWiderThan72Characters,
+    Lint::NotConventionalCommit,
+    Lint::NotEmojiLog,
+]);
+
+/// The ones that are enabled by default
+static DEFAULT_ENABLED_LINTS: LazyLock<[Lint; 4]> = LazyLock::new(|| [
+    Lint::DuplicatedTrailers,
+    Lint::SubjectNotSeparateFromBody,
+    Lint::SubjectLongerThan72Characters,
+    Lint::BodyWiderThan72Characters,
+]);
 
 impl Lint {
     /// Iterator over all the lints
