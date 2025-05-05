@@ -24,7 +24,6 @@
 //! ```
 
 #![warn(clippy::nursery)]
-#![feature(const_vec_string_slice)]
 #![deny(
     unused,
     nonstandard_style,
