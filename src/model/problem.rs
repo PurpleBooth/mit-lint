@@ -174,7 +174,7 @@ impl Problem {
     /// assert_eq!(problem.error(), "Error title".to_string())
     /// ```
     #[must_use]
-    pub fn error(&self) -> &str {
+    pub const fn error(&self) -> &str {
         &self.error
     }
 
@@ -200,7 +200,7 @@ impl Problem {
     /// assert_eq!(problem.tip(), "Some advice on how to fix it".to_string())
     /// ```
     #[must_use]
-    pub fn tip(&self) -> &str {
+    pub const fn tip(&self) -> &str {
         &self.tip
     }
 }
