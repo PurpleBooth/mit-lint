@@ -16,17 +16,17 @@ bench:
 
 # Lint it
 lint:
-	cargo +nightly fmt --all -- --check
-	cargo +nightly clippy --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo -A clippy::multiple_crate_versions
-	cargo +nightly check
-	cargo +nightly audit
+	cargo fmt --all -- --check
+	cargo clippy --all-features
+	cargo check
+	cargo audit
 
 # Format what can be formatted
 fmt:
-	cargo +nightly fix --allow-dirty --allow-staged
-	cargo +nightly clippy --allow-dirty --allow-staged --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo -D clippy::nursery -A clippy::multiple_crate_versions
-	cargo +nightly fmt --all
-	npx prettier --write **.yml
+	cargo fix --allow-dirty --allow-staged
+	cargo clippy --allow-dirty --allow-staged --fix --all-features
+	cargo fmt --all
+	npx prettier --write **.yml **.json
 
 # Clean the build directory
 clean:
