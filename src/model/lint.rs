@@ -517,7 +517,7 @@ impl TryFrom<&str> for Lint {
             .collect::<Vec<Self>>()
             .first()
             .copied()
-            .ok_or_else(|| Error::new_lint_not_found(from.into()))
+            .ok_or_else(|| Error::new_lint_not_found(from))
     }
 }
 
@@ -745,7 +745,7 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_lint_not_found(missing_lint: String) -> Self {
-        Self::LintNotFound(missing_lint.clone(), (0, missing_lint.len()))
+    fn new_lint_not_found(missing_lint: &str) -> Self {
+        Self::LintNotFound(missing_lint.to_string(), (0, missing_lint.len()))
     }
 }
