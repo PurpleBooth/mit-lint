@@ -10,8 +10,7 @@ use strum_macros::EnumIter;
 use thiserror::Error;
 
 use crate::{
-    checks,
-    model,
+    checks, model,
     model::{Lints, Problem},
 };
 
@@ -742,7 +741,7 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_lint_not_found(missing_lint: String) -> Self {
+    const fn new_lint_not_found(missing_lint: String) -> Self {
         let length = missing_lint.len();
         Self::LintNotFound(missing_lint, (0, length))
     }
