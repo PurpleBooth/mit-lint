@@ -1,6 +1,7 @@
-use std::{ops::Add, option::Option::None};
+use std::{ops::Add, option::Option::None, sync::LazyLock};
 
 use mit_commit::CommitMessage;
+use regex::Regex;
 
 use crate::model::{Code, Problem};
 
@@ -14,10 +15,8 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 /// Description of the problem
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
-lazy_static! {
-    static ref RE: regex::Regex =
-        regex::Regex::new(r"(?m)(^| )\[?[A-Z]{2,}-[0-9]+\]?(| |$)").unwrap();
-}
+static RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)(^| )\[?[A-Z]{2,}-[0-9]+\]?(| |$)").unwrap());
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&RE) {

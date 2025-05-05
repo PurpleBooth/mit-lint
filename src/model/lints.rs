@@ -1,6 +1,7 @@
 use std::{
     collections::{BTreeMap, BTreeSet},
     convert::TryFrom,
+    sync::LazyLock,
     vec::IntoIter,
 };
 
@@ -15,13 +16,11 @@ pub struct Lints {
     lints: BTreeSet<Lint>,
 }
 
-lazy_static! {
-    /// All the available lints
-    static ref AVAILABLE: Lints = {
-        let set = Lint::all_lints().collect();
-        Lints::new(set)
-    };
-}
+/// All the available lints
+static AVAILABLE: LazyLock<Lints> = LazyLock::new(|| {
+    let set = Lint::all_lints().collect();
+    Lints::new(set)
+});
 
 impl Lints {
     /// Create a new lint

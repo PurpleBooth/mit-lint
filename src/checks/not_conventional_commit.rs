@@ -1,6 +1,7 @@
-use std::option::Option::None;
+use std::{option::Option::None, sync::LazyLock};
 
 use mit_commit::CommitMessage;
+use regex::Regex;
 
 use crate::model::{Code, Problem};
 
@@ -23,9 +24,7 @@ You can fix it by following style
 /// Description of the problem
 pub const ERROR: &str = "Your commit message isn't in conventional style";
 
-lazy_static! {
-    static ref RE: regex::Regex = regex::Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap();
-}
+static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap());
 
 fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     let subject: String = commit_message.get_subject().into();
