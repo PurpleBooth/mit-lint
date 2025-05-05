@@ -745,8 +745,7 @@ pub enum Error {
 }
 
 impl Error {
-    const fn new_lint_not_found(missing_lint: String) -> Self {
-        let length = missing_lint.len();
-        Self::LintNotFound(missing_lint, (0, length))
+    fn new_lint_not_found(missing_lint: String) -> Self {
+        Self::LintNotFound(missing_lint, (0, missing_lint.len()))
     }
 }
