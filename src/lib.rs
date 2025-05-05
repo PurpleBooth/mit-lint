@@ -43,8 +43,6 @@
 )]
 #![allow(clippy::multiple_crate_versions)]
 
-extern crate lazy_static;
-
 #[cfg(test)]
 extern crate quickcheck;
 #[cfg(test)]
