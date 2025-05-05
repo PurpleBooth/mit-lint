@@ -23,16 +23,25 @@
 //! );
 //! ```
 
-#![warn(
-    rust_2018_idioms,
+#![warn(clippy::nursery)]
+#![deny(
     unused,
-    rust_2021_compatibility,
     nonstandard_style,
     future_incompatible,
     missing_copy_implementations,
     missing_debug_implementations,
-    missing_docs
+    missing_docs,
+    clippy::pedantic,
+    clippy::cargo,
+    clippy::complexity,
+    clippy::correctness,
+    clippy::pedantic,
+    clippy::perf,
+    clippy::style,
+    clippy::suspicious,
+    non_fmt_panics
 )]
+#![allow(clippy::multiple_crate_versions)]
 
 #[macro_use]
 extern crate lazy_static;
@@ -44,7 +53,7 @@ extern crate quickcheck;
 extern crate quickcheck_macros;
 
 pub use cmd::{async_lint, lint};
-pub use model::{Code, Error, Lint, LintError, Lints, Problem, CONFIG_KEY_PREFIX};
+pub use model::{CONFIG_KEY_PREFIX, Code, Error, Lint, LintError, Lints, Problem};
 
 mod checks;
 mod cmd;
@@ -55,7 +64,7 @@ mod test_readme {
     macro_rules! external_doc_test {
         ($x:expr) => {
             #[doc = $x]
-            extern "C" {}
+            unsafe extern "C" {}
         };
     }
 
