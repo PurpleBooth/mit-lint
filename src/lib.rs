@@ -44,8 +44,6 @@
 #![allow(clippy::multiple_crate_versions)]
 
 #[cfg(test)]
-extern crate quickcheck;
-#[cfg(test)]
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
