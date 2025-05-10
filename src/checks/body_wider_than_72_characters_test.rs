@@ -393,13 +393,25 @@ impl quickcheck::Arbitrary for CommitBody {
         let mut body = String::new();
         
         for _ in 0..line_count {
+            // Generate valid commit body lines with printable ASCII chars only
             let mut line = String::arbitrary(g)
-                .replace(|c: char| c == '\0' || c == '\r', "") // Remove invalid chars
-                .replace("\n", " "); // Replace newlines with spaces
-            
-            // Randomly make some lines longer than 72 chars
-            if bool::arbitrary(g) {
-                line.push_str(&"x".repeat(73));
+                .replace(|c: char| !c.is_ascii_graphic() && c != ' ', "") // Remove non-printables
+                .replace("\n", " ")
+                .trim() // Remove leading/trailing whitespace
+                .to_string();
+
+            // Ensure at least one line exceeds limit if we're supposed to fail
+            if bool::arbitrary(g) || line.is_empty() {
+                // Add overlong text at start/middle/end randomly
+                let position = g.choose(&["start", "middle", "end"]).unwrap();
+                let padding = " ".repeat(g.choose(&0..=72).unwrap());
+                
+                match position.as_str() {
+                    "start" => line = format!("{}{}", "x".repeat(73), padding),
+                    "end" => line = format!("{}{}", padding, "x".repeat(73)),
+                    _ => line = format!("{}{}{}", 
+                        padding, "x".repeat(73), padding),
+                }
             }
             
             body.push_str(&line);
