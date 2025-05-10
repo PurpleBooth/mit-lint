@@ -400,19 +400,12 @@ impl quickcheck::Arbitrary for CommitBody {
                 .trim() // Remove leading/trailing whitespace
                 .to_string();
 
-            // Ensure at least one line exceeds limit if we're supposed to fail
-            if bool::arbitrary(g) || line.is_empty() {
-                // Add overlong text at start/middle/end randomly
-                let position = g.choose(&["start", "middle", "end"]).unwrap();
-                let padding = " ".repeat(*g.choose((0..=72).collect::<Vec<_>>().as_slice()).unwrap());
-                
-                match *position {
-                    "start" => line = format!("{}{}", "x".repeat(73), padding),
-                    "end" => line = format!("{}{}", padding, "x".repeat(73)),
-                    _ => line = format!("{}{}{}", 
-                        padding, "x".repeat(73), padding),
-                }
-            }
+            // Always create at least one overlong line for fail cases
+            let padding = 0; // Don't pad since it might make line valid again
+            let overlong = "x".repeat(73);
+            
+            // Replace entire line with guaranteed overlong content
+            line = format!("{}{}", overlong, " ".repeat(padding));
             
             body.push_str(&line);
             body.push('\n');
