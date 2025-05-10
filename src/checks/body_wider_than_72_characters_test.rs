@@ -393,14 +393,7 @@ impl quickcheck::Arbitrary for CommitBody {
         let mut body = String::new();
         
         for _ in 0..line_count {
-            // Generate valid commit body lines with printable ASCII chars only
-            let mut line = String::arbitrary(g)
-                .replace(|c: char| !c.is_ascii_graphic() && c != ' ', "") // Remove non-printables
-                .replace("\n", " ")
-                .trim() // Remove leading/trailing whitespace
-                .to_string();
-
-            // Always create at least one overlong line for fail cases
+            // Create guaranteed overlong line for testing failure cases
             let padding = 0; // Don't pad since it might make line valid again
             let overlong = "x".repeat(73);
             
