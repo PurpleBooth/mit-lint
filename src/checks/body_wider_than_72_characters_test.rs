@@ -401,7 +401,6 @@ fn fail_check(commit: String) -> TestResult {
     // Normalize input using same logic as success_check
     let commit = String::from_utf8_lossy(&commit.into_bytes())
         .into_owned()
-        .replace('\0', " ")
         .chars()
         .filter(|c| !c.is_control() || *c == '\n')
         .collect::<String>();
