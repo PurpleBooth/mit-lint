@@ -11,7 +11,7 @@ readme = "README.md"
 repository = "https://github.com/PurpleBooth/mit-lint"
 
 [dependencies]
-ahash = { version = "0.7.7", default-features = false, features = [] }
+ahash = { version = "0.7.7, ||, ^0", default-features = false, features = [] }
 miette = { version = "7.2.0", features = ["fancy"] }
 thiserror = "2.0.11"
 mit-commit = "3.2.0"
