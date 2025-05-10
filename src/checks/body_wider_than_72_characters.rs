@@ -22,7 +22,7 @@ fn has_problem(commit: &CommitMessage<'_>) -> bool {
         .get_body()
         .to_string()
         .lines()
-        .any(|line| line.len() > LIMIT)
+        .any(|line| line.chars().count() > LIMIT)
 }
 
 const LIMIT: usize = 72;
