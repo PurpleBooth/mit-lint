@@ -16,10 +16,15 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 static RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?m)^(?!\s*#).*\[?([A-Z]{2,}-[0-9]+)\]?").unwrap());
+    LazyLock::new(|| Regex::new(r"(?m)^[^#]*\[?([A-Z]{2,}-[0-9]+)\]?").unwrap());
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    if commit_message.matches_pattern(&RE) {
+    let comment_char = commit_message.get_comment_char();
+    let has_jira_key = commit_message.clone().into_iter()
+        .skip_while(|line| line.starts_with(comment_char))
+        .any(|line| RE.is_match(line));
+        
+    if has_jira_key {
         None
     } else {
         let commit_text = String::from(commit_message.clone());
