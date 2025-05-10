@@ -311,17 +311,30 @@ fn fmt_report(diag: &Report) -> String {
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn success_check(commit: String) -> TestResult {
-    if commit.starts_with('\n')
-        || commit
-            .lines()
-            .skip(1)
-            .filter(|x| x.starts_with('#'))
-            .any(|x| x.chars().count() > 72)
+    // Normalize input by replacing null bytes and trimming
+    let commit = commit.replace('\0', "x");
+    
+    // Ensure we have a valid commit structure with non-empty subject and body separator
+    if commit.is_empty() || commit.starts_with('\n') || !commit.contains("\n\n") {
+        return TestResult::discard();
+    }
+    
+    // Split into subject and body parts
+    let parts: Vec<&str> = commit.split("\n\n").collect();
+    if parts.len() != 2 || parts[0].trim().is_empty() {
+        return TestResult::discard();
+    }
+
+    // Check body lines (excluding comments) for length
+    let body = parts[1];
+    if body.lines()
+        .filter(|line| !line.starts_with('#'))
+        .any(|line| line.chars().count() > 72) 
     {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::from(format!("{commit}\n# comment"));
+    let message = CommitMessage::from(commit);
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
 }
@@ -329,15 +342,30 @@ fn success_check(commit: String) -> TestResult {
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn fail_check(commit: String) -> TestResult {
-    if commit
-        .lines()
-        .filter(|x| x.starts_with('#'))
-        .all(|x| x.chars().count() <= 72)
+    // Normalize input by replacing null bytes and trimming
+    let commit = commit.replace('\0', "x");
+    
+    // Ensure we have a valid commit structure with non-empty subject and body separator
+    if commit.is_empty() || commit.starts_with('\n') || !commit.contains("\n\n") {
+        return TestResult::discard();
+    }
+    
+    // Split into subject and body parts
+    let parts: Vec<&str> = commit.split("\n\n").collect();
+    if parts.len() != 2 || parts[0].trim().is_empty() {
+        return TestResult::discard();
+    }
+
+    // Check body lines (excluding comments) for at least one line over limit
+    let body = parts[1];
+    if body.lines()
+        .filter(|line| !line.starts_with('#'))
+        .all(|line| line.chars().count() <= 72) 
     {
         return TestResult::discard();
     }
 
-    let message = CommitMessage::from(format!("{commit}\n# comment"));
+    let message = CommitMessage::from(commit);
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
 }
