@@ -205,10 +205,10 @@ impl quickcheck::Arbitrary for CommitWithoutJira {
             .replace("PROJ", "");
 
         let mut body = String::new();
-        for _ in 0..(usize::arbitrary(g) % 5 + 1) {
+        for _ in 0..=(usize::arbitrary(g) % 5) {
             let word = String::arbitrary(g)
                 .replace(|c: char| c.is_ascii_uppercase() || c.is_ascii_digit(), "")
-                .replace("-", "");
+                .replace('-', "");
             body.push_str(&word);
             body.push(' ');
         }
