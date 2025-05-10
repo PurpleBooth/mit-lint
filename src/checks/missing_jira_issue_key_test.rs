@@ -13,7 +13,14 @@ use crate::model::{Code, Problem};
 fn ignores_jira_keys_in_comments() {
     test_has_missing_jira_issue_key(
         "An example commit\n\n# JRA-123 in comment",
-        None,
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::JiraIssueKeyMissing,
+            &"An example commit\n\n# JRA-123 in comment".into(),
+            Some(vec![("No JIRA Issue Key".to_string(), 19, 19)]),
+            Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
+        )).as_ref(),
     );
 }
 
