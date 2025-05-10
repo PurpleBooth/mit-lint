@@ -316,10 +316,7 @@ fn success_check(input: Vec<u8>) -> TestResult {
     let utf8_cleaned = String::from_utf8_lossy(&input).into_owned();
 
     // Ensure we have a valid commit structure with non-empty subject and body separator
-    if utf8_cleaned.is_empty()
-        || utf8_cleaned.starts_with('\n')
-        || !utf8_cleaned.contains("\n\n")
-    {
+    if utf8_cleaned.is_empty() || utf8_cleaned.starts_with('\n') || !utf8_cleaned.contains("\n\n") {
         return TestResult::discard();
     }
 
@@ -405,7 +402,7 @@ fn fail_check(commit: String) -> TestResult {
     if body
         .lines()
         .filter(|line| !line.starts_with('#'))
-        .all(|line| line.chars().count() <= 72) 
+        .all(|line| line.chars().count() <= 72)
     {
         return TestResult::discard();
     }

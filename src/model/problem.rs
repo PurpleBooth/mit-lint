@@ -34,6 +34,12 @@ impl Diagnostic for Problem {
         Some(Box::new(&self.tip))
     }
 
+    fn url<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+        self.url
+            .as_deref()
+            .map(|x| Box::new(x) as Box<dyn Display + 'a>)
+    }
+
     fn source_code(&self) -> Option<&dyn SourceCode> {
         if self.commit_message.is_empty() {
             None
@@ -54,12 +60,6 @@ impl Diagnostic for Problem {
                 }),
             ) as Box<dyn Iterator<Item = LabeledSpan> + '_>
         })
-    }
-
-    fn url<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
-        self.url
-            .as_deref()
-            .map(|x| Box::new(x) as Box<dyn Display + 'a>)
     }
 }
 

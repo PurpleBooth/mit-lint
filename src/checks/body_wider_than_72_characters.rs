@@ -71,12 +71,8 @@ fn label_line_over_limit(
 ) -> (String, ByteOffset, usize) {
     let char_count = line.chars().count();
     // Calculate character-based position accounting for multi-byte characters
-    let char_offset = line
-        .chars()
-        .take(LIMIT)
-        .map(|c| c.len_utf8())
-        .sum::<usize>();
-        
+    let char_offset = line.chars().take(LIMIT).map(char::len_utf8).sum::<usize>();
+
     (
         "Too long".to_string(),
         SourceOffset::from_location(commit_text, line_index + 1, char_offset + 1).offset(),
