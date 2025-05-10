@@ -365,6 +365,23 @@ fn success_check(input: Vec<u8>) -> TestResult {
 }
 
 #[test]
+fn handles_unicode_characters_correctly() {
+    // This string has 73 Unicode characters but 146 bytes
+    let message = "Subject\n\n\u{1f600}".repeat(73);
+    test_body_wider_than_72_characters(
+        &message,
+        Some(Problem::new(
+            ERROR.into(),
+            HELP_MESSAGE.into(),
+            Code::BodyWiderThan72Characters,
+            &message.into(),
+            Some(vec![("Too long".to_string(), 81, 1)]),
+            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+        )).as_ref(),
+    );
+}
+
+#[test]
 fn handles_null_bytes_correctly() {
     let message = "\0\n\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     let expected_problem = Problem::new(
