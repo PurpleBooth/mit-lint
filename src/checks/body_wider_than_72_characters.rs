@@ -64,6 +64,11 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         ))
 }
 
+fn is_line_over_limit(line: &str, comment_char: Option<&str>) -> bool {
+    let is_comment = comment_char.map_or(false, |cc| line.starts_with(cc));
+    !is_comment && line.len() > LIMIT
+}
+
 fn label_line_over_limit(
     commit_text: String,
     line_index: usize,
