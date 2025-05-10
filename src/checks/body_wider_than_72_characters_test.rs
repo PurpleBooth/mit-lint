@@ -398,7 +398,7 @@ impl quickcheck::Arbitrary for CommitBody {
             let overlong = "x".repeat(73);
             
             // Replace entire line with guaranteed overlong content
-            line = format!("{}{}", overlong, " ".repeat(padding));
+            let line = format!("{}{}", overlong, " ".repeat(padding));
             
             body.push_str(&line);
             body.push('\n');
