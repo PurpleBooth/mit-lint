@@ -20,7 +20,7 @@ static RE: LazyLock<Regex> =
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     let comment_char = commit_message.get_comment_char();
-    let has_jira_key = commit_message.clone().into_iter()
+    let has_jira_key = commit_message.clone().to_string().lines()
         .skip_while(|line| line.starts_with(comment_char))
         .any(|line| RE.is_match(line));
         
