@@ -314,21 +314,24 @@ fn success_check(input: Vec<u8>) -> TestResult {
     // Clean and normalize test input through several transformations:
     // 1. Convert raw bytes to valid UTF-8, replacing invalid sequences
     let utf8_cleaned = String::from_utf8_lossy(&input).into_owned();
-    
+
     // 2. Replace any null bytes with spaces
     let nulls_replaced = utf8_cleaned.replace('\0', " ");
-    
+
     // 3. Filter out control characters except newlines
     let control_chars_filtered = nulls_replaced
         .chars()
         .filter(|c| !c.is_control() || *c == '\n')
         .collect::<String>();
-    
+
     // Ensure we have a valid commit structure with non-empty subject and body separator
-    if control_chars_filtered.is_empty() || control_chars_filtered.starts_with('\n') || !control_chars_filtered.contains("\n\n") {
+    if control_chars_filtered.is_empty()
+        || control_chars_filtered.starts_with('\n')
+        || !control_chars_filtered.contains("\n\n")
+    {
         return TestResult::discard();
     }
-    
+
     // Split into subject and body parts
     let parts: Vec<&str> = control_chars_filtered.split("\n\n").collect();
     if parts.len() != 2 || parts[0].trim().is_empty() {
@@ -338,13 +341,13 @@ fn success_check(input: Vec<u8>) -> TestResult {
     // Check body lines (excluding comments) for length
     let body = parts[1];
     let mut lines_valid = true;
-    
+
     for line in body.split('\n') {
         // Skip comment lines
         if line.starts_with('#') {
             continue;
         }
-        
+
         // Check actual byte length like the linter does
         if line.len() > 72 {
             lines_valid = false;
@@ -379,7 +382,8 @@ fn handles_null_bytes_correctly() {
 #[quickcheck]
 fn fail_check(commit: String) -> TestResult {
     // Normalize input using same logic as success_check
-    let commit = String::from_utf8_lossy(&commit.into_bytes()).into_owned()
+    let commit = String::from_utf8_lossy(&commit.into_bytes())
+        .into_owned()
         .replace('\0', " ")
         .chars()
         .filter(|c| !c.is_control() || *c == '\n')
@@ -389,7 +393,7 @@ fn fail_check(commit: String) -> TestResult {
     if commit.is_empty() || commit.starts_with('\n') || !commit.contains("\n\n") {
         return TestResult::discard();
     }
-    
+
     // Split into subject and body parts
     let parts: Vec<&str> = commit.split("\n\n").collect();
     if parts.len() != 2 || parts[0].trim().is_empty() {
@@ -398,9 +402,10 @@ fn fail_check(commit: String) -> TestResult {
 
     // Check body lines (excluding comments) for at least one line over limit
     let body = parts[1];
-    if body.lines()
+    if body
+        .lines()
         .filter(|line| !line.starts_with('#'))
-        .all(|line| line.len() <= 72) 
+        .all(|line| line.len() <= 72)
     {
         return TestResult::discard();
     }
