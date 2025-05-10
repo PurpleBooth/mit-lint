@@ -91,7 +91,7 @@ fn longer_than_72_characters() {
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.clone().into(),
-            Some(vec![("Too long".to_string(), 81, 1)]), // Line starts at 81 (Subject + 2 newlines)
+            Some(vec![("Too long".to_string(), 81, 1)]), // Correct offset after 8 bytes for "Subject\n\n"
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
         )).as_ref(),
     );
