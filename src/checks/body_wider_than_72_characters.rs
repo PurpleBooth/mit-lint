@@ -66,12 +66,13 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
 
 fn label_line_over_limit(
     commit_text: String,
-    line_index: usize,
+    line_index: usize, 
     line: &str,
 ) -> (String, ByteOffset, usize) {
+    let char_count = line.chars().count();
     (
         "Too long".to_string(),
         SourceOffset::from_location(commit_text, line_index + 1, LIMIT.add(1)).offset(),
-        line.len() - (LIMIT),
+        char_count.saturating_sub(LIMIT),
     )
 }

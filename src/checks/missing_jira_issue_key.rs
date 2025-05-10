@@ -16,7 +16,7 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 static RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?m)^[^#]*\[?([A-Z]{2,}-[0-9]+)\]?").unwrap());
+    LazyLock::new(|| Regex::new(r"(?mi)^\s*(\[?\b[A-Z]{2,}-\d+\b\]?)").unwrap());
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     let comment_char = commit_message.get_comment_char();
@@ -41,7 +41,7 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
             Some(vec![(
                 "No JIRA Issue Key".to_string(),
                 last_line_location,
-                commit_text.len().saturating_sub(last_line_location+1),
+                commit_text.chars().count().saturating_sub(last_line_location + 1),
             )]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".to_string()),
         ))
