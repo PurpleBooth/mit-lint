@@ -404,9 +404,9 @@ impl quickcheck::Arbitrary for CommitBody {
             if bool::arbitrary(g) || line.is_empty() {
                 // Add overlong text at start/middle/end randomly
                 let position = g.choose(&["start", "middle", "end"]).unwrap();
-                let padding = " ".repeat(g.choose(&0..=72).unwrap());
+                let padding = " ".repeat(*g.choose(&(0..=72).collect::<Vec<_>>()).unwrap());
                 
-                match position.as_str() {
+                match position {
                     "start" => line = format!("{}{}", "x".repeat(73), padding),
                     "end" => line = format!("{}{}", padding, "x".repeat(73)),
                     _ => line = format!("{}{}{}", 
