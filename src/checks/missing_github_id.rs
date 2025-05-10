@@ -23,9 +23,9 @@ Be careful just putting '#642' on a line by itself, as '#' is the default commen
 /// Description of the problem
 pub const ERROR: &str = "Your commit message is missing a GitHub ID";
 
-static RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9-]+#|GH-|#)[0-9]+( |$)")
-        .unwrap());
+static RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9-]+#|GH-|#)[0-9]+( |$)").unwrap()
+});
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&RE) {

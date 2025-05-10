@@ -24,7 +24,8 @@ You can fix it by following style
 /// Description of the problem
 pub const ERROR: &str = "Your commit message isn't in conventional style";
 
-static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap());
+static RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap());
 
 fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     let subject: String = commit_message.get_subject().into();

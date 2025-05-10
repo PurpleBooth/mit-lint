@@ -28,10 +28,10 @@ This will address [#12345884]";
 /// Description of the problem
 pub const ERROR: &str = "Your commit message is missing a Pivotal Tracker ID";
 
-static RE: LazyLock<Regex> = LazyLock::new(|| 
+static RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?i)\[(((finish|fix)(ed|es)?|complete[ds]?|deliver(s|ed)?) )?#\d+([, ]#\d+)*]")
-    .unwrap()
-);
+        .unwrap()
+});
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&RE) {

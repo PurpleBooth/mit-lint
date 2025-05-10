@@ -7,3 +7,4 @@ mutants.out*
 /.aider.conf.yml
 /.aider.input.history
 /.aider.*
+.aider*

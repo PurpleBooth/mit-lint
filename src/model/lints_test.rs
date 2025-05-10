@@ -8,16 +8,11 @@ use quickcheck::TestResult;
 
 use crate::model::{
     lint::Lint::{
-        BodyWiderThan72Characters,
-        DuplicatedTrailers,
-        JiraIssueKeyMissing,
-        PivotalTrackerIdMissing,
-        SubjectLongerThan72Characters,
-        SubjectNotSeparateFromBody,
+        BodyWiderThan72Characters, DuplicatedTrailers, JiraIssueKeyMissing,
+        PivotalTrackerIdMissing, SubjectLongerThan72Characters, SubjectNotSeparateFromBody,
     },
     lints::Error,
-    Lint,
-    Lints,
+    Lint, Lints,
 };
 
 #[allow(clippy::needless_pass_by_value)]
