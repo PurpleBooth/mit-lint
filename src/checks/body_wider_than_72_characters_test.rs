@@ -406,7 +406,7 @@ impl quickcheck::Arbitrary for CommitBody {
                 let position = g.choose(&["start", "middle", "end"]).unwrap();
                 let padding = " ".repeat(*g.choose((0..=72).collect::<Vec<_>>().as_slice()).unwrap());
                 
-                match position {
+                match *position {
                     "start" => line = format!("{}{}", "x".repeat(73), padding),
                     "end" => line = format!("{}{}", padding, "x".repeat(73)),
                     _ => line = format!("{}{}{}", 
