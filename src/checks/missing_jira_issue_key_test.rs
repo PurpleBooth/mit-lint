@@ -18,7 +18,7 @@ fn ignores_jira_keys_in_comments() {
             HELP_MESSAGE.into(),
             Code::JiraIssueKeyMissing,
             &"An example commit\n\n# JRA-123 in comment".into(),
-            Some(vec![("No JIRA Issue Key".to_string(), 19, 25)]),
+            Some(vec![("No JIRA Issue Key".to_string(), 19, 19)]),
             Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
         )).as_ref(),
     );
