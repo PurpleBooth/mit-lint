@@ -1,4 +1,4 @@
-use std::{ops::Add, option::Option::None};
+use std::option::Option::None;
 
 use miette::{ByteOffset, SourceOffset};
 use mit_commit::CommitMessage;
