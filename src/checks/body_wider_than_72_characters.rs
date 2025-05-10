@@ -47,8 +47,8 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
                 .as_ref()
                 .is_none_or(|comment_char| !line.starts_with(comment_char))
         })
-        .filter(|(line_index, _)| *line_index < scissors_start_line)
-        .filter(|(line_index, line)| line_index > &0 && line.len() > LIMIT)
+        .filter(|(line_index, _)| *line_index <= scissors_start_line)
+        .filter(|(_, line)| line.len() > LIMIT)
         .map(|(line_index, line)| label_line_over_limit(commit_text.clone(), line_index, line))
         .collect();
 
