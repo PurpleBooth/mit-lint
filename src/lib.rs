@@ -48,7 +48,7 @@
 extern crate quickcheck_macros;
 
 pub use cmd::{async_lint, lint};
-pub use model::{CONFIG_KEY_PREFIX, Code, Error, Lint, LintError, Lints, Problem};
+pub use model::{Code, Error, Lint, LintError, Lints, Problem, CONFIG_KEY_PREFIX};
 
 mod checks;
 mod cmd;
