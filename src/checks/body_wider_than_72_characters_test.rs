@@ -350,7 +350,6 @@ fn success_check(input: Vec<u8>) -> TestResult {
         return TestResult::discard();
     }
 
-    // Use the cleaned UTF-8 string
     let message = CommitMessage::from(utf8_cleaned);
     let result = lint(&message);
     TestResult::from_bool(result.is_none())
