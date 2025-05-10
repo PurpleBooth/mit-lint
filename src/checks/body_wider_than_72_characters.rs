@@ -18,12 +18,7 @@ pub const HELP_MESSAGE: &str = "It's important to keep the body of the commit na
 pub const ERROR: &str = "Your commit has a body wider than 72 characters";
 
 fn has_problem(commit: &CommitMessage<'_>) -> bool {
-    commit
-        .get_body()
-        .iter()
-        .map(Clone::clone)
-        .map(String::from)
-        .any(|body| body.lines().any(|line| line.chars().count() > LIMIT))
+    commit.get_body().to_string().lines().any(|line| line.len() > LIMIT)
 }
 
 const LIMIT: usize = 72;
