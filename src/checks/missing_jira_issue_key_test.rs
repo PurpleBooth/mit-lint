@@ -203,7 +203,7 @@ impl quickcheck::Arbitrary for CommitWithoutJira {
             .replace(|c: char| c.is_ascii_uppercase() || c == '-', "")
             .replace("JRA", "")
             .replace("PROJ", "");
-        
+
         let mut body = String::new();
         for _ in 0..(usize::arbitrary(g) % 5 + 1) {
             let word = String::arbitrary(g)

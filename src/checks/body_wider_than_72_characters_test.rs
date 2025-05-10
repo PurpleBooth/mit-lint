@@ -391,19 +391,19 @@ impl quickcheck::Arbitrary for CommitBody {
         // Generate body lines with some lines over 72 chars but no invalid characters
         let line_count = usize::arbitrary(g) % 20 + 1;
         let mut body = String::new();
-        
+
         for _ in 0..line_count {
             // Create guaranteed overlong line for testing failure cases
             let padding = 0; // Don't pad since it might make line valid again
             let overlong = "x".repeat(73);
-            
+
             // Replace entire line with guaranteed overlong content
             let line = format!("{}{}", overlong, " ".repeat(padding));
-            
+
             body.push_str(&line);
             body.push('\n');
         }
-        
+
         // Build full commit message with valid structure
         CommitBody(format!("Valid subject\n\n{}", body.trim_end()))
     }
