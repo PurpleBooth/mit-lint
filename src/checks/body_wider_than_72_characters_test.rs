@@ -366,8 +366,8 @@ fn success_check(input: Vec<u8>) -> TestResult {
 
 #[test]
 fn handles_unicode_characters_correctly() {
-    // This string has 73 Unicode characters but 146 bytes
-    let message = "Subject\n\n\u{1f600}".repeat(73);
+    // This string has 73 Unicode characters in a single line (146 bytes)
+    let message = format!("Subject\n\n{}", "\u{1f600}".repeat(73));
     test_body_wider_than_72_characters(
         &message,
         Some(Problem::new(
