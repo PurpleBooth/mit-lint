@@ -117,8 +117,8 @@ impl Lints {
 }
 
 impl IntoIterator for Lints {
-    type IntoIter = IntoIter<Lint>;
     type Item = Lint;
+    type IntoIter = IntoIter<Lint>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.lints.into_iter().collect::<Vec<_>>().into_iter()
