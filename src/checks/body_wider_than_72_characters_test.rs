@@ -400,12 +400,12 @@ fn fail_check(commit: String) -> TestResult {
         return TestResult::discard();
     }
 
-    // Check body lines (excluding comments) for at least one line over limit
+    // Check body lines (excluding comments) for at least one line over CHARACTER limit
     let body = parts[1];
     if body
         .lines()
         .filter(|line| !line.starts_with('#'))
-        .all(|line| line.len() <= 72)
+        .all(|line| line.chars().count() <= 72) 
     {
         return TestResult::discard();
     }
