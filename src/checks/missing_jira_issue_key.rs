@@ -21,7 +21,7 @@ static RE: LazyLock<Regex> =
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     let comment_char = commit_message.get_comment_char();
     let has_jira_key = String::from(commit_message.clone()).lines()
-        .filter(|line| line.trim_start().starts_with(comment_char.unwrap_or(' ')) == false)
+        .filter(|line| line.trim_start().trim_start_matches(char::is_whitespace).starts_with(comment_char.unwrap_or('#')) == false)
         .any(|line| RE.is_match(line));
         
     if has_jira_key {
