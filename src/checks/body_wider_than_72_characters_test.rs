@@ -389,7 +389,7 @@ fn handles_null_bytes_correctly() {
         HELP_MESSAGE.into(),
         Code::BodyWiderThan72Characters,
         &CommitMessage::from(message),
-        Some(vec![("Too long".to_string(), 75, 1)]),
+        Some(vec![("Too long".to_string(), 81, 1)]),
         Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
     );
     test_body_wider_than_72_characters(message, Some(&expected_problem));
