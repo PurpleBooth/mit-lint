@@ -155,7 +155,7 @@ fn last_line_included() {
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
             &message.clone().into(),
-            Some(vec![("Too long".to_string(), 75, 1)]),
+            Some(vec![("Too long".to_string(), 81, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
         )).as_ref(),
     );
