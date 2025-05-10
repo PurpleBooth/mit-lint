@@ -3,9 +3,7 @@
   "extends": ["local>PurpleBooth/renovate-config"],
   "packageRules": [
     {
-      "matchDepTypes": [
-        "dependencies"
-      ],
+      "matchDepTypes": ["dependencies"],
       "rangeStrategy": "widen"
     }
   ]
