@@ -383,13 +383,38 @@ fn handles_null_bytes_correctly() {
     test_body_wider_than_72_characters(message, Some(&expected_problem));
 }
 
+#[derive(Debug, Clone)]
+struct CommitBody(String);
+
+impl quickcheck::Arbitrary for CommitBody {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        // Generate body lines with some lines over 72 chars but no invalid characters
+        let line_count = usize::arbitrary(g) % 20 + 1;
+        let mut body = String::new();
+        
+        for _ in 0..line_count {
+            let mut line = String::arbitrary(g)
+                .replace(|c: char| c == '\0' || c == '\r', "") // Remove invalid chars
+                .replace("\n", " "); // Replace newlines with spaces
+            
+            // Randomly make some lines longer than 72 chars
+            if bool::arbitrary(g) {
+                line.push_str(&"x".repeat(73));
+            }
+            
+            body.push_str(&line);
+            body.push('\n');
+        }
+        
+        // Build full commit message with valid structure
+        CommitBody(format!("Valid subject\n\n{}", body.trim_end()))
+    }
+}
+
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
-fn fail_check(commit: String) -> TestResult {
-    // Ensure we have a valid commit structure with non-empty subject and body separator
-    if commit.is_empty() || commit.starts_with('\n') || !commit.contains("\n\n") {
-        return TestResult::discard();
-    }
+fn fail_check(commit: CommitBody) -> TestResult {
+    let commit = commit.0;
 
     // Split into subject and body parts
     let parts: Vec<&str> = commit.split("\n\n").collect();
