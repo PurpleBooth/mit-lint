@@ -43,8 +43,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         .lines()
         .enumerate()
         .filter(|(line_index, line)| {
-            *line_index <= scissors_start_line && 
-            is_line_over_limit(line, comment_char.as_deref())
+            *line_index <= scissors_start_line && is_line_over_limit(line, comment_char.as_deref())
         })
         .map(|(line_index, line)| label_line_over_limit(commit_text.clone(), line_index, line))
         .collect();
@@ -62,7 +61,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
 }
 
 fn is_line_over_limit(line: &str, comment_char: Option<&str>) -> bool {
-    let is_comment = comment_char.map_or(false, |cc| line.starts_with(cc));
+    let is_comment = comment_char.is_some_and(|cc| line.starts_with(cc));
     !is_comment && line.len() > LIMIT
 }
 
