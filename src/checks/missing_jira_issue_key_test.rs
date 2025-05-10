@@ -193,10 +193,34 @@ fn test_has_missing_jira_issue_key(message: &str, expected: Option<&Problem>) {
     );
 }
 
+#[derive(Debug, Clone)]
+struct CommitWithoutJira(String);
+
+impl quickcheck::Arbitrary for CommitWithoutJira {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        // Generate a commit message guaranteed to lack JIRA issue keys
+        let subject = String::arbitrary(g)
+            .replace(|c: char| c.is_ascii_uppercase() || c == '-', "")
+            .replace("JRA", "")
+            .replace("PROJ", "");
+        
+        let mut body = String::new();
+        for _ in 0..(usize::arbitrary(g) % 5 + 1) {
+            let word = String::arbitrary(g)
+                .replace(|c: char| c.is_ascii_uppercase() || c.is_ascii_digit(), "")
+                .replace("-", "");
+            body.push_str(&word);
+            body.push(' ');
+        }
+
+        CommitWithoutJira(format!("{subject}\n\n{body}"))
+    }
+}
+
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
-fn fail_check(commit: String) -> TestResult {
-    let message = CommitMessage::from(commit);
+fn fail_check(commit: CommitWithoutJira) -> TestResult {
+    let message = CommitMessage::from(commit.0);
     let result = lint(&message);
     TestResult::from_bool(result.is_some())
 }
