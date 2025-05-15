@@ -11,7 +11,7 @@ post_bump_hooks = [
     "git commit --am --no-e",
     "git tag -f v{{version}} -m 'chore(version): v{{version}}'",
     "git push",
-    "git push origin v{{version}}",
+    "git push codeberg v{{version}}",
 ]
 pre_package_bump_hooks = []
 post_package_bump_hooks = []
