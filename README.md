@@ -4,7 +4,7 @@ Lint commit messages
 
 ## Example
 
-``` rust
+```rust
 use mit_commit::CommitMessage;
 use mit_lint::{Code, lint, Problem, Lints, Lint};
 
@@ -27,3 +27,7 @@ assert_eq!(
 ## Docs
 
 Read more at [Docs.rs](https://docs.rs/mit-lint/)
+
+## Source
+
+The source code is available on [Codeberg](https://codeberg.org/PurpleBooth/mit-lint)

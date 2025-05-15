@@ -8,7 +8,7 @@ description = "Lints for commits parsed with mit-commit."
 categories = ["development-tools"]
 keywords = ["git", "commit", "lints"]
 readme = "README.md"
-repository = "https://github.com/PurpleBooth/mit-lint"
+repository = "https://codeberg.org/PurpleBooth/mit-lint"
 
 [dependencies]
 miette = { version = "7.6.0", features = ["fancy"] }
