@@ -72,7 +72,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         None
     } else {
         // Use the commit message directly without cloning
-        let commit_message = commit.to_string();
+        let commit_message = String::from(commit);
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
             ERROR.into(),
