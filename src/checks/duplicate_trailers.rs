@@ -31,7 +31,7 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
         .filter_map(|(trailer, count)| {
             let key = trailer.get_key();
 
-            if count > 1 && TRAILERS_TO_CHECK_FOR_DUPLICATES.contains(&key) {
+            if count > 1 && TRAILERS_TO_CHECK_FOR_DUPLICATES.contains(&key.as_str()) {
                 Some(key.to_string())
             } else {
                 None
