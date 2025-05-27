@@ -1,14 +1,3 @@
-// Merge this with body_wider_than_72_characters.rs AI!
-#![allow(clippy::wildcard_imports)]
-
-use std::option::Option::None;
-
-use miette::{GraphicalReportHandler, GraphicalTheme, Report};
-use mit_commit::CommitMessage;
-use quickcheck::TestResult;
-
-use super::body_wider_than_72_characters::{ERROR, HELP_MESSAGE, lint};
-use crate::{Problem, model::Code};
 
 #[test]
 fn narrower_than_72_characters() {
