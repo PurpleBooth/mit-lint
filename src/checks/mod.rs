@@ -1,7 +1,13 @@
 pub mod body_wider_than_72_characters;
 pub mod duplicate_trailers;
+#[cfg(test)]
+mod duplicate_trailers_test;
 pub mod missing_github_id;
+#[cfg(test)]
+mod missing_github_id_test;
 pub mod missing_jira_issue_key;
+#[cfg(test)]
+mod missing_jira_issue_key_test;
 pub mod missing_pivotal_tracker_id;
 #[cfg(test)]
 mod missing_pivotal_tracker_id_test;
@@ -23,12 +29,3 @@ mod subject_not_capitalized_test;
 pub mod subject_not_separate_from_body;
 #[cfg(test)]
 mod subject_not_separate_from_body_test;
-
-#[cfg(test)]
-mod body_wider_than_72_characters_test;
-#[cfg(test)]
-mod duplicate_trailers_test;
-#[cfg(test)]
-mod missing_github_id_test;
-#[cfg(test)]
-mod missing_jira_issue_key_test;
