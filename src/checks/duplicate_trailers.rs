@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ops::Add, option::Option::None};
+use std::{collections::BTreeMap, option::Option::None};
 
 use mit_commit::{CommitMessage, Trailer};
 
@@ -21,14 +21,10 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
         .iter()
         .fold(
             BTreeMap::new(),
-            |acc: BTreeMap<&Trailer<'_>, usize>, trailer| {
-                let mut next = acc.clone();
-                match acc.get(trailer) {
-                    Some(count) => next.insert(trailer, count.add(1)),
-                    None => next.insert(trailer, 1),
-                };
-
-                next
+            |mut acc: BTreeMap<&Trailer<'_>, usize>, trailer| {
+                let count = acc.get(trailer).map_or(1, |c| c + 1);
+                acc.insert(trailer, count);
+                acc
             },
         )
         .into_iter()
@@ -44,6 +40,33 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
         .collect::<Vec<_>>()
 }
 
+/// Checks if the commit message contains duplicated trailers
+///
+/// # Arguments
+///
+/// * `commit` - The commit message to check
+///
+/// # Returns
+///
+/// * `Some(Problem)` - If the commit message contains duplicated trailers
+/// * `None` - If the commit message does not contain duplicated trailers
+///
+/// # Examples
+///
+/// ```rust
+/// use mit_commit::CommitMessage;
+/// use mit_lint::checks::duplicate_trailers::lint;
+///
+/// // This should pass
+/// let passing = CommitMessage::from("Subject\n\nBody\n\nSigned-off-by: Someone <someone@example.com>");
+/// assert!(lint(&passing).is_none());
+///
+/// // This should fail
+/// let failing = CommitMessage::from(
+///     "Subject\n\nBody\n\nSigned-off-by: Someone <someone@example.com>\nSigned-off-by: Someone <someone@example.com>"
+/// );
+/// assert!(lint(&failing).is_some());
+/// ```
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     let duplicated_trailers = get_duplicated_trailers(commit);
     if duplicated_trailers.is_empty() {
@@ -84,7 +107,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
 }
 
 fn warning(duplicated_trailers: &[String]) -> String {
-    let warning = format!(
+    format!(
         "These are normally added accidentally when you're rebasing or amending to a commit, \
          sometimes in the text editor, but often by git hooks.\n\nYou can fix this by deleting \
          the duplicated \"{}\" {}",
@@ -94,6 +117,5 @@ fn warning(duplicated_trailers: &[String]) -> String {
         } else {
             FIELD_SINGULAR
         }
-    );
-    warning
+    )
 }

@@ -27,6 +27,31 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9-]+#|GH-|#)[0-9]+( |$)").unwrap()
 });
 
+/// Checks if the commit message contains a GitHub ID
+///
+/// # Arguments
+///
+/// * `commit_message` - The commit message to check
+///
+/// # Returns
+///
+/// * `Some(Problem)` - If the commit message does not contain a GitHub ID
+/// * `None` - If the commit message contains a GitHub ID
+///
+/// # Examples
+///
+/// ```rust
+/// use mit_commit::CommitMessage;
+/// use mit_lint::Lint;
+///
+/// // This should pass
+/// let passing = CommitMessage::from("Subject\n\nBody\n\n#123");
+/// assert!(Lint::GitHubIdMissing.lint(&passing).is_none());
+///
+/// // This should fail
+/// let failing = CommitMessage::from("Subject\n\nBody");
+/// assert!(Lint::GitHubIdMissing.lint(&failing).is_some());
+/// ```
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&RE) {
         None
