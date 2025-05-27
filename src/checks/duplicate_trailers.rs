@@ -72,7 +72,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if duplicated_trailers.is_empty() {
         None
     } else {
-        let commit_text = String::from(commit.clone());
+        let commit_text = String::from(commit);
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
             ERROR.into(),
