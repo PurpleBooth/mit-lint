@@ -8,7 +8,7 @@ use std::{
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::model::{lint, Lint};
+use crate::model::{Lint, lint};
 
 /// A collection of lints
 #[derive(Debug, Eq, PartialEq, Clone)]

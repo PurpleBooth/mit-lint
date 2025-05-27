@@ -15,7 +15,8 @@
 //!     Code::SubjectLongerThan72Characters,&message.clone().into(),Some(vec![(String::from("Too long"), 72, 1)]),
 //!     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
 //! )];
-//! let actual = lint(&CommitMessage::from(message), Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect()));
+//! let lints = Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect());
+//! let actual = lint(&CommitMessage::from(message), &lints);
 //! assert_eq!(
 //!     actual, expected,
 //!     "Expected {:?}, found {:?}",
@@ -48,7 +49,7 @@
 extern crate quickcheck_macros;
 
 pub use cmd::{async_lint, lint};
-pub use model::{Code, Error, Lint, LintError, Lints, Problem, CONFIG_KEY_PREFIX};
+pub use model::{CONFIG_KEY_PREFIX, Code, Error, Lint, LintError, Lints, Problem};
 
 mod checks;
 mod cmd;

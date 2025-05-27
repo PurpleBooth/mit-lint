@@ -4,8 +4,8 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
-use super::duplicate_trailers::{lint, ERROR};
-use crate::{model::Code, Problem};
+use super::duplicate_trailers::{ERROR, lint};
+use crate::{Problem, model::Code};
 
 #[test]
 fn commit_without_trailers() {

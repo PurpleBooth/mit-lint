@@ -27,6 +27,33 @@ fn has_problem(commit: &CommitMessage<'_>) -> bool {
 
 const LIMIT: usize = 72;
 
+/// Checks if the commit message body has lines wider than 72 characters
+///
+/// # Arguments
+///
+/// * `commit` - The commit message to check
+///
+/// # Returns
+///
+/// * `Some(Problem)` - If the commit message body has lines wider than 72 characters
+/// * `None` - If the commit message body has no lines wider than 72 characters
+///
+/// # Examples
+///
+/// ```rust
+/// use mit_commit::CommitMessage;
+/// use mit_lint::Lint;
+///
+/// // This should pass
+/// let passing = CommitMessage::from("Subject\n\nBody that is less than 72 chars wide");
+/// assert!(Lint::BodyWiderThan72Characters.lint(&passing).is_none());
+///
+/// // This should fail
+/// let failing = CommitMessage::from(
+///     "Subject\n\nThis line is way too long and exceeds the 72 character limit by quite a bit actually"
+/// );
+/// assert!(Lint::BodyWiderThan72Characters.lint(&failing).is_some());
+/// ```
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if !has_problem(commit) {
         return None;
@@ -39,13 +66,12 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
             .map(|s| String::from(s).lines().count())
             .unwrap_or_default();
     let labels = commit_text
-        .clone()
         .lines()
         .enumerate()
         .filter(|(line_index, line)| {
             *line_index <= scissors_start_line && is_line_over_limit(line, comment_char.as_deref())
         })
-        .map(|(line_index, line)| label_line_over_limit(commit_text.clone(), line_index, line))
+        .map(|(line_index, line)| label_line_over_limit(&commit_text, line_index, line))
         .collect();
 
     Some(Problem::new(
@@ -66,7 +92,7 @@ fn is_line_over_limit(line: &str, comment_char: Option<&str>) -> bool {
 }
 
 fn label_line_over_limit(
-    commit_text: String,
+    commit_text: &str,
     line_index: usize,
     line: &str,
 ) -> (String, ByteOffset, usize) {

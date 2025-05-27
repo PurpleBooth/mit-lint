@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use mit_commit::CommitMessage;
-use mit_lint::{async_lint, Lint, Lints};
+use mit_lint::{Lint, Lints, async_lint};
 use tokio::runtime::Runtime;
 
 const COMMIT_WITH_ALL_FEATURES: &str = "Add file
@@ -53,6 +53,14 @@ index 0000000..e69de29
 
 /// Run the benchmark
 ///
+/// # Arguments
+///
+/// * `c` - The Criterion instance used to configure and run the benchmarks
+///
+/// # Returns
+///
+/// This function doesn't return a value; it configures the Criterion benchmarks
+///
 /// # Panics
 ///
 /// Panics if tokio fails to start
@@ -70,7 +78,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             |b, (message, enabled_lints)| {
                 let commit = CommitMessage::from(*message);
                 b.to_async(&tokio)
-                    .iter(|| async_lint(&commit, enabled_lints.clone()));
+                    .iter(|| async_lint(&commit, enabled_lints));
             },
         );
     }
@@ -78,11 +86,10 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     let all_lints = Lints::available();
     c.bench_with_input(
         BenchmarkId::new("commit_with_all_features", "all"),
-        &(COMMIT_WITH_ALL_FEATURES, all_lints.clone()),
+        &(COMMIT_WITH_ALL_FEATURES, all_lints),
         |b, (message, all_lints)| {
             let commit = CommitMessage::from(*message);
-            b.to_async(&tokio)
-                .iter(|| async_lint(&commit, all_lints.clone()));
+            b.to_async(&tokio).iter(|| async_lint(&commit, all_lints));
         },
     );
 }

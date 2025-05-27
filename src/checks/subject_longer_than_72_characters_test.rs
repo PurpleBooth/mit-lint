@@ -4,7 +4,7 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
-use super::subject_longer_than_72_characters::{lint, ERROR, HELP_MESSAGE};
+use super::subject_longer_than_72_characters::{ERROR, HELP_MESSAGE, lint};
 use crate::model::{Code, Problem};
 
 #[test]

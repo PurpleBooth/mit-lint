@@ -3,10 +3,10 @@ use std::option::Option::None;
 use miette::Diagnostic;
 use mit_commit::CommitMessage;
 
-use crate::model::{code::Code, Problem};
+use crate::model::{Problem, code::Code};
 
 #[test]
-fn examples_has_error() {
+fn test_error_returns_correct_value() {
     let problem = Problem::new(
         "Some error".into(),
         String::new(),
@@ -19,7 +19,7 @@ fn examples_has_error() {
 }
 
 #[test]
-fn labels_are_none_if_commit_empty() {
+fn test_empty_commit_returns_no_labels() {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -32,7 +32,7 @@ fn labels_are_none_if_commit_empty() {
 }
 
 #[test]
-fn commit_message_is_none_when_it_is_empty() {
+fn test_empty_commit_returns_no_source_code() {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -44,14 +44,17 @@ fn commit_message_is_none_when_it_is_empty() {
     assert!(problem.source_code().is_none());
 }
 
-#[allow(clippy::needless_pass_by_value)]
+#[allow(
+    clippy::needless_pass_by_value,
+    reason = "Cannot be passed by value, not supported by quickcheck"
+)]
 #[quickcheck]
-fn test_has_error(error: String) -> bool {
+fn test_error_matches_input(error: String) -> bool {
     let problem = Problem::new(
         error.clone(),
         String::new(),
         Code::NotConventionalCommit,
-        &"".into(),
+        &CommitMessage::from(""),
         None,
         None,
     );
@@ -59,7 +62,7 @@ fn test_has_error(error: String) -> bool {
 }
 
 #[test]
-fn examples_has_has_tip() {
+fn test_tip_returns_correct_value() {
     let problem = Problem::new(
         String::new(),
         "Some tip".into(),
@@ -71,12 +74,15 @@ fn examples_has_has_tip() {
     assert_eq!(problem.tip(), "Some tip");
 }
 
-#[allow(clippy::needless_pass_by_value)]
+#[allow(
+    clippy::needless_pass_by_value,
+    reason = "Cannot be passed by value, not supported by quickcheck"
+)]
 #[quickcheck]
-fn test_has_has_tip(tip: String) -> bool {
+fn test_tip_matches_input(tip: String) -> bool {
     let problem = Problem::new(
         String::new(),
-        tip.clone(),
+        tip.to_string(),
         Code::NotConventionalCommit,
         &"".into(),
         None,
@@ -86,7 +92,7 @@ fn test_has_has_tip(tip: String) -> bool {
 }
 
 #[test]
-fn examples_has_has_code() {
+fn test_code_returns_correct_value() {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -99,14 +105,14 @@ fn examples_has_has_code() {
 }
 
 #[quickcheck]
-fn test_has_has_code(code: Code) {
+fn test_code_matches_input(code: Code) {
     let problem = Problem::new(String::new(), String::new(), code, &"".into(), None, None);
 
-    assert_eq!(problem.code(), &code);
+    assert_eq!(problem.code(), &code, "Code should match the input value");
 }
 
 #[test]
-fn examples_it_contains_the_triggering_message() {
+fn test_commit_message_returns_correct_value() {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -122,7 +128,7 @@ fn examples_it_contains_the_triggering_message() {
 }
 
 #[quickcheck]
-fn test_it_contains_the_triggering_message(message: String) {
+fn test_commit_message_matches_input(message: String) {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -131,11 +137,15 @@ fn test_it_contains_the_triggering_message(message: String) {
         None,
         None,
     );
-    assert_eq!(problem.commit_message(), CommitMessage::from(message));
+    assert_eq!(
+        problem.commit_message(),
+        CommitMessage::from(message),
+        "Commit message should match the input value"
+    );
 }
 
 #[test]
-fn examples_it_contains_the_labels() {
+fn test_labels_return_correct_values() {
     let problem = Problem::new(
         String::new(),
         String::new(),
@@ -153,8 +163,9 @@ fn examples_it_contains_the_labels() {
         vec![("String".to_string(), 10_usize, 20_usize)]
     );
 }
+
 #[quickcheck]
-fn test_it_contains_the_labels(start: usize, offset: usize) {
+fn test_labels_match_input_values(start: usize, offset: usize) {
     let problem = Problem::new(
         String::new(),
         String::new(),

@@ -4,7 +4,7 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
-use super::missing_pivotal_tracker_id::{lint, ERROR, HELP_MESSAGE};
+use super::missing_pivotal_tracker_id::{ERROR, HELP_MESSAGE, lint};
 use crate::model::{Code, Problem};
 
 #[test]

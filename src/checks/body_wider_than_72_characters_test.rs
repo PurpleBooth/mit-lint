@@ -6,8 +6,8 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
-use super::body_wider_than_72_characters::{lint, ERROR, HELP_MESSAGE};
-use crate::{model::Code, Problem};
+use super::body_wider_than_72_characters::{ERROR, HELP_MESSAGE, lint};
+use crate::{Problem, model::Code};
 
 #[test]
 fn narrower_than_72_characters() {
@@ -138,7 +138,7 @@ fn first_line_ok_but_second_line_too_long() {
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::BodyWiderThan72Characters,
-            &message.clone().into(),
+            &message.into(),
             Some(vec![("Too long".to_string(), 83, 1)]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
         )).as_ref(),
@@ -405,7 +405,7 @@ impl quickcheck::Arbitrary for CommitBody {
         }
 
         // Build full commit message with valid structure
-        CommitBody(format!("Valid subject\n\n{}", body.trim_end()))
+        Self(format!("Valid subject\n\n{}", body.trim_end()))
     }
 }
 
