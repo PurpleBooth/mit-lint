@@ -1,7 +1,8 @@
 use std::option::Option::None;
 
-use miette::{ByteOffset, SourceOffset};
+use miette::{ByteOffset, GraphicalReportHandler, GraphicalTheme, Report, SourceOffset};
 use mit_commit::CommitMessage;
+use quickcheck::TestResult;
 
 use crate::model::{Code, Problem};
 
@@ -28,6 +29,9 @@ fn has_problem(commit: &CommitMessage<'_>) -> bool {
 #[cfg(test)]
 mod tests {
     #![allow(clippy::wildcard_imports)]
+
+    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+    use quickcheck::TestResult;
 
     use super::*;
 
