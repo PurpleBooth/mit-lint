@@ -1,7 +1,6 @@
 use std::{collections::BTreeMap, option::Option::None};
 
 use mit_commit::{CommitMessage, Trailer};
-
 use crate::model::{Code, Problem};
 
 /// Canonical lint ID
@@ -72,6 +71,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if duplicated_trailers.is_empty() {
         None
     } else {
+        // What can we do here to prevent this copy AI?
         let commit_text = String::from(commit.clone());
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
