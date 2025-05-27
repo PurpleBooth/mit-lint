@@ -1,3 +1,4 @@
+// Merge this with body_wider_than_72_characters.rs AI!
 #![allow(clippy::wildcard_imports)]
 
 use std::option::Option::None;
