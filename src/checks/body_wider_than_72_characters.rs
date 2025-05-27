@@ -1,8 +1,7 @@
 use std::option::Option::None;
 
-use miette::{ByteOffset, GraphicalReportHandler, GraphicalTheme, Report, SourceOffset};
+use miette::{ByteOffset, SourceOffset};
 use mit_commit::CommitMessage;
-use quickcheck::TestResult;
 
 use crate::model::{Code, Problem};
 
