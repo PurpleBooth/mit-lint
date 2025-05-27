@@ -71,8 +71,8 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if duplicated_trailers.is_empty() {
         None
     } else {
-        // Use the commit message directly without cloning
-        let commit_message = String::from(commit);
+        // We need to clone here as String::from works with CommitMessage but not &CommitMessage
+        let commit_message = String::from(commit.clone());
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
             ERROR.into(),
