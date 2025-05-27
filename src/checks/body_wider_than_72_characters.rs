@@ -54,17 +54,26 @@ const LIMIT: usize = 72;
 /// );
 /// assert!(Lint::BodyWiderThan72Characters.lint(&failing).is_some());
 /// ```
+///
+/// # Errors
+///
+/// This function will never return an error, only an Option<Problem>
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if !has_problem(commit) {
         return None;
     }
+
     let comment_char = commit.get_comment_char().map(|x| format!("{x} "));
     let commit_text: String = commit.into();
+
+    // Calculate where scissors section begins to exclude it from linting
     let scissors_start_line = commit_text.lines().count()
         - commit
             .get_scissors()
             .map(|s| String::from(s).lines().count())
             .unwrap_or_default();
+
+    // Create labels for all lines that exceed the limit
     let labels = commit_text
         .lines()
         .enumerate()
@@ -75,20 +84,18 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         .collect();
 
     Some(Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::BodyWiderThan72Characters,
-            commit,
-            Some(
-                labels,
-            ),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        ))
+        ERROR.into(),
+        HELP_MESSAGE.into(),
+        Code::BodyWiderThan72Characters,
+        commit,
+        Some(labels),
+        Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+    ))
 }
 
 fn is_line_over_limit(line: &str, comment_char: Option<&str>) -> bool {
     let is_comment = comment_char.is_some_and(|cc| line.starts_with(cc));
-    !is_comment && line.len() > LIMIT
+    !is_comment && line.chars().count() > LIMIT
 }
 
 fn label_line_over_limit(
@@ -109,24 +116,23 @@ fn label_line_over_limit(
 
 #[cfg(test)]
 mod tests {
-    // Can you rename the tests in here to match the guidelines please .junie/guidelines.md AI!
     use miette::{GraphicalReportHandler, GraphicalTheme, Report};
     use quickcheck::TestResult;
 
     use super::*;
 
     #[test]
-    fn narrower_than_72_characters() {
+    fn test_body_with_width_equal_to_limit_passes() {
         test_body_wider_than_72_characters(&format!("Subject\n\n{}", "x".repeat(72)), None);
     }
 
     #[test]
-    fn no_body() {
+    fn test_commit_with_no_body_passes() {
         test_body_wider_than_72_characters("Subject", None);
     }
 
     #[test]
-    fn body_ok_but_comments_longer_than_72() {
+    fn test_body_within_limit_with_long_comments_passes() {
         let message = "Remove duplicated function
 
 The function got skipped in thee previous round of refactoring
@@ -188,10 +194,10 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn longer_than_72_characters() {
+    fn test_body_exceeding_width_limit_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(73));
         test_body_wider_than_72_characters(
-            &message.clone(),
+            &message,
             Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
@@ -204,10 +210,10 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn longer_than_73_still_fails() {
+    fn test_body_exceeding_width_limit_by_multiple_chars_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(75));
         test_body_wider_than_72_characters(
-            &message.clone(),
+            &message,
             Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
@@ -220,10 +226,10 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn multiple_long_lines_fails() {
+    fn test_body_with_multiple_long_lines_fails() {
         let message = format!("Subject\n\n{}\n{}", "x".repeat(73), "y".repeat(73));
         test_body_wider_than_72_characters(
-            &message.clone(),
+            &message,
             Some(Problem::new(
                 ERROR.into(),
                 HELP_MESSAGE.into(),
@@ -236,7 +242,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn first_line_ok_but_second_line_too_long() {
+    fn test_body_with_some_lines_exceeding_limit_fails() {
         let message = format!("Subject\n\nx\n{}\nx\n", "x".repeat(73));
         test_body_wider_than_72_characters(
             &message.clone(),
@@ -252,7 +258,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn last_line_included() {
+    fn test_body_with_last_line_exceeding_limit_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(73));
         test_body_wider_than_72_characters(
             &message.clone(),
@@ -268,7 +274,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn lines_after_scissors_and_comments_are_not_included() {
+    fn test_lines_after_scissors_are_ignored() {
         let message = [
             "Subject",
             "",
@@ -291,7 +297,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn formatting() {
+    fn test_error_report_formatting() {
         let message = format!(
             "Subject\n\nx\n{}\nx\n{}\nx\n",
             "x".repeat(73),
@@ -328,7 +334,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn lines_after_scissors_and_comments_are_not_included_in_highlights() {
+    fn test_error_highlights_exclude_scissors_section() {
         let message = [
             "Subject",
             "",
@@ -366,7 +372,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn comments_are_not_included_in_highlights() {
+    fn test_error_highlights_exclude_comment_lines() {
         let message = [
             "Subject",
             "",
@@ -462,7 +468,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn handles_unicode_characters_correctly() {
+    fn test_unicode_character_handling() {
         // This string has 73 Unicode characters in a single line (146 bytes)
         let message = format!("Subject\n\n{}", "\u{1f600}".repeat(73));
         test_body_wider_than_72_characters(
@@ -479,7 +485,7 @@ index 5a83784..ebaee48 100644
     }
 
     #[test]
-    fn handles_null_bytes_correctly() {
+    fn test_null_byte_handling() {
         let message = "\0\n\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
         let expected_problem = Problem::new(
             ERROR.into(),

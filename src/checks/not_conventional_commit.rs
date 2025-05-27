@@ -27,38 +27,67 @@ pub const ERROR: &str = "Your commit message isn't in conventional style";
 static RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap());
 
-fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
+/// Checks if the commit message follows the conventional commit format
+///
+/// # Arguments
+///
+/// * `commit_message` - The commit message to check
+///
+/// # Returns
+///
+/// * `Some(Problem)` - If the commit message does not follow the conventional commit format
+/// * `None` - If the commit message follows the conventional commit format
+///
+/// # Examples
+///
+/// ```rust
+/// use mit_commit::CommitMessage;
+/// use mit_lint::Lint::NotConventionalCommit;
+///
+/// // This should pass
+/// let passing = CommitMessage::from("feat: add new feature");
+/// assert!(NotConventionalCommit.lint(&passing).is_none());
+///
+/// // This should fail
+/// let failing = CommitMessage::from("Add new feature");
+/// assert!(NotConventionalCommit.lint(&failing).is_some());
+/// ```
+///
+/// # Errors
+///
+/// This function will never return an error, only an Option<Problem>
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     let subject: String = commit_message.get_subject().into();
 
-    !RE.is_match(&subject)
-}
-
-pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    if has_problem(commit_message) {
-        let commit_text = String::from(commit_message.clone());
-        Some(Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::NotConventionalCommit,
-            commit_message,
-            Some(vec![(
-                "Not conventional".to_string(),
-                0_usize,
-                commit_text.lines().next().map(str::len).unwrap_or_default(),
-            )]),
-            Some("https://www.conventionalcommits.org/".to_string()),
-        ))
-    } else {
-        None
+    // Early return if the commit message follows the conventional format
+    if RE.is_match(&subject) {
+        return None;
     }
+
+    // Create a problem with appropriate labels
+    let commit_text = String::from(commit_message.clone());
+    let first_line_length = commit_text.lines().next().map(str::len).unwrap_or_default();
+
+    Some(Problem::new(
+        ERROR.into(),
+        HELP_MESSAGE.into(),
+        Code::NotConventionalCommit,
+        commit_message,
+        Some(vec![(
+            "Not conventional".to_string(),
+            0_usize,
+            first_line_length,
+        )]),
+        Some("https://www.conventionalcommits.org/".to_string()),
+    ))
 }
 
 #[cfg(test)]
 mod tests {
-    #![allow(clippy::wildcard_imports)]
-
     use super::*;
     use crate::model::Code;
+    use mit_commit::Trailer;
+    use quickcheck::TestResult;
 
     // Examples from https://www.conventionalcommits.org/en/v1.0.0/
 
@@ -257,5 +286,69 @@ This is an example commit
             .render_report(&mut out, diag.as_ref())
             .unwrap();
         out
+    }
+
+    #[allow(clippy::needless_pass_by_value)]
+    #[quickcheck]
+    fn fail_check(commit: String) -> TestResult {
+        let has_non_alpha_type = commit
+            .chars()
+            .position(|x| x == ':')
+            .is_some_and(|x| commit.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
+        if has_non_alpha_type {
+            return TestResult::discard();
+        }
+        let message = CommitMessage::from(format!("{commit}\n# comment"));
+        let result = lint(&message);
+        TestResult::from_bool(result.is_some())
+    }
+
+    #[allow(clippy::needless_pass_by_value)]
+    #[quickcheck]
+    fn success_check(
+        type_slug: String,
+        scope: Option<String>,
+        description: String,
+        body: Option<String>,
+        bc_break: Option<String>,
+    ) -> TestResult {
+        if type_slug.starts_with('#')
+            || type_slug.is_empty()
+            || type_slug.chars().any(|x| !x.is_ascii_alphanumeric())
+        {
+            return TestResult::discard();
+        }
+        if let Some(scope) = scope.clone() {
+            if scope.is_empty() || scope.chars().any(|x| !x.is_alphanumeric()) {
+                return TestResult::discard();
+            }
+        }
+
+        let mut commit: CommitMessage<'_> = CommitMessage::default().with_subject(
+            format!(
+                "{}{}{}: {}",
+                type_slug,
+                scope.map(|x| format!("({x})")).unwrap_or_default(),
+                bc_break
+                    .clone()
+                    .map(|_| "!".to_string())
+                    .unwrap_or_default(),
+                description
+            )
+            .into(),
+        );
+
+        let body_contents = body.clone().unwrap_or_default();
+
+        if body.is_some() {
+            commit = commit.with_body_contents(&body_contents);
+        }
+
+        if let Some(_bc_contents) = bc_break {
+            commit = commit.add_trailer(Trailer::new("BC BREAK".into(), "bc_contents".into()));
+        }
+
+        let result = lint(&commit);
+        TestResult::from_bool(result.is_none())
     }
 }
