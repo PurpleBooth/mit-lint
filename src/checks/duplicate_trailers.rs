@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, option::Option::None};
 
-use mit_commit::{CommitMessage, Trailer};
 use crate::model::{Code, Problem};
+use mit_commit::{CommitMessage, Trailer};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "duplicated-trailers";
