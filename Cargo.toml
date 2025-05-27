@@ -1,6 +1,6 @@
 [package]
 name = "mit-lint"
-version = "3.3.1"
+version = "3.4.0"
 edition = "2024"
 authors = ["Billie Thompson <billie+mit-lint@billiecodes.com>"]
 license = "CC0-1.0"
