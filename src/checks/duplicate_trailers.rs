@@ -71,8 +71,8 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     if duplicated_trailers.is_empty() {
         None
     } else {
-        // What can we do here to prevent this copy AI?
-        let commit_text = String::from(commit.clone());
+        // Use the commit message directly without cloning
+        let commit_message = commit.to_string();
         let warning = warning(&duplicated_trailers);
         Some(Problem::new(
             ERROR.into(),
@@ -83,14 +83,14 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
                 duplicated_trailers
                     .into_iter()
                     .flat_map(|trailer| {
-                        commit_text
+                        commit_message
                             .match_indices(&trailer)
                             .skip(1)
                             .map(|x| {
                                 (
                                     format!("Duplicated `{trailer}`"),
                                     x.0,
-                                    commit_text
+                                    commit_message
                                         .chars()
                                         .skip(x.0)
                                         .take_while(|x| x != &'\n')
