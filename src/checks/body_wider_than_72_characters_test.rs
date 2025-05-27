@@ -1,3 +1,9 @@
+use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+use mit_commit::CommitMessage;
+use quickcheck::TestResult;
+
+use super::body_wider_than_72_characters::{ERROR, HELP_MESSAGE, lint};
+use crate::{Problem, model::Code};
 
 #[test]
 fn narrower_than_72_characters() {
