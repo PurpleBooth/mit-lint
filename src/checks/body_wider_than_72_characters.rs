@@ -59,7 +59,7 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         return None;
     }
     let comment_char = commit.get_comment_char().map(|x| format!("{x} "));
-    let commit_text: String = commit.clone().into();
+    let commit_text: String = commit.into();
     let scissors_start_line = commit_text.lines().count()
         - commit
             .get_scissors()
