@@ -55,17 +55,18 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
 ///
 /// ```rust
 /// use mit_commit::CommitMessage;
-/// use mit_lint::checks::duplicate_trailers::lint;
+/// use mit_lint::{Lint, Lints, lint};
 ///
 /// // This should pass
 /// let passing = CommitMessage::from("Subject\n\nBody\n\nSigned-off-by: Someone <someone@example.com>");
-/// assert!(lint(&passing).is_none());
+/// let lints = Lints::new(vec![Lint::DuplicatedTrailers].into_iter().collect());
+/// assert!(lint(&passing, &lints).is_empty());
 ///
 /// // This should fail
 /// let failing = CommitMessage::from(
 ///     "Subject\n\nBody\n\nSigned-off-by: Someone <someone@example.com>\nSigned-off-by: Someone <someone@example.com>"
 /// );
-/// assert!(lint(&failing).is_some());
+/// assert!(!lint(&failing, &lints).is_empty());
 /// ```
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
     let duplicated_trailers = get_duplicated_trailers(commit);
