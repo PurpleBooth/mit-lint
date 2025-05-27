@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
 use crate::{
-    checks::subject_not_separate_from_body::{lint, ERROR, HELP_MESSAGE},
+    checks::subject_not_separate_from_body::{ERROR, HELP_MESSAGE, lint},
     model::{Code, Problem},
 };
 

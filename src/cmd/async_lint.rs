@@ -1,4 +1,4 @@
-use futures::{future, stream, StreamExt};
+use futures::{StreamExt, future, stream};
 use mit_commit::CommitMessage;
 
 use crate::model::{Lints, Problem};
@@ -15,7 +15,7 @@ use crate::model::{Lints, Problem};
 /// let actual = rt.block_on(async {
 ///     async_lint(
 ///         &CommitMessage::from("An example commit message"),
-///         Lints::available().clone(),
+///         Lints::available(),
 ///     )
 ///     .await
 /// });
@@ -37,7 +37,8 @@ use crate::model::{Lints, Problem};
 /// )];
 /// let rt = Runtime::new().unwrap();
 /// let actual = rt.block_on(async {
-///     async_lint(&CommitMessage::from(message), Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect())).await
+///     let lints = Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect());
+///     async_lint(&CommitMessage::from(message), &lints).await
 /// });
 /// assert_eq!(
 ///     actual, expected,
@@ -45,8 +46,8 @@ use crate::model::{Lints, Problem};
 ///     expected, actual
 /// );
 /// ```
-pub async fn async_lint(commit_message: &CommitMessage<'_>, lints: Lints) -> Vec<Problem> {
-    stream::iter(lints.into_iter())
+pub async fn async_lint(commit_message: &CommitMessage<'_>, lints: &Lints) -> Vec<Problem> {
+    stream::iter(lints.clone().into_iter())
         .filter_map(|lint| future::ready(lint.lint(commit_message)))
         .collect::<Vec<Problem>>()
         .await

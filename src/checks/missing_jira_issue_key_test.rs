@@ -6,7 +6,7 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 
-use super::missing_jira_issue_key::{lint, ERROR, HELP_MESSAGE};
+use super::missing_jira_issue_key::{ERROR, HELP_MESSAGE, lint};
 use crate::model::{Code, Problem};
 
 #[test]
@@ -213,7 +213,7 @@ impl quickcheck::Arbitrary for CommitWithoutJira {
             body.push(' ');
         }
 
-        CommitWithoutJira(format!("{subject}\n\n{body}"))
+        Self(format!("{subject}\n\n{body}"))
     }
 }
 

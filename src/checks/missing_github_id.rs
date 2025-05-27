@@ -43,15 +43,15 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
 /// ```rust
 /// use mit_commit::CommitMessage;
 /// use mit_lint::{Lint, Lints, lint};
+/// use mit_lint::Lint::GitHubIdMissing;
 ///
 /// // This should pass
-/// let passing = CommitMessage::from("Subject\n\nBody\n\n#123");
-/// let lints = Lints::new(vec![Lint::GitHubIdMissing].into_iter().collect());
-/// assert!(lint(&passing, &lints).is_empty());
+/// let passing = CommitMessage::from("Subject\n\nBody\n\nRelates-to: #123");
+/// assert!(GitHubIdMissing.lint(&passing).is_none());
 ///
 /// // This should fail
 /// let failing = CommitMessage::from("Subject\n\nBody");
-/// assert!(!lint(&failing, &lints).is_empty());
+/// assert!(GitHubIdMissing.lint(&failing).is_some());
 /// ```
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
     if commit_message.matches_pattern(&RE) {

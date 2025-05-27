@@ -7,12 +7,12 @@ use std::{
 use quickcheck::TestResult;
 
 use crate::model::{
+    Lint, Lints,
     lint::Lint::{
         BodyWiderThan72Characters, DuplicatedTrailers, JiraIssueKeyMissing,
         PivotalTrackerIdMissing, SubjectLongerThan72Characters, SubjectNotSeparateFromBody,
     },
     lints::Error,
-    Lint, Lints,
 };
 
 #[allow(clippy::needless_pass_by_value)]

@@ -11,7 +11,7 @@ use crate::model::{Lints, Problem};
 /// use mit_lint::{lint, Lints};
 /// let actual = lint(
 ///     &CommitMessage::from("An example commit message"),
-///     Lints::available().clone(),
+///     Lints::available(),
 /// );
 /// assert!(!actual.is_empty());
 /// ```
@@ -28,7 +28,8 @@ use crate::model::{Lints, Problem};
 ///     Code::SubjectLongerThan72Characters,&message.clone().into(),Some(vec![("Too long".to_string(), 72, 1)]),
 ///     Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
 /// )];
-/// let actual = lint(&CommitMessage::from(message), Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect()));
+/// let lints = Lints::new(vec![Lint::SubjectLongerThan72Characters].into_iter().collect());
+/// let actual = lint(&CommitMessage::from(message), &lints);
 /// assert_eq!(
 ///     actual, expected,
 ///     "Expected {:?}, found {:?}",
@@ -36,8 +37,9 @@ use crate::model::{Lints, Problem};
 /// );
 /// ```
 #[must_use]
-pub fn lint(commit_message: &CommitMessage<'_>, lints: Lints) -> Vec<Problem> {
+pub fn lint(commit_message: &CommitMessage<'_>, lints: &Lints) -> Vec<Problem> {
     lints
+        .clone()
         .into_iter()
         .collect::<Vec<_>>()
         .into_iter()

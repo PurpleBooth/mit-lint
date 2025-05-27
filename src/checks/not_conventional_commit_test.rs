@@ -4,8 +4,8 @@ use miette::{GraphicalReportHandler, GraphicalTheme, Report};
 use mit_commit::{CommitMessage, Trailer};
 use quickcheck::TestResult;
 
-use super::not_conventional_commit::{lint, ERROR, HELP_MESSAGE};
-use crate::{model::Code, Problem};
+use super::not_conventional_commit::{ERROR, HELP_MESSAGE, lint};
+use crate::{Problem, model::Code};
 
 // Examples from https://www.conventionalcommits.org/en/v1.0.0/
 

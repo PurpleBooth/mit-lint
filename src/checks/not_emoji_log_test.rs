@@ -5,7 +5,7 @@ use mit_commit::CommitMessage;
 use quickcheck::TestResult;
 use strum::IntoEnumIterator;
 
-use super::not_emoji_log::{lint, ERROR, HELP_MESSAGE};
+use super::not_emoji_log::{ERROR, HELP_MESSAGE, lint};
 use crate::{
     checks::not_emoji_log::Prefix,
     model::{Code, Problem},
