@@ -1,8 +1,6 @@
-use std::option::Option::None;
-
 use mit_commit::CommitMessage;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "subject-line-ends-with-period";
@@ -14,6 +12,15 @@ pub const HELP_MESSAGE: &str = "It's important to keep your commits short, becau
                             truncated. Full stops aren't normally in subject lines, and take up \
                             an extra character, so we shouldn't use them in commit message \
                             subjects.\n\nYou can fix this by removing the period";
+
+/// Configuration for subject line ending with period linting
+pub struct SubjectLineEndsWithPeriodConfig;
+
+impl Default for SubjectLineEndsWithPeriodConfig {
+    fn default() -> Self {
+        Self
+    }
+}
 
 /// Checks if the commit message subject line ends with a period
 ///
@@ -45,21 +52,30 @@ pub const HELP_MESSAGE: &str = "It's important to keep your commits short, becau
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    // Check if the subject ends with a period
-    let has_period = commit_message
+    lint_with_config(commit_message, &SubjectLineEndsWithPeriodConfig)
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    _config: &SubjectLineEndsWithPeriodConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| has_problem(commit))
+        .map(create_problem)
+}
+
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
+    commit_message
         .get_subject()
         .to_string()
         .trim_end()
         .chars()
         .next_back()
         .filter(|x| *x == '.')
-        .is_some();
+        .is_some()
+}
 
-    // Early return if no period is found
-    if !has_period {
-        return None;
-    }
-
+fn create_problem(commit_message: &CommitMessage) -> Problem {
     // Create a problem with appropriate labels
     let subject = commit_message.get_subject().to_string();
 
@@ -80,18 +96,15 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
         .take_while(|ch| ch == &'.')
         .count();
 
-    Some(Problem::new(
-        ERROR.into(),
-        HELP_MESSAGE.into(),
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
         Code::SubjectEndsWithPeriod,
         commit_message,
-        Some(vec![(
-            "Unneeded period".to_string(),
-            period_position,
-            period_count,
-        )]),
-        Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-    ))
+    )
+    .with_label("Unneeded period", period_position, period_count)
+    .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+    .build()
 }
 
 #[cfg(test)]

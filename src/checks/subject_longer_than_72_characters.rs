@@ -1,9 +1,6 @@
-// Make this match the guidelines .junie/guidelines.md AI!
-use std::option::Option::None;
-
 use mit_commit::CommitMessage;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "subject-longer-than-72-characters";
@@ -20,24 +17,46 @@ pub const HELP_MESSAGE: &str = "It's important to keep the subject of the commit
 
 const LIMIT: usize = 72;
 
-pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    let subject_till_newline = subject_length(commit);
-    if subject_till_newline > LIMIT {
-        Some(Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::SubjectLongerThan72Characters,
-            commit,
-            Some(vec![(
-                "Too long".to_string(),
-                LIMIT,
-                subject_till_newline - LIMIT,
-            )]),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-        ))
-    } else {
-        None
+/// Configuration for subject length linting
+pub struct SubjectLengthConfig {
+    /// Maximum allowed length for subject line
+    pub character_limit: usize,
+}
+
+impl Default for SubjectLengthConfig {
+    fn default() -> Self {
+        Self {
+            character_limit: LIMIT,
+        }
     }
+}
+
+pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit, &SubjectLengthConfig::default())
+}
+
+fn lint_with_config(commit: &CommitMessage<'_>, config: &SubjectLengthConfig) -> Option<Problem> {
+    Some(commit)
+        .filter(|commit| has_problem(commit, config.character_limit))
+        .map(|commit| create_problem(commit, config.character_limit))
+}
+
+fn has_problem(commit: &CommitMessage<'_>, limit: usize) -> bool {
+    subject_length(commit) > limit
+}
+
+fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
+    let subject_length = subject_length(commit);
+
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
+        Code::SubjectLongerThan72Characters,
+        commit,
+    )
+    .with_label("Too long", limit, subject_length - limit)
+    .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+    .build()
 }
 
 fn subject_length(commit: &CommitMessage<'_>) -> usize {
@@ -56,7 +75,7 @@ const fn is_newline(character: char) -> bool {
 mod tests {
     use super::*;
     use crate::model::{Code, Problem};
-    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+    use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, Report};
     use mit_commit::CommitMessage;
     use quickcheck::TestResult;
 
@@ -733,6 +752,7 @@ index 5a83784..ebaee48 100644
 -    has_no_pivotal_tracker_id(commit_message)
 -}
 -
+
  fn has_no_pivotal_tracker_id(text: &CommitMessage) -> bool {
      let re = Regex::new(REGEX_PIVOTAL_TRACKER_ID).unwrap();
      !text.matches_pattern(&re)
@@ -748,6 +768,45 @@ index 5a83784..ebaee48 100644
 
 ";
         test_subject_longer_than_72_characters(&format!("{}\n\n{message}", "x".repeat(72)), None);
+    }
+
+    #[test]
+    fn test_create_problem_length_calculation() {
+        // Create a commit with a subject longer than the limit
+        let subject_length = 80;
+        let subject = "x".repeat(subject_length);
+        let commit = CommitMessage::from(subject);
+
+        // Create the problem
+        let problem = create_problem(&commit, LIMIT);
+
+        // Get the labels from the problem
+        let labels = problem.labels().unwrap().collect::<Vec<_>>();
+
+        // Verify there's exactly one label
+        assert_eq!(labels.len(), 1, "There should be exactly one label");
+
+        // The length of the label should be subject_length - LIMIT
+        // If - was replaced with /, this would fail
+        let expected_length = subject_length - LIMIT;
+        assert_eq!(
+            labels[0].len(),
+            expected_length,
+            "Length calculation is incorrect"
+        );
+
+        // Also verify that it's not using division instead of subtraction
+        let incorrect_length = if LIMIT != 0 {
+            subject_length / LIMIT
+        } else {
+            0
+        };
+
+        assert_ne!(
+            labels[0].len(),
+            incorrect_length,
+            "Length calculation appears to be using division instead of subtraction"
+        );
     }
 
     #[test]
