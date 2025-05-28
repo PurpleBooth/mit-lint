@@ -15,14 +15,6 @@ pub const HELP_MESSAGE: &str = "It's important to keep the body of the commit na
 /// Description of the problem
 pub const ERROR: &str = "Your commit has a body wider than 72 characters";
 
-fn has_problem(commit: &CommitMessage<'_>) -> bool {
-    commit
-        .get_body()
-        .to_string()
-        .lines()
-        .any(|line| line.chars().count() > LIMIT)
-}
-
 const LIMIT: usize = 72;
 
 /// Checks if the commit message body has lines wider than 72 characters
@@ -58,7 +50,55 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
         .map(create_problem)
 }
 
+fn has_problem(commit: &CommitMessage<'_>) -> bool {
+    commit
+        .get_body()
+        .to_string()
+        .lines()
+        .any(|line| line.chars().count() > LIMIT)
+}
+
 fn create_problem(commit: &CommitMessage) -> Problem {
+    fn calculate_scissors_start_line(commit: &CommitMessage, commit_text: &str) -> usize {
+        commit_text.lines().count()
+            - commit
+                .get_scissors()
+                .map(|s| String::from(s).lines().count())
+                .unwrap_or_default()
+    }
+
+    fn create_label_for_line(
+        commit_text: &str,
+        line_index: usize,
+        line: &str,
+    ) -> (String, usize, usize) {
+        let label_text = "Too long".to_string();
+        let position = SourceOffset::from_location(
+            commit_text,
+            line_index + 1,
+            line.chars().take(LIMIT).map(char::len_utf8).sum::<usize>() + 1,
+        )
+        .offset();
+        let excess_chars = line.chars().count().saturating_sub(LIMIT);
+
+        (label_text, position, excess_chars)
+    }
+
+    fn create_line_labels(
+        commit_text: &str,
+        scissors_start_line: usize,
+        comment_char: Option<&str>,
+    ) -> Vec<(String, usize, usize)> {
+        commit_text
+            .lines()
+            .enumerate()
+            .filter(|(line_index, _)| *line_index <= scissors_start_line)
+            .filter(|(_, line)| !comment_char.is_some_and(|cc| line.starts_with(cc)))
+            .filter(|(_, line)| line.chars().count() > LIMIT)
+            .map(|(line_index, line)| create_label_for_line(commit_text, line_index, line))
+            .collect()
+    }
+
     let comment_char = commit.get_comment_char().map(|x| format!("{x} "));
     let commit_text: String = commit.into();
 
@@ -76,50 +116,6 @@ fn create_problem(commit: &CommitMessage) -> Problem {
         Some(labels),
         Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
     )
-}
-
-fn calculate_scissors_start_line(commit: &CommitMessage, commit_text: &str) -> usize {
-    commit_text.lines().count()
-        - commit
-            .get_scissors()
-            .map(|s| String::from(s).lines().count())
-            .unwrap_or_default()
-}
-
-fn create_line_labels(
-    commit_text: &str,
-    scissors_start_line: usize,
-    comment_char: Option<&str>,
-) -> Vec<(String, usize, usize)> {
-    commit_text
-        .lines()
-        .enumerate()
-        .filter(|(line_index, line)| {
-            let is_before_scissors = *line_index <= scissors_start_line;
-            let is_not_comment = !comment_char.is_some_and(|cc| line.starts_with(cc));
-            let exceeds_limit = line.chars().count() > LIMIT;
-
-            is_before_scissors && is_not_comment && exceeds_limit
-        })
-        .map(|(line_index, line)| create_label_for_line(commit_text, line_index, line))
-        .collect()
-}
-
-fn create_label_for_line(
-    commit_text: &str,
-    line_index: usize,
-    line: &str,
-) -> (String, usize, usize) {
-    let label_text = "Too long".to_string();
-    let position = SourceOffset::from_location(
-        commit_text,
-        line_index + 1,
-        line.chars().take(LIMIT).map(char::len_utf8).sum::<usize>() + 1,
-    )
-    .offset();
-    let excess_chars = line.chars().count().saturating_sub(LIMIT);
-
-    (label_text, position, excess_chars)
 }
 
 #[cfg(test)]
