@@ -1,11 +1,9 @@
-use std::option::Option::None;
-
 use mit_commit::CommitMessage;
 use quickcheck::{Arbitrary, Gen};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "not-emoji-log";
@@ -26,6 +24,15 @@ You can fix it using one of the prefixes:
 \u{203c}\u{fe0f} BREAKING:";
 /// Description of the problem
 pub const ERROR: &str = "Your commit message isn't in emoji log style";
+
+/// Configuration for emoji log linting
+pub struct EmojiLogConfig;
+
+impl Default for EmojiLogConfig {
+    fn default() -> Self {
+        Self
+    }
+}
 
 /// Checks if the commit message follows the emoji log style
 ///
@@ -57,35 +64,37 @@ pub const ERROR: &str = "Your commit message isn't in emoji log style";
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit_message, &EmojiLogConfig)
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    _config: &EmojiLogConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| has_problem(commit))
+        .map(create_problem)
+}
+
+fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     // Check if the commit message starts with any of the valid emoji log prefixes
-    let is_emoji_log = Prefix::iter().any(|prefix| {
+    !Prefix::iter().any(|prefix| {
         commit_message
             .get_subject()
             .to_string()
             .starts_with(&String::from(prefix))
-    });
+    })
+}
 
-    // Early return if the commit message follows the emoji log style
-    if is_emoji_log {
-        return None;
-    }
-
+fn create_problem(commit_message: &CommitMessage) -> Problem {
     // Create a problem with appropriate labels
     let commit_text = String::from(commit_message.clone());
     let first_line_length = commit_text.lines().next().map(str::len).unwrap_or_default();
 
-    Some(Problem::new(
-        ERROR.into(),
-        HELP_MESSAGE.into(),
-        Code::NotEmojiLog,
-        commit_message,
-        Some(vec![(
-            "Not emoji log".to_string(),
-            0_usize,
-            first_line_length,
-        )]),
-        Some("https://github.com/ahmadawais/Emoji-Log".to_string()),
-    ))
+    ProblemBuilder::new(ERROR, HELP_MESSAGE, Code::NotEmojiLog, commit_message)
+        .with_label("Not emoji log", 0, first_line_length)
+        .with_url("https://github.com/ahmadawais/Emoji-Log")
+        .build()
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, EnumIter)]

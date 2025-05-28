@@ -1,7 +1,6 @@
-use miette::SourceOffset;
 use mit_commit::CommitMessage;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "body-wider-than-72-characters";
@@ -14,6 +13,22 @@ pub const HELP_MESSAGE: &str = "It's important to keep the body of the commit na
                             lines in your body no more than 72 characters";
 /// Description of the problem
 pub const ERROR: &str = "Your commit has a body wider than 72 characters";
+
+/// Character limit for body width
+pub const CHARACTER_LIMIT: usize = 72;
+
+pub struct BodyWidthConfig {
+    /// Maximum allowed width for body lines
+    pub character_limit: usize,
+}
+
+impl Default for BodyWidthConfig {
+    fn default() -> Self {
+        Self {
+            character_limit: CHARACTER_LIMIT,
+        }
+    }
+}
 
 /// Checks if the commit message body has lines wider than 72 characters
 ///
@@ -42,11 +57,15 @@ pub const ERROR: &str = "Your commit has a body wider than 72 characters";
 /// );
 /// assert!(Lint::BodyWiderThan72Characters.lint(&failing).is_some());
 /// ```
+/// Configuration for body width linting
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    const LIMIT_A: usize = 72;
+    lint_with_config(commit, &BodyWidthConfig::default())
+}
+
+fn lint_with_config(commit: &CommitMessage, config: &BodyWidthConfig) -> Option<Problem> {
     Some(commit)
-        .filter(|commit| has_problem(commit, LIMIT_A))
-        .map(|commit| create_problem(commit, LIMIT_A))
+        .filter(|commit| has_problem(commit, config.character_limit))
+        .map(|commit| create_problem(commit, config.character_limit))
 }
 
 fn has_problem(commit: &CommitMessage<'_>, limit: usize) -> bool {
@@ -58,82 +77,39 @@ fn has_problem(commit: &CommitMessage<'_>, limit: usize) -> bool {
 }
 
 fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
-    struct LineLabel {
-        text: String,
-        position: usize,
-        length: usize,
-    }
-
-    fn calculate_scissors_start_line(commit: &CommitMessage, commit_text: &str) -> usize {
-        commit_text.lines().count()
-            - commit
-                .get_scissors()
-                .map(|s| String::from(s).lines().count())
-                .unwrap_or_default()
-    }
-
-    fn create_label_for_line(
-        commit_text: &str,
-        line_index: usize,
-        line: &str,
-        limit: usize,
-    ) -> LineLabel {
-        LineLabel {
-            text: "Too long".to_string(),
-            position: SourceOffset::from_location(
-                commit_text,
-                line_index + 1,
-                line.chars().take(limit).map(char::len_utf8).sum::<usize>() + 1,
-            )
-            .offset(),
-            length: line.chars().count().saturating_sub(limit),
-        }
-    }
-
-    fn create_line_labels(
-        commit_text: &str,
-        scissors_start_line: usize,
-        comment_char: Option<&str>,
-        limit: usize,
-    ) -> Vec<LineLabel> {
-        commit_text
-            .lines()
-            .enumerate()
-            .filter(|(line_index, _)| *line_index <= scissors_start_line)
-            .filter(|(_, line)| !comment_char.is_some_and(|cc| line.starts_with(cc)))
-            .filter(|(_, line)| line.chars().count() > limit)
-            .map(|(line_index, line)| create_label_for_line(commit_text, line_index, line, limit))
-            .collect()
-    }
-
-    fn new_problem(commit: &CommitMessage, labels: Vec<LineLabel>) -> Problem {
-        // Convert LineLabel structs to tuples for Problem::new
-        let label_tuples = labels
-            .into_iter()
-            .map(|label| (label.text, label.position, label.length))
-            .collect();
-        Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::BodyWiderThan72Characters,
-            commit,
-            Some(label_tuples),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        )
-    }
-
     let commit_text: String = commit.into();
-    // Create labels for all lines that exceed the limit
-    let labels = create_line_labels(
-        &commit_text,
-        calculate_scissors_start_line(commit, &commit_text),
+    let scissors_start_line = calculate_scissors_start_line(commit, &commit_text);
+    let comment_char = commit.get_comment_char().map(|x| format!("{x} "));
+
+    let mut builder = ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
+        Code::BodyWiderThan72Characters,
         commit
-            .get_comment_char()
-            .map(|x| format!("{x} "))
-            .as_deref(),
-        limit,
-    );
-    new_problem(commit, labels)
+    )
+    .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines");
+
+    // Add labels for all lines that exceed the limit
+    for (line_index, line) in commit_text.lines().enumerate() {
+        // Skip lines after scissors line or comment lines
+        if line_index > scissors_start_line
+            || comment_char.as_ref().is_some_and(|cc| line.starts_with(cc))
+        {
+            continue;
+        }
+
+        // Add label if line exceeds limit
+        builder = builder.with_label_for_line(&commit_text, line_index, line, limit, "Too long");
+    }
+
+    builder.build()
+}
+
+fn calculate_scissors_start_line(commit: &CommitMessage, commit_text: &str) -> usize {
+    commit_text.lines().count()
+        - commit
+            .get_scissors()
+            .map_or(0, |s| String::from(s).lines().count())
 }
 
 #[cfg(test)]
@@ -218,81 +194,92 @@ index 5a83784..ebaee48 100644
     #[test]
     fn test_body_exceeding_width_limit_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(73));
-        test_body_wider_than_72_characters(
-            &message,
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.clone().into(),
-                Some(vec![("Too long".to_string(), 81, 1)]), // Correct offset after 8 bytes for "Subject\n\n"
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 2, &"x".repeat(73), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
     fn test_body_exceeding_width_limit_by_multiple_chars_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(75));
-        test_body_wider_than_72_characters(
-            &message,
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.clone().into(),
-                Some(vec![("Too long".to_string(), 81, 3)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 2, &"x".repeat(75), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
     fn test_body_with_multiple_long_lines_fails() {
         let message = format!("Subject\n\n{}\n{}", "x".repeat(73), "y".repeat(73));
-        test_body_wider_than_72_characters(
-            &message,
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.clone().into(),
-                Some(vec![("Too long".to_string(), 81, 1), ("Too long".to_string(), 155, 1)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 2, &"x".repeat(73), 72, "Too long")
+        .with_label_for_line(&message, 3, &"y".repeat(73), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
     fn test_body_with_some_lines_exceeding_limit_fails() {
         let message = format!("Subject\n\nx\n{}\nx\n", "x".repeat(73));
-        test_body_wider_than_72_characters(
-            &message.clone(),
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.into(),
-                Some(vec![("Too long".to_string(), 83, 1)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 3, &"x".repeat(73), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
     fn test_body_with_last_line_exceeding_limit_fails() {
         let message = format!("Subject\n\n{}", "x".repeat(73));
-        test_body_wider_than_72_characters(
-            &message.clone(),
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.into(),
-                Some(vec![("Too long".to_string(), 81, 1)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 2, &"x".repeat(73), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
@@ -493,31 +480,67 @@ index 5a83784..ebaee48 100644
     fn test_unicode_character_handling() {
         // This string has 73 Unicode characters in a single line (146 bytes)
         let message = format!("Subject\n\n{}", "\u{1f600}".repeat(73));
-        test_body_wider_than_72_characters(
-            &message,
-            Some(Problem::new(
-                ERROR.into(),
-                HELP_MESSAGE.into(),
-                Code::BodyWiderThan72Characters,
-                &message.clone().into(),
-                Some(vec![("Too long".to_string(), 301, 1)]),
-                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-            )).as_ref(),
-        );
+        let commit = CommitMessage::from(message.clone());
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
+            Code::BodyWiderThan72Characters,
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(&message, 2, &"\u{1f600}".repeat(73), 72, "Too long")
+        .build();
+
+        test_body_wider_than_72_characters(&message, Some(&expected_problem));
     }
 
     #[test]
     fn test_null_byte_handling() {
         let message = "\0\n\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-        let expected_problem = Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
+        let commit = CommitMessage::from(message);
+
+        let expected_problem = ProblemBuilder::new(
+            ERROR,
+            HELP_MESSAGE,
             Code::BodyWiderThan72Characters,
-            &CommitMessage::from(message),
-            Some(vec![("Too long".to_string(), 75, 1)]),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
-        );
+            &commit
+        )
+        .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+        .with_label_for_line(message, 2, &"\0".repeat(73), 72, "Too long")
+        .build();
+
         test_body_wider_than_72_characters(message, Some(&expected_problem));
+    }
+
+    #[test]
+    fn test_custom_character_limit() {
+        // Create a custom config with a different character limit
+        let config = BodyWidthConfig {
+            character_limit: 50,
+        };
+
+        // Test with a line exactly at the custom limit
+        let message = format!("Subject\n\n{}", "x".repeat(50));
+        let commit = CommitMessage::from(message);
+        let result = lint_with_config(&commit, &config);
+        assert!(result.is_none(), "Line at custom limit should pass");
+
+        // Test with a line exceeding the custom limit
+        let message = format!("Subject\n\n{}", "x".repeat(51));
+        let commit = CommitMessage::from(message);
+        let result = lint_with_config(&commit, &config);
+        assert!(result.is_some(), "Line exceeding custom limit should fail");
+
+        // Verify the error message references the custom limit
+        if let Some(problem) = result {
+            let report = Report::new(problem);
+            let formatted = fmt_report(&report);
+            assert!(
+                formatted.contains("Too long"),
+                "Error should indicate the line is too long"
+            );
+        }
     }
 
     #[derive(Debug, Clone)]

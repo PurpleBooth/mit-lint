@@ -1,9 +1,7 @@
-use std::{option::Option::None, sync::LazyLock};
-
 use mit_commit::CommitMessage;
-use regex::Regex;
+use std::collections::HashSet;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "not-conventional-commit";
@@ -24,8 +22,88 @@ You can fix it by following style
 /// Description of the problem
 pub const ERROR: &str = "Your commit message isn't in conventional style";
 
-static RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new("^[a-zA-Z0-9]+(\\(\\w+\\))?!?: ").unwrap());
+/// Configuration for conventional commit linting
+#[derive(Default)]
+pub struct ConventionalCommitConfig {
+    /// Allowed commit types (None means any alphanumeric type is allowed)
+    pub allowed_types: Option<HashSet<String>>,
+    /// Allowed commit scopes (None means any word character is allowed)
+    pub allowed_scopes: Option<HashSet<String>>,
+}
+
+impl ConventionalCommitConfig {
+    /// Create a new configuration with custom allowed types and scopes
+    ///
+    /// # Arguments
+    ///
+    /// * `allowed_types` - Optional set of allowed commit types (None means any alphanumeric type is allowed)
+    /// * `allowed_scopes` - Optional set of allowed commit scopes (None means any word character is allowed)
+    ///
+    /// # Returns
+    ///
+    /// A new `ConventionalCommitConfig` with the specified allowed types and scopes
+    #[allow(dead_code)]
+    pub const fn new(
+        allowed_types: Option<HashSet<String>>,
+        allowed_scopes: Option<HashSet<String>>,
+    ) -> Self {
+        Self {
+            allowed_types,
+            allowed_scopes,
+        }
+    }
+}
+
+/// Parse a conventional commit subject line
+///
+/// Returns (type, scope, `breaking_change`, description) if successful
+fn parse_conventional_commit(subject: &str) -> Option<(String, Option<String>, bool, String)> {
+    // Find the colon that separates type/scope from description
+    let colon_pos = subject.find(':')?;
+
+    // Extract the description (must have a space after the colon)
+    if subject.len() <= colon_pos + 1 || subject.chars().nth(colon_pos + 1) != Some(' ') {
+        return None;
+    }
+    let description = subject[colon_pos + 2..].to_string();
+
+    // Parse the type, scope, and breaking change indicator
+    let type_scope_part = &subject[..colon_pos];
+
+    // Check for breaking change indicator
+    let (type_scope_part, breaking_change) = type_scope_part
+        .strip_suffix('!')
+        .map_or((type_scope_part, false), |stripped| (stripped, true));
+
+    // Check for scope in parentheses
+    let (commit_type, scope) = if let (Some(open_paren), Some(close_paren)) =
+        (type_scope_part.find('('), type_scope_part.find(')'))
+    {
+        if open_paren > 0 && close_paren > open_paren && close_paren == type_scope_part.len() - 1 {
+            let commit_type = type_scope_part[..open_paren].to_string();
+            let scope = type_scope_part[open_paren + 1..close_paren].to_string();
+            (commit_type, Some(scope))
+        } else {
+            return None; // Malformed scope
+        }
+    } else {
+        (type_scope_part.to_string(), None)
+    };
+
+    // Validate type is alphanumeric
+    if !commit_type.chars().all(|c| c.is_ascii_alphanumeric()) || commit_type.is_empty() {
+        return None;
+    }
+
+    // Validate scope is alphanumeric if present
+    if let Some(scope) = &scope {
+        if !scope.chars().all(char::is_alphanumeric) || scope.is_empty() {
+            return None;
+        }
+    }
+
+    Some((commit_type, scope, breaking_change, description))
+}
 
 /// Checks if the commit message follows the conventional commit format
 ///
@@ -57,29 +135,60 @@ static RE: LazyLock<Regex> =
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit_message, &ConventionalCommitConfig::default())
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    config: &ConventionalCommitConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| has_problem(commit, config))
+        .map(create_problem)
+}
+
+fn has_problem(commit_message: &CommitMessage<'_>, config: &ConventionalCommitConfig) -> bool {
     let subject: String = commit_message.get_subject().into();
 
-    // Early return if the commit message follows the conventional format
-    if RE.is_match(&subject) {
-        return None;
-    }
+    // Parse the subject line
+    match parse_conventional_commit(&subject) {
+        None => true, // Not a conventional commit format
+        Some((commit_type, scope, _, _)) => {
+            // If allowed_types is Some, check if the type is allowed
+            if let Some(allowed_types) = &config.allowed_types {
+                if !allowed_types.contains(&commit_type) {
+                    return true;
+                }
+            }
 
+            // If allowed_scopes is Some and a scope is present, check if the scope is allowed
+            if let Some(allowed_scopes) = &config.allowed_scopes {
+                if let Some(scope) = scope {
+                    if !allowed_scopes.contains(&scope) {
+                        return true;
+                    }
+                }
+            }
+
+            false
+        }
+    }
+}
+
+fn create_problem(commit_message: &CommitMessage) -> Problem {
     // Create a problem with appropriate labels
     let commit_text = String::from(commit_message.clone());
     let first_line_length = commit_text.lines().next().map(str::len).unwrap_or_default();
 
-    Some(Problem::new(
-        ERROR.into(),
-        HELP_MESSAGE.into(),
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
         Code::NotConventionalCommit,
         commit_message,
-        Some(vec![(
-            "Not conventional".to_string(),
-            0_usize,
-            first_line_length,
-        )]),
-        Some("https://www.conventionalcommits.org/".to_string()),
-    ))
+    )
+    .with_label("Not conventional", 0, first_line_length)
+    .with_url("https://www.conventionalcommits.org/")
+    .build()
 }
 
 #[cfg(test)]

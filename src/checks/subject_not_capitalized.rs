@@ -1,6 +1,6 @@
 use mit_commit::CommitMessage;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "subject-line-not-capitalized";
@@ -20,30 +20,43 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
         .is_some()
 }
 
-pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    fn label_position(commit_message: &CommitMessage) -> usize {
-        commit_message
-            .get_subject()
-            .chars()
-            .filter(|x| x.is_whitespace())
-            .count()
-            .saturating_sub(2)
+pub struct SubjectNotCapitalizedConfig;
+impl Default for SubjectNotCapitalizedConfig {
+    fn default() -> Self {
+        Self
     }
+}
 
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit_message, &SubjectNotCapitalizedConfig)
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    _config: &SubjectNotCapitalizedConfig,
+) -> Option<Problem> {
     Some(commit_message)
-        .filter(|commit_message| has_problem(commit_message))
-        .map(|commit_message: &CommitMessage| Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::SubjectNotCapitalized,
-            commit_message,
-            Some(vec![(
-                "Not capitalised".to_string(),
-                label_position(commit_message),
-                1_usize,
-            )]),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-        ))
+        .filter(|commit| has_problem(commit))
+        .map(create_problem)
+}
+
+fn create_problem(commit_message: &CommitMessage) -> Problem {
+    let position = commit_message
+        .get_subject()
+        .chars()
+        .filter(|x| x.is_whitespace())
+        .count()
+        .saturating_sub(2);
+
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
+        Code::SubjectNotCapitalized,
+        commit_message,
+    )
+    .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+    .with_label("Not capitalised", position, 1)
+    .build()
 }
 
 #[cfg(test)]
@@ -137,7 +150,12 @@ mod tests {
         {
             None => return TestResult::discard(),
             Some(char) => {
-                if char.to_uppercase().to_string() == char.to_string() {
+                // Some Unicode characters don't have proper case mapping
+                // Skip characters that don't have a clear uppercase version
+                if char.to_uppercase().to_string() == char.to_string()
+                    || char.is_uppercase()
+                    || !char.is_alphabetic()
+                {
                     return TestResult::discard();
                 }
             }

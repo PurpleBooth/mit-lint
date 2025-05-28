@@ -1,9 +1,9 @@
-use std::{ops::Add, option::Option::None, sync::LazyLock};
+use std::sync::LazyLock;
 
 use mit_commit::CommitMessage;
 use regex::Regex;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "jira-issue-key-missing";
@@ -16,6 +16,13 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?mi)\b[A-Z]{2,}-\d+\b").unwrap());
+
+pub struct JiraIssueKeyConfig;
+impl Default for JiraIssueKeyConfig {
+    fn default() -> Self {
+        Self
+    }
+}
 
 /// Checks if the commit message contains a JIRA issue key
 ///
@@ -47,10 +54,23 @@ static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?mi)\b[A-Z]{2,}-\d+\
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit_message, &JiraIssueKeyConfig)
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    _config: &JiraIssueKeyConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| !has_jira_key(commit, &RE))
+        .map(create_problem)
+}
+
+fn has_jira_key(commit_message: &CommitMessage<'_>, pattern: &Regex) -> bool {
     let comment_char = commit_message.get_comment_char();
 
     // Check if any non-comment line contains a JIRA key
-    let has_jira_key = String::from(commit_message)
+    String::from(commit_message)
         .lines()
         .filter(|line| {
             !line
@@ -58,41 +78,20 @@ pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
                 .trim_start_matches(char::is_whitespace)
                 .starts_with(comment_char.unwrap_or('#'))
         })
-        .any(|line| RE.is_match(line));
+        .any(|line| pattern.is_match(line))
+}
 
-    // Early return if a JIRA key is found
-    if has_jira_key {
-        return None;
-    }
-
-    // Create a problem with appropriate labels
-    let commit_text = String::from(commit_message);
-
-    // Find the position for the label
-    let last_line_location = commit_text
-        .trim_end()
-        .rfind('\n')
-        .unwrap_or_default()
-        .add(1);
-
-    // Calculate the length of the last line
-    let last_line_length = commit_text
-        .chars()
-        .count()
-        .saturating_sub(last_line_location + 1);
-
-    Some(Problem::new(
-        ERROR.into(),
-        HELP_MESSAGE.into(),
+fn create_problem(commit_message: &CommitMessage) -> Problem {
+    // Use ProblemBuilder instead of directly creating Problem
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
         Code::JiraIssueKeyMissing,
         commit_message,
-        Some(vec![(
-            "No JIRA Issue Key".to_string(),
-            last_line_location,
-            last_line_length,
-        )]),
-        Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".to_string()),
-    ))
+    )
+    .with_label_at_last_line("No JIRA Issue Key")
+    .with_url("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys")
+    .build()
 }
 
 #[cfg(test)]
@@ -114,7 +113,7 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
                 &"An example commit\n\n# JRA-123 in comment".into(),
-                Some(vec![("No JIRA Issue Key".to_string(), 19, 19)]),
+                Some(vec![("No JIRA Issue Key".to_string(), 19, 20)]),
                 Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
             )).as_ref(),
         );

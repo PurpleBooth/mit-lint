@@ -1,8 +1,6 @@
-use std::option::Option::None;
-
 use mit_commit::CommitMessage;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "subject-not-separated-from-body";
@@ -21,27 +19,41 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     subject.lines().count() > 1
 }
 
-pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    if has_problem(commit_message) {
-        let commit_text = String::from(commit_message.clone());
-        let mut lines = commit_text.lines();
-        let first_line_length = lines.next().map(str::len).unwrap_or_default() + 1;
-        let gutter_line_length = lines.next().map(str::len).unwrap_or_default();
-        Some(Problem::new(
-            ERROR.into(),
-            HELP_MESSAGE.into(),
-            Code::SubjectNotSeparateFromBody,
-            commit_message,
-            Some(vec![(
-                "Missing blank line".to_string(),
-                first_line_length,
-                gutter_line_length,
-            )]),
-            Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
-        ))
-    } else {
-        None
+pub struct SubjectNotSeparateFromBodyConfig;
+impl Default for SubjectNotSeparateFromBodyConfig {
+    fn default() -> Self {
+        Self
     }
+}
+
+pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
+    lint_with_config(commit_message, &SubjectNotSeparateFromBodyConfig)
+}
+
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    _config: &SubjectNotSeparateFromBodyConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| has_problem(commit))
+        .map(create_problem)
+}
+
+fn create_problem(commit_message: &CommitMessage) -> Problem {
+    let commit_text = String::from(commit_message.clone());
+    let mut lines = commit_text.lines();
+    let first_line_length = lines.next().map(str::len).unwrap_or_default() + 1;
+    let gutter_line_length = lines.next().map(str::len).unwrap_or_default();
+
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
+        Code::SubjectNotSeparateFromBody,
+        commit_message,
+    )
+    .with_label("Missing blank line", first_line_length, gutter_line_length)
+    .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
+    .build()
 }
 
 #[cfg(test)]

@@ -1,9 +1,9 @@
-use std::{ops::Add, option::Option::None, sync::LazyLock};
+use std::sync::LazyLock;
 
 use mit_commit::CommitMessage;
 use regex::Regex;
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 
 /// Canonical lint ID
 pub const CONFIG: &str = "github-id-missing";
@@ -26,6 +26,19 @@ pub const ERROR: &str = "Your commit message is missing a GitHub ID";
 static RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9-]+#|GH-|#)[0-9]+( |$)").unwrap()
 });
+
+pub struct GitHubIdConfig {
+    /// Regular expression for matching GitHub IDs
+    pub pattern: Regex,
+}
+
+impl Default for GitHubIdConfig {
+    fn default() -> Self {
+        Self {
+            pattern: RE.clone(),
+        }
+    }
+}
 
 /// Checks if the commit message contains a GitHub ID
 ///
@@ -58,36 +71,32 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    // Early return if the pattern matches
-    if commit_message.matches_pattern(&RE) {
-        return None;
-    }
+    lint_with_config(commit_message, &GitHubIdConfig::default())
+}
 
-    // Create a problem with appropriate labels
-    let commit_text = String::from(commit_message);
+fn lint_with_config(
+    commit_message: &CommitMessage<'_>,
+    config: &GitHubIdConfig,
+) -> Option<Problem> {
+    Some(commit_message)
+        .filter(|commit| has_problem(commit, &config.pattern))
+        .map(create_problem)
+}
 
-    // Find the position for the label
-    let last_line_location = commit_text
-        .trim_end()
-        .rfind('\n')
-        .unwrap_or_default()
-        .add(1);
+fn has_problem(commit_message: &CommitMessage<'_>, pattern: &Regex) -> bool {
+    !commit_message.matches_pattern(pattern)
+}
 
-    // Calculate the length of the last line
-    let last_line_length = commit_text.len().saturating_sub(last_line_location + 1);
-
-    Some(Problem::new(
-        ERROR.into(),
-        HELP_MESSAGE.into(),
+fn create_problem(commit_message: &CommitMessage) -> Problem {
+    ProblemBuilder::new(
+        ERROR,
+        HELP_MESSAGE,
         Code::GitHubIdMissing,
         commit_message,
-        Some(vec![(
-            "No GitHub ID".to_string(),
-            last_line_location,
-            last_line_length,
-        )]),
-        Some("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests".to_string()),
-    ))
+    )
+    .with_label_at_last_line("No GitHub ID")
+    .with_url("https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests")
+    .build()
 }
 
 #[cfg(test)]

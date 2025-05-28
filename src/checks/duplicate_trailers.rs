@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, option::Option::None};
 
-use crate::model::{Code, Problem};
+use crate::model::{Code, Problem, ProblemBuilder};
 use mit_commit::{CommitMessage, Trailer};
 
 /// Canonical lint ID
@@ -14,16 +14,37 @@ const TRAILERS_TO_CHECK_FOR_DUPLICATES: [&str; 3] =
 const FIELD_SINGULAR: &str = "field";
 const FIELD_PLURAL: &str = "fields";
 
+/// Configuration for duplicated trailers linting
+pub struct DuplicatedTrailersConfig {
+    /// Trailers to check for duplicates
+    pub trailers_to_check: Vec<String>,
+}
+
+impl Default for DuplicatedTrailersConfig {
+    fn default() -> Self {
+        Self {
+            trailers_to_check: TRAILERS_TO_CHECK_FOR_DUPLICATES
+                .iter()
+                .map(|&s| s.to_string())
+                .collect(),
+        }
+    }
+}
+
 /// Get a list of duplicated trailers from a commit message
 ///
 /// # Arguments
 ///
 /// * `commit_message` - The commit message to check for duplicated trailers
+/// * `trailers_to_check` - List of trailer keys to check for duplicates
 ///
 /// # Returns
 ///
 /// A vector of strings containing the keys of duplicated trailers
-fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
+fn get_duplicated_trailers(
+    commit_message: &CommitMessage<'_>,
+    trailers_to_check: &[String],
+) -> Vec<String> {
     commit_message
         .get_trailers()
         .iter()
@@ -39,7 +60,7 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
         .filter_map(|(trailer, count)| {
             let key = trailer.get_key();
 
-            if count > 1 && TRAILERS_TO_CHECK_FOR_DUPLICATES.contains(&key.as_str()) {
+            if count > 1 && trailers_to_check.contains(&key) {
                 Some(key)
             } else {
                 None
@@ -75,16 +96,25 @@ fn get_duplicated_trailers(commit_message: &CommitMessage<'_>) -> Vec<String> {
 /// );
 /// assert!(DuplicatedTrailers.lint(&failing).is_some());
 /// ```
-///
-/// # Errors
-///
-/// This function will never return an error, only an Option<Problem>
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    let duplicated_trailers = get_duplicated_trailers(commit);
+    lint_with_config(commit, &DuplicatedTrailersConfig::default())
+}
 
-    if duplicated_trailers.is_empty() {
-        return None;
-    }
+fn lint_with_config(
+    commit: &CommitMessage<'_>,
+    config: &DuplicatedTrailersConfig,
+) -> Option<Problem> {
+    Some(commit)
+        .filter(|commit| has_problem(commit, &config.trailers_to_check))
+        .map(|commit| create_problem(commit, &config.trailers_to_check))
+}
+
+fn has_problem(commit: &CommitMessage<'_>, trailers_to_check: &[String]) -> bool {
+    !get_duplicated_trailers(commit, trailers_to_check).is_empty()
+}
+
+fn create_problem(commit: &CommitMessage, trailers_to_check: &[String]) -> Problem {
+    let duplicated_trailers = get_duplicated_trailers(commit, trailers_to_check);
 
     // We need to clone here as String::from works with CommitMessage but not &CommitMessage
     let commit_message = String::from(commit.clone());
@@ -92,11 +122,11 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
 
     // Create labels for all duplicated trailers
     let labels = duplicated_trailers
-        .into_iter()
+        .iter()
         .flat_map(|trailer| {
             // First, collect all positions where the trailer appears
             let positions: Vec<_> = commit_message
-                .match_indices(&trailer)
+                .match_indices(trailer)
                 .skip(1) // Skip the first occurrence as it's not a duplicate
                 .collect();
 
@@ -114,16 +144,18 @@ pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
 
             results
         })
-        .collect();
+        .collect::<Vec<_>>();
 
-    Some(Problem::new(
-        ERROR.into(),
-        warning,
-        Code::DuplicatedTrailers,
-        commit,
-        Some(labels),
-        Some("https://git-scm.com/docs/githooks#_commit_msg".to_string()),
-    ))
+    // Use ProblemBuilder to create the Problem
+    let mut builder = ProblemBuilder::new(ERROR, warning, Code::DuplicatedTrailers, commit)
+        .with_url("https://git-scm.com/docs/githooks#_commit_msg");
+
+    // Add all labels to the builder
+    for (label, position, length) in labels {
+        builder = builder.with_label(label, position, length);
+    }
+
+    builder.build()
 }
 
 /// Generate a warning message for duplicated trailers
