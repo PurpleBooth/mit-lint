@@ -1,5 +1,3 @@
-use std::option::Option::None;
-
 use mit_commit::CommitMessage;
 
 use crate::model::{Code, Problem};
@@ -17,34 +15,35 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     commit_message
         .get_subject()
         .chars()
-        .skip_while(|x| x.is_whitespace())
-        .map(|x| x.to_uppercase().to_string() != x.to_string())
-        .next()
-        .unwrap_or(false)
+        .find(|x| !x.is_whitespace())
+        .filter(|x| x.is_lowercase())
+        .is_some()
 }
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    if has_problem(commit_message) {
-        Some(Problem::new(
+    fn label_position(commit_message: &CommitMessage) -> usize {
+        commit_message
+            .get_subject()
+            .chars()
+            .filter(|x| x.is_whitespace())
+            .count()
+            .saturating_sub(2)
+    }
+
+    Some(commit_message)
+        .filter(|commit_message| has_problem(commit_message))
+        .map(|commit_message: &CommitMessage| Problem::new(
             ERROR.into(),
             HELP_MESSAGE.into(),
             Code::SubjectNotCapitalized,
             commit_message,
             Some(vec![(
                 "Not capitalised".to_string(),
-                commit_message
-                    .get_subject()
-                    .chars()
-                    .filter(|x| x.is_whitespace())
-                    .count()
-                    .saturating_sub(2),
+                label_position(commit_message),
                 1_usize,
             )]),
             Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
         ))
-    } else {
-        None
-    }
 }
 
 #[cfg(test)]
