@@ -65,6 +65,10 @@ fn parse_conventional_commit(subject: &str) -> Option<(String, Option<String>, b
     if subject.len() <= colon_pos + 1 || subject.chars().nth(colon_pos + 1) != Some(' ') {
         return None;
     }
+    // Description must not be empty
+    if subject.len() <= colon_pos + 2 {
+        return None;
+    }
     let description = subject[colon_pos + 2..].to_string();
 
     // Parse the type, scope, and breaking change indicator
@@ -357,29 +361,7 @@ This is an example commit
 ";
         let problem = lint(&CommitMessage::from(message.to_string()));
         let actual = fmt_report(&Report::new(problem.unwrap()));
-        let expected = "NotConventionalCommit (https://www.conventionalcommits.org/)
-
-  x Your commit message isn't in conventional style
-   ,-[1:1]
- 1 | An example commit
-   : ^^^^^^^^|^^^^^^^^
-   :         `-- Not conventional
- 2 | 
-   `----
-  help: It's important to follow the conventional commit style when creating
-        your commit message. By using this style we can automatically
-        calculate the version of software using deployment pipelines, and also
-        generate changelogs and other useful information without human
-        interaction.
-        
-        You can fix it by following style
-        
-        <type>[optional scope]: <description>
-        
-        [optional body]
-        
-        [optional footer(s)]
-"
+        let expected = "NotConventionalCommit (https://www.conventionalcommits.org/)\n\n  x Your commit message isn't in conventional style\n   ,-[1:1]\n 1 | An example commit\n   : ^^^^^^^^|^^^^^^^^\n   :         `-- Not conventional\n 2 | \n   `----\n  help: It's important to follow the conventional commit style when creating\n        your commit message. By using this style we can automatically\n        calculate the version of software using deployment pipelines, and also\n        generate changelogs and other useful information without human\n        interaction.\n        \n        You can fix it by following style\n        \n        <type>[optional scope]: <description>\n        \n        [optional body]\n        \n        [optional footer(s)]\n"
         .to_string();
         assert_eq!(
             actual, expected,
@@ -459,5 +441,102 @@ This is an example commit
 
         let result = lint(&commit);
         TestResult::from_bool(result.is_none())
+    }
+
+    // Tests for custom configurations with allowed_types and allowed_scopes
+    #[test]
+    fn test_lint_with_config_allowed_types() {
+        use std::collections::HashSet;
+
+        // Create a config that only allows "feat" type
+        let mut allowed_types = HashSet::new();
+        allowed_types.insert("feat".to_string());
+        let config = ConventionalCommitConfig::new(Some(allowed_types), None);
+
+        // Test with allowed type
+        let commit_allowed = CommitMessage::from("feat: add new feature");
+        assert!(lint_with_config(&commit_allowed, &config).is_none());
+
+        // Test with disallowed type
+        let commit_disallowed = CommitMessage::from("fix: fix a bug");
+        assert!(lint_with_config(&commit_disallowed, &config).is_some());
+    }
+
+    #[test]
+    fn test_lint_with_config_allowed_scopes() {
+        use std::collections::HashSet;
+
+        // Create a config that only allows "ui" scope
+        let mut allowed_scopes = HashSet::new();
+        allowed_scopes.insert("ui".to_string());
+        let config = ConventionalCommitConfig::new(None, Some(allowed_scopes));
+
+        // Test with allowed scope
+        let commit_allowed = CommitMessage::from("feat(ui): add new UI feature");
+        assert!(lint_with_config(&commit_allowed, &config).is_none());
+
+        // Test with disallowed scope
+        let commit_disallowed = CommitMessage::from("feat(api): add new API feature");
+        assert!(lint_with_config(&commit_disallowed, &config).is_some());
+    }
+
+    // Tests for edge cases in parse_conventional_commit
+    #[test]
+    fn test_parse_conventional_commit_colon_position() {
+        // Test with no space after colon (should fail)
+        assert!(parse_conventional_commit("feat:no-space").is_none());
+
+        // Test with space after colon (should pass)
+        assert!(parse_conventional_commit("feat: with-space").is_some());
+
+        // Test with colon at the end (should fail)
+        assert!(parse_conventional_commit("feat:").is_none());
+
+        // Test with colon at the end followed by a space (should fail)
+        // This specifically tests the condition at line 65: subject.len() <= colon_pos + 1
+        assert!(parse_conventional_commit("feat: ").is_none());
+
+        // Test with colon followed by a space and then empty string (should fail)
+        // This specifically tests the condition at line 69: subject.len() <= colon_pos + 2
+        assert!(parse_conventional_commit("feat: ").is_none());
+
+        // Test with colon at position 0 (should fail because the commit type is empty)
+        assert!(parse_conventional_commit(": description").is_none());
+
+        // Test with colon at a high position (should pass if followed by space and description)
+        let long_type = "a".repeat(100);
+        let commit_message = format!("{long_type}(scope): description");
+        assert!(parse_conventional_commit(&commit_message).is_some());
+    }
+
+    #[test]
+    fn test_parse_conventional_commit_scope_parsing() {
+        // Test with valid scope
+        let result = parse_conventional_commit("feat(ui): add feature");
+        assert!(result.is_some());
+        let (commit_type, scope, _, _) = result.unwrap();
+        assert_eq!(commit_type, "feat");
+        assert_eq!(scope, Some("ui".to_string()));
+
+        // Test with malformed scope (open paren at beginning)
+        assert!(parse_conventional_commit("(ui): add feature").is_none());
+
+        // Test with malformed scope (close paren not at end)
+        assert!(parse_conventional_commit("feat(ui)extra: add feature").is_none());
+
+        // Test with malformed scope (open paren after close paren)
+        assert!(parse_conventional_commit("feat)(: add feature").is_none());
+    }
+
+    #[test]
+    fn test_parse_conventional_commit_scope_validation() {
+        // Test with empty scope (should fail)
+        assert!(parse_conventional_commit("feat(): add feature").is_none());
+
+        // Test with non-alphanumeric scope (should fail)
+        assert!(parse_conventional_commit("feat(ui-component): add feature").is_none());
+
+        // Test with alphanumeric scope (should pass)
+        assert!(parse_conventional_commit("feat(ui123): add feature").is_some());
     }
 }
