@@ -72,16 +72,16 @@ fn create_problem(commit: &CommitMessage) -> Problem {
         line_index: usize,
         line: &str,
     ) -> (String, usize, usize) {
-        let label_text = "Too long".to_string();
-        let position = SourceOffset::from_location(
-            commit_text,
-            line_index + 1,
-            line.chars().take(LIMIT).map(char::len_utf8).sum::<usize>() + 1,
+        (
+            "Too long".to_string(),
+            SourceOffset::from_location(
+                commit_text,
+                line_index + 1,
+                line.chars().take(LIMIT).map(char::len_utf8).sum::<usize>() + 1,
+            )
+            .offset(),
+            line.chars().count().saturating_sub(LIMIT),
         )
-        .offset();
-        let excess_chars = line.chars().count().saturating_sub(LIMIT);
-
-        (label_text, position, excess_chars)
     }
 
     fn create_line_labels(
