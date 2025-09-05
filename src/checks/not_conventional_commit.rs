@@ -97,10 +97,10 @@ fn parse_conventional_commit(subject: &str) -> Option<(String, Option<String>, b
     }
 
     // Validate scope is alphanumeric if present
-    if let Some(scope) = &scope {
-        if !scope.chars().all(char::is_alphanumeric) || scope.is_empty() {
-            return None;
-        }
+    if let Some(scope) = &scope
+        && (!scope.chars().all(char::is_alphanumeric) || scope.is_empty())
+    {
+        return None;
     }
 
     Some((commit_type, scope, breaking_change, description))
@@ -156,19 +156,18 @@ fn has_problem(commit_message: &CommitMessage<'_>, config: &ConventionalCommitCo
         None => true, // Not a conventional commit format
         Some((commit_type, scope, _, _)) => {
             // If allowed_types is Some, check if the type is allowed
-            if let Some(allowed_types) = &config.allowed_types {
-                if !allowed_types.contains(&commit_type) {
-                    return true;
-                }
+            if let Some(allowed_types) = &config.allowed_types
+                && !allowed_types.contains(&commit_type)
+            {
+                return true;
             }
 
             // If allowed_scopes is Some and a scope is present, check if the scope is allowed
-            if let Some(allowed_scopes) = &config.allowed_scopes {
-                if let Some(scope) = scope {
-                    if !allowed_scopes.contains(&scope) {
-                        return true;
-                    }
-                }
+            if let Some(allowed_scopes) = &config.allowed_scopes
+                && let Some(scope) = scope
+                && !allowed_scopes.contains(&scope)
+            {
+                return true;
             }
 
             false
