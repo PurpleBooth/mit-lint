@@ -410,7 +410,6 @@ jobs:
                       TAG_NAME=$(cat bump/current-version)
                       RELEASE_NAME="Release $TAG_NAME"
                       CHANGELOG_BODY=$(cat src/CHANGELOG.md)
-                      
                       jq -n \
                         --arg tag "$TAG_NAME" \
                         --arg name "$RELEASE_NAME" \
