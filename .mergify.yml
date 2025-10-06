@@ -1,3 +1,4 @@
+---
 queue_rules:
   - name: default
     speculative_checks: 20
@@ -18,16 +19,12 @@ queue_rules:
       - check-success="rust-checks / security-audit"
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
-
 pull_request_rules:
   - name: request review on external contributor
-    conditions:
-      - -author=PurpleBooth
+    conditions: [-author=PurpleBooth]
     actions:
       assign:
-        add_users:
-          - PurpleBooth
-
+        add_users: [PurpleBooth]
   - name: automatic rebase for dependencies
     conditions:
       - check-success=lint-markdown / lint-markdown
