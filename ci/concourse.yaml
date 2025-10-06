@@ -1,4 +1,9 @@
 ---
+# Concourse pipeline for mit-lint validation and auto-formatting
+# - Triggers on any change to main
+# - Validates and auto-fixes Rust code (fmt, clippy, check)
+# - Runs tests and security scans
+# - Validates PRs without auto-fixing
 jobs:
   - name: set-pipeline
     serial: true
@@ -392,41 +397,16 @@ jobs:
                   dir: src
                   args: [publish, --token, ((vault:cargo.token))]
             - task: create-codeberg-release
+              file: task/concourse/tasks/codeberg-release/task.yaml
               image: ci-runtime-env
-              config:
-                platform: linux
-                params:
-                  CODEBERG_TOKEN: ((vault:forgejo.token))
-                  REPO_OWNER: PurpleBooth
-                  REPO_NAME: mit-lint
-                inputs:
-                  - name: src
-                  - name: bump
-                run:
-                  path: ash
-                  args:
-                    - -c
-                    - |
-                      TAG_NAME=$(cat bump/current-version)
-                      RELEASE_NAME="Release $TAG_NAME"
-                      CHANGELOG_BODY=$(cat src/CHANGELOG.md)
-                      jq -n \
-                        --arg tag "$TAG_NAME" \
-                        --arg name "$RELEASE_NAME" \
-                        --arg body "$CHANGELOG_BODY" \
-                        '{
-                          tag_name: $tag,
-                          target_commitish: "main",
-                          name: $name,
-                          body: $body,
-                          draft: false,
-                          prerelease: false
-                        }' | \
-                      curl -X POST \
-                        -H "Authorization: token $CODEBERG_TOKEN" \
-                        -H "Content-Type: application/json" \
-                        -d @- \
-                        "https://codeberg.org/api/v1/repos/$REPO_OWNER/$REPO_NAME/releases"
+              input_mapping:
+                src: src
+                task: task
+                bump: bump
+              params:
+                CODEBERG_TOKEN: ((vault:forgejo.token))
+                REPO_OWNER: PurpleBooth
+                REPO_NAME: mit-lint
       - params:
           repository: repo-main
         put: repo-main
