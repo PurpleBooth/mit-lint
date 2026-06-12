@@ -41,8 +41,6 @@ pub fn lint(commit_message: &CommitMessage<'_>, lints: &Lints) -> Vec<Problem> {
     lints
         .clone()
         .into_iter()
-        .collect::<Vec<_>>()
-        .into_iter()
         .filter_map(|lint| lint.lint(commit_message))
         .collect::<Vec<Problem>>()
 }

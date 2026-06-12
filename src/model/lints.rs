@@ -2,7 +2,6 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     convert::TryFrom,
     sync::LazyLock,
-    vec::IntoIter,
 };
 
 use miette::Diagnostic;
@@ -118,10 +117,10 @@ impl Lints {
 
 impl IntoIterator for Lints {
     type Item = Lint;
-    type IntoIter = IntoIter<Lint>;
+    type IntoIter = std::collections::btree_set::IntoIter<Lint>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.lints.into_iter().collect::<Vec<_>>().into_iter()
+        self.lints.into_iter()
     }
 }
 
