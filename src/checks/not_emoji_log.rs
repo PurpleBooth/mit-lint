@@ -77,13 +77,10 @@ fn lint_with_config(
 }
 
 fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
-    // Check if the commit message starts with any of the valid emoji log prefixes
-    !Prefix::iter().any(|prefix| {
-        commit_message
-            .get_subject()
-            .to_string()
-            .starts_with(&String::from(prefix))
-    })
+    // Check if the commit message starts with any of the valid emoji log prefixes.
+    // Compute the subject string once rather than per-prefix.
+    let subject = commit_message.get_subject().to_string();
+    !Prefix::iter().any(|prefix| subject.starts_with(&String::from(prefix)))
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {

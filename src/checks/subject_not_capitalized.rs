@@ -205,12 +205,11 @@ mod tests {
         {
             None => return TestResult::discard(),
             Some(char) => {
-                // Some Unicode characters don't have proper case mapping
-                // Skip characters that don't have a clear uppercase version
-                if char.to_uppercase().to_string() == char.to_string()
-                    || char.is_uppercase()
-                    || !char.is_alphabetic()
-                {
+                // We only want characters that the lint detects as problems,
+                // i.e. characters where is_lowercase() returns true.
+                // Skip titlecase, uppercase, non-alphabetic, and characters
+                // without a distinct uppercase form.
+                if !char.is_lowercase() || char.to_uppercase().to_string() == char.to_string() {
                     return TestResult::discard();
                 }
             }

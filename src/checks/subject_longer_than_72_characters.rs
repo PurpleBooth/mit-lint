@@ -67,11 +67,11 @@ fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
 }
 
 fn subject_length(commit: &CommitMessage<'_>) -> usize {
-    commit
-        .get_subject()
+    let subject = commit.get_subject();
+    subject
         .chars()
         .position(is_newline)
-        .unwrap_or_else(|| commit.get_subject().chars().count())
+        .unwrap_or_else(|| subject.chars().count())
 }
 
 const fn is_newline(character: char) -> bool {

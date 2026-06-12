@@ -67,12 +67,10 @@ fn lint_with_config(
 fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     commit_message
         .get_subject()
-        .to_string()
-        .trim_end()
         .chars()
-        .next_back()
-        .as_ref()
-        .is_some_and(|x| *x == '.')
+        .rev()
+        .find(|c| !c.is_whitespace())
+        .is_some_and(|c| c == '.')
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {
