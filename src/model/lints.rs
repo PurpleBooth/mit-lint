@@ -22,7 +22,7 @@ static AVAILABLE: LazyLock<Lints> = LazyLock::new(|| {
 });
 
 impl Lints {
-    /// Create a new lint
+    /// Create a new collection of lints
     ///
     /// # Examples
     ///
@@ -162,17 +162,18 @@ impl TryFrom<Vec<&str>> for Lints {
     type Error = Error;
 
     fn try_from(value: Vec<&str>) -> Result<Self, Self::Error> {
+        let len = value.len();
         let lints = value
             .into_iter()
             .try_fold(
-                vec![],
-                |lints: Vec<Lint>, item_name| -> Result<Vec<Lint>, Error> {
+                Vec::with_capacity(len),
+                |mut lints: Vec<Lint>, item_name| -> Result<Vec<Lint>, Error> {
                     let lint = Lint::try_from(item_name)?;
-
-                    Ok([lints, vec![lint]].concat())
+                    lints.push(lint);
+                    Ok(lints)
                 },
-            )
-            .map(Vec::into_iter)?;
+            )?
+            .into_iter();
 
         Ok(Self::new(lints.collect()))
     }
@@ -253,6 +254,46 @@ mod tests {
         let actual: Result<Lints, Error> = lints.try_into();
 
         actual.unwrap_err();
+    }
+
+    #[test]
+    fn test_try_from_preserves_all_lints_from_names() {
+        // Regression test: previously used O(n²) [vec, vec].concat() allocation.
+        // This test verifies that all lint names round-trip correctly through
+        // TryFrom<Vec<&str>>, which would fail if the replacement had a bug.
+        let all_names: Vec<&str> = Lint::all_lints().map(Lint::name).collect();
+        let result: Lints = all_names
+            .try_into()
+            .expect("All lint names should be valid");
+        let expected = Lints::new(Lint::all_lints().collect());
+        assert_eq!(
+            result, expected,
+            "All lints should round-trip through name parsing"
+        );
+    }
+
+    #[test]
+    fn test_try_from_preserves_duplicate_names_as_unique() {
+        // Duplicate names should result in a single lint entry (BTreeSet dedup)
+        let names = vec![
+            "duplicated-trailers",
+            "duplicated-trailers",
+            "jira-issue-key-missing",
+        ];
+        let result: Lints = names.try_into().expect("Valid lint names should parse");
+        let mut expected_set = BTreeSet::new();
+        expected_set.insert(Lint::DuplicatedTrailers);
+        expected_set.insert(Lint::JiraIssueKeyMissing);
+        assert_eq!(result, Lints::new(expected_set));
+    }
+
+    #[test]
+    fn test_try_from_empty_vec_produces_empty_lints() {
+        let names: Vec<&str> = vec![];
+        let result: Lints = names
+            .try_into()
+            .expect("Empty vec should produce empty Lints");
+        assert!(result.clone().into_iter().next().is_none());
     }
 
     #[quickcheck]

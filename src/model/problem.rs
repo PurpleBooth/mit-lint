@@ -96,7 +96,7 @@ impl Problem {
             error,
             tip,
             code,
-            commit_message: String::from(commit_message.clone()),
+            commit_message: String::from(commit_message),
             labels,
             url,
         }
@@ -389,6 +389,27 @@ mod tests {
                 .map(|x| (x.label().unwrap().to_string(), x.offset(), x.len()))
                 .collect::<Vec<_>>(),
             vec![("String".to_string(), start, offset)]
+        );
+    }
+
+    #[test]
+    fn test_new_preserves_commit_message_without_unnecessary_clone() {
+        // Regression test: Problem::new used to clone the CommitMessage unnecessarily
+        // before converting to String. Verify the commit message is preserved exactly.
+        let original = "feat: add unicode support ñ ö ü 日本語";
+        let commit = CommitMessage::from(original);
+        let problem = Problem::new(
+            "Error".into(),
+            "Fix it".into(),
+            Code::BodyWiderThan72Characters,
+            &commit,
+            None,
+            None,
+        );
+        assert_eq!(
+            problem.commit_message(),
+            CommitMessage::from(original),
+            "Commit message should be preserved exactly through Problem::new()"
         );
     }
 }

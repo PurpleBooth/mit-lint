@@ -143,7 +143,7 @@ impl ProblemBuilder {
             self.error,
             self.tip,
             self.code,
-            &self.commit_message.clone().into(),
+            &self.commit_message.into(),
             labels,
             self.url,
         )
@@ -351,6 +351,23 @@ mod tests {
             suffix.chars().count(),
             suffix.len(),
             labels[0].len()
+        );
+    }
+
+    #[test]
+    fn test_build_preserves_commit_message_without_unnecessary_clone() {
+        // Regression test: build() used to clone the commit_message String unnecessarily.
+        // Verify the commit message is preserved correctly through the build process.
+        let original_text = "Test commit message with unicode: ñ ö ü";
+        let commit = CommitMessage::from(original_text);
+        let problem =
+            ProblemBuilder::new("Error", "Fix it", Code::BodyWiderThan72Characters, &commit)
+                .build();
+
+        assert_eq!(
+            problem.commit_message(),
+            CommitMessage::from(original_text),
+            "Commit message should be preserved through build()"
         );
     }
 }
