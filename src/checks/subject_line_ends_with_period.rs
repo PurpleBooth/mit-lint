@@ -71,8 +71,8 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
         .trim_end()
         .chars()
         .next_back()
-        .filter(|x| *x == '.')
-        .is_some()
+        .as_ref()
+        .is_some_and(|x| *x == '.')
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {
