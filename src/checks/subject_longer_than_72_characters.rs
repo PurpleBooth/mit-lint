@@ -46,7 +46,14 @@ fn has_problem(commit: &CommitMessage<'_>, limit: usize) -> bool {
 }
 
 fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
-    let subject_length = subject_length(commit);
+    let subject = commit.get_subject();
+    let byte_offset: usize = subject.chars().take(limit).map(char::len_utf8).sum();
+    let byte_length: usize = subject
+        .chars()
+        .skip(limit)
+        .take_while(|c| *c != '\n')
+        .map(char::len_utf8)
+        .sum();
 
     ProblemBuilder::new(
         ERROR,
@@ -54,7 +61,7 @@ fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
         Code::SubjectLongerThan72Characters,
         commit,
     )
-    .with_label("Too long", limit, subject_length - limit)
+    .with_label("Too long", byte_offset, byte_length)
     .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
     .build()
 }
@@ -259,6 +266,25 @@ index 5a83784..ebaee48 100644
                 Code::SubjectLongerThan72Characters,
                 &message.into(),
                 Some(vec![("Too long".to_string(), 72_usize, 1_usize)]),
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
+            )).as_ref(),
+        );
+    }
+
+    #[test]
+    fn longer_than_72_characters_with_multibyte_unicode() {
+        // 73 'ä' characters — each 'ä' is 2 bytes in UTF-8.
+        // The 72-char boundary is at byte offset 144, and the remaining 1 char is 2 bytes.
+        // Buggy code passes character counts (72, 1) instead of byte offsets (144, 2).
+        let subject = "ä".repeat(73);
+        test_subject_longer_than_72_characters(
+            &subject.clone(),
+            Some(Problem::new(
+                ERROR.into(),
+                HELP_MESSAGE.into(),
+                Code::SubjectLongerThan72Characters,
+                &subject.into(),
+                Some(vec![("Too long".to_string(), 144_usize, 2_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )).as_ref(),
         );
