@@ -41,12 +41,17 @@ fn lint_with_config(
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {
-    let position: usize = commit_message
-        .get_subject()
+    let subject = commit_message.get_subject();
+    let position: usize = subject
         .chars()
         .take_while(|x| x.is_whitespace())
         .map(char::len_utf8)
         .sum();
+
+    let length: usize = subject
+        .chars()
+        .find(|x| !x.is_whitespace())
+        .map_or(1, char::len_utf8);
 
     ProblemBuilder::new(
         ERROR,
@@ -55,7 +60,7 @@ fn create_problem(commit_message: &CommitMessage) -> Problem {
         commit_message,
     )
     .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines")
-    .with_label("Not capitalised", position, 1)
+    .with_label("Not capitalised", position, length)
     .build()
 }
 
@@ -65,7 +70,7 @@ mod tests {
     use std::option::Option::None;
 
     use crate::{Code, Problem};
-    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+    use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, Report};
     use mit_commit::CommitMessage;
     use quickcheck::TestResult;
 
@@ -135,6 +140,29 @@ mod tests {
         // Test with the specific character "ǅ" (U+01C5 LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON)
         // This is a titlecase character in Unicode
         run_test("ǅ", None);
+    }
+
+    #[test]
+    fn test_multibyte_lowercase_char_label_uses_byte_length() {
+        // "ä" is a lowercase character that is 2 bytes in UTF-8.
+        // The label must use the byte length (2), not a hardcoded 1.
+        let message = "ä test commit\n# comment";
+        let commit = CommitMessage::from(message);
+        let result = lint(&commit);
+
+        let problem = result.expect("should detect lowercase 'ä'");
+        let labels: Vec<_> = problem
+            .labels()
+            .unwrap()
+            .map(|span| (span.label().unwrap().to_string(), span.offset(), span.len()))
+            .collect();
+
+        assert_eq!(labels.len(), 1, "Expected 1 label, got {labels:?}");
+        assert_eq!(
+            labels[0],
+            ("Not capitalised".to_string(), 0, 2),
+            "Label for 'ä' should be at byte offset 0 with byte length 2"
+        );
     }
 
     #[test]
