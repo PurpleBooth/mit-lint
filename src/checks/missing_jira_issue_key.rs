@@ -67,18 +67,7 @@ fn lint_with_config(
 }
 
 fn has_jira_key(commit_message: &CommitMessage<'_>, pattern: &Regex) -> bool {
-    let comment_char = commit_message.get_comment_char();
-
-    // Check if any non-comment line contains a JIRA key
-    String::from(commit_message)
-        .lines()
-        .filter(|line| {
-            !line
-                .trim_start()
-                .trim_start_matches(char::is_whitespace)
-                .starts_with(comment_char.unwrap_or('#'))
-        })
-        .any(|line| pattern.is_match(line))
+    commit_message.matches_pattern(pattern)
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {
@@ -366,7 +355,7 @@ This is an example commit
                 HELP_MESSAGE.into(),
                 Code::JiraIssueKeyMissing,
                 &message.into(),
-                Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
+                Some(vec![("No JIRA Issue Key".to_string(), 100_usize, 7_usize)]),
                 Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
             )).as_ref(),
         );
