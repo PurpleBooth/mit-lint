@@ -16,8 +16,8 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
         .get_subject()
         .chars()
         .find(|x| !x.is_whitespace())
-        .filter(|x| x.is_lowercase())
-        .is_some()
+        .as_ref()
+        .is_some_and(|x| x.is_lowercase())
 }
 
 pub struct SubjectNotCapitalizedConfig;
