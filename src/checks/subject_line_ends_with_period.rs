@@ -79,17 +79,21 @@ fn create_problem(commit_message: &CommitMessage) -> Problem {
     // Create a problem with appropriate labels
     let subject = commit_message.get_subject().to_string();
 
-    // Calculate the position of the period(s)
-    let period_position = subject.len()
-        - subject
-            .chars()
+    // Calculate the position of the period(s) using byte offsets
+    // (LabeledSpan expects byte offsets, not char offsets)
+    let trimmed = subject.trim_end();
+
+    // period_position = start of trailing periods (skip the non-period trailing whitespace)
+    let period_position = trimmed.len()
+        - trimmed
+            .bytes()
             .rev()
-            .filter(|ch| ch == &'.' || ch.is_whitespace())
-            .count()
-            .saturating_sub(2);
+            .filter(|b| !b.is_ascii_whitespace())
+            .take_while(|b| *b == b'.')
+            .count();
 
     // Count how many periods there are
-    let period_count = subject
+    let period_count = trimmed
         .chars()
         .rev()
         .filter(|ch| !ch.is_whitespace())
@@ -111,7 +115,7 @@ fn create_problem(commit_message: &CommitMessage) -> Problem {
 mod tests {
     use super::*;
     use crate::model::{Code, Problem};
-    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+    use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, Report};
     use mit_commit::CommitMessage;
     use quickcheck::TestResult;
     use std::option::Option::None;
@@ -127,8 +131,7 @@ mod tests {
 
     #[test]
     fn subject_ends_with_period() {
-        let message = "Subject Line.
-";
+        let message = "Subject Line.\n";
         run_test(
             message,
             Some(Problem::new(
@@ -136,10 +139,10 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
+                Some(vec![("Unneeded period".to_string(), 12_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".parse().unwrap()),
             )).as_ref(),
-            );
+        );
     }
 
     #[test]
@@ -152,10 +155,10 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 1_usize)]),
+                Some(vec![("Unneeded period".to_string(), 12_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )).as_ref(),
-            );
+        );
     }
 
     #[test]
@@ -168,10 +171,10 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
-                Some(vec![("Unneeded period".to_string(), 13_usize, 3_usize)]),
+                Some(vec![("Unneeded period".to_string(), 12_usize, 3_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )).as_ref(),
-            );
+        );
     }
 
     #[test]
@@ -184,9 +187,31 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectEndsWithPeriod,
                 &message.into(),
-                Some(vec![("Unneeded period".to_string(), 1_usize, 1_usize)]),
+                Some(vec![("Unneeded period".to_string(), 0_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )).as_ref(),
+        );
+    }
+
+    #[test]
+    fn subject_with_multibyte_chars_ends_with_period() {
+        // "Ünïcödé." has multi-byte UTF-8 chars before the period
+        // byte length = 12, char length = 8, period at byte offset 11
+        let message = "Ünïcödé.\n";
+        let problem = lint(&CommitMessage::from(message)).unwrap();
+
+        // Get the labels from the diagnostic
+        let labels: Vec<_> = problem
+            .labels()
+            .unwrap()
+            .map(|span| (span.label().unwrap().to_string(), span.offset(), span.len()))
+            .collect();
+
+        assert_eq!(labels.len(), 1, "Expected 1 label, got {labels:?}");
+        assert_eq!(
+            labels[0],
+            ("Unneeded period".to_string(), 11, 1),
+            "Period label should be at byte offset 11 with length 1"
         );
     }
 
