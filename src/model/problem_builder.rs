@@ -104,7 +104,7 @@ impl ProblemBuilder {
         )
         .offset();
 
-        let length = line.chars().count().saturating_sub(limit);
+        let length: usize = line.chars().skip(limit).map(char::len_utf8).sum();
 
         self.with_label(label_text, position, length)
     }
@@ -316,6 +316,41 @@ mod tests {
             expected_position,
             limit,
             line_index + 1
+        );
+    }
+
+    #[test]
+    fn test_with_label_for_line_uses_byte_length_for_unicode() {
+        // A line with exactly 72 ASCII characters followed by multi-byte Unicode characters
+        let prefix = "a".repeat(72);
+        let suffix = "éé"; // each 'é' is 2 bytes in UTF-8
+        let line = format!("{prefix}{suffix}");
+        let commit_text = format!("Subject\n\n{line}");
+        let commit = CommitMessage::from(commit_text.as_str());
+
+        let problem = ProblemBuilder::new(
+            "Error message",
+            "Fix advice",
+            Code::BodyWiderThan72Characters,
+            &commit,
+        )
+        .with_label_for_line(&commit_text, 2, &line, 72, "Too long")
+        .build();
+
+        let labels = problem.labels().unwrap().collect::<Vec<_>>();
+        assert_eq!(labels.len(), 1);
+
+        // The label should cover the byte length of the suffix, not the character count
+        let expected_length = suffix.len(); // 4 bytes for "éé"
+        assert_eq!(
+            labels[0].len(),
+            expected_length,
+            "Label length should be {} bytes for the suffix '{}' ({} chars, {} bytes), but got {}",
+            expected_length,
+            suffix,
+            suffix.chars().count(),
+            suffix.len(),
+            labels[0].len()
         );
     }
 }
