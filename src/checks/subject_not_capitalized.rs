@@ -41,12 +41,12 @@ fn lint_with_config(
 }
 
 fn create_problem(commit_message: &CommitMessage) -> Problem {
-    let position = commit_message
+    let position: usize = commit_message
         .get_subject()
         .chars()
-        .filter(|x| x.is_whitespace())
-        .count()
-        .saturating_sub(2);
+        .take_while(|x| x.is_whitespace())
+        .map(char::len_utf8)
+        .sum();
 
     ProblemBuilder::new(
         ERROR,
@@ -93,6 +93,21 @@ mod tests {
     }
 
     #[test]
+    fn test_two_leading_spaces_with_lowercase_subject_fails() {
+        run_test(
+            "  hello",
+            Some(Problem::new(
+                ERROR.into(),
+                HELP_MESSAGE.into(),
+                Code::SubjectNotCapitalized,
+                &CommitMessage::from("  hello"),
+                Some(vec![("Not capitalised".to_string(), 2_usize, 1_usize)]),
+                Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
+            )).as_ref(),
+        );
+    }
+
+    #[test]
     fn test_leading_space_with_lowercase_subject_fails() {
         run_test(
             "  subject line",
@@ -101,7 +116,7 @@ mod tests {
                 HELP_MESSAGE.into(),
                 Code::SubjectNotCapitalized,
                 &CommitMessage::from("  subject line"),
-                Some(vec![("Not capitalised".to_string(), 1_usize, 1_usize)]),
+                Some(vec![("Not capitalised".to_string(), 2_usize, 1_usize)]),
                 Some("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines".to_string()),
             )).as_ref(),
         );
