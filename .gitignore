@@ -8,3 +8,4 @@ mutants.out*
 /.aider.input.history
 /.aider.*
 .aider*
+.worktrees/
