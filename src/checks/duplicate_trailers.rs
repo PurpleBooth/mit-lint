@@ -124,20 +124,28 @@ fn create_problem(commit: &CommitMessage, trailers_to_check: &[String]) -> Probl
     let labels = duplicated_trailers
         .iter()
         .flat_map(|trailer| {
-            // First, collect all positions where the trailer appears
-            let positions: Vec<_> = commit_message
-                .match_indices(trailer)
-                .skip(1) // Skip the first occurrence as it's not a duplicate
-                .collect();
-
-            // Then, calculate line lengths for each position
             let mut results = Vec::new();
-            for (position, _) in positions {
-                let line_length = commit_message[position..]
-                    .find('\n')
-                    .unwrap_or(commit_message.len() - position);
+            let mut occurrence_count = 0;
+            let mut offset = 0;
 
-                results.push((format!("Duplicated `{trailer}`"), position, line_length));
+            while offset < commit_message.len() {
+                let remaining = &commit_message[offset..];
+                let line_end = remaining
+                    .find('\n')
+                    .map_or(commit_message.len(), |i| offset + i);
+                let line = &commit_message[offset..line_end];
+
+                if line.starts_with(&format!("{trailer}: ")) {
+                    occurrence_count += 1;
+                    if occurrence_count > 1 {
+                        results.push((format!("Duplicated `{trailer}`"), offset, line.len()));
+                    }
+                }
+
+                if line_end == commit_message.len() {
+                    break;
+                }
+                offset = line_end + 1;
             }
 
             results
@@ -518,6 +526,55 @@ Co-authored-by: Billie Thompson <email@example.com>
             "Label length should be byte length of trailer line, got {} (expected {})",
             len,
             trailer_line.len()
+        );
+    }
+
+    #[test]
+    fn test_match_indices_false_positive_in_body() {
+        // The body contains "Signed-off-by" as plain text, not as a trailer
+        // There is one actual duplicate trailer
+        let message = "An example commit\n\nPlease Signed-off-by here\n\nSigned-off-by: Billie Thompson <email@example.com>\nSigned-off-by: Billie Thompson <email@example.com>\n";
+        let problem = lint(&CommitMessage::from(message.to_string()));
+
+        // Should still detect the problem
+        assert!(problem.is_some());
+
+        // But should only have ONE label (for the actual duplicate)
+        let labels: Vec<_> = problem
+            .unwrap()
+            .labels()
+            .unwrap()
+            .map(|span| (span.label().unwrap().to_string(), span.offset(), span.len()))
+            .collect();
+
+        assert_eq!(
+            labels.len(),
+            1,
+            "Expected 1 label for the single duplicate trailer, but got {labels:?}"
+        );
+    }
+
+    #[test]
+    fn test_match_indices_false_positive_trailer_value_contains_key() {
+        // A trailer value contains another trailer key
+        let message = "An example commit\n\nSigned-off-by: Co-authored-by <email@example.com>\nCo-authored-by: Billie Thompson <email@example.com>\nCo-authored-by: Billie Thompson <email@example.com>\n";
+        let problem = lint(&CommitMessage::from(message.to_string()));
+
+        // Should detect the problem
+        assert!(problem.is_some());
+
+        // Should only have ONE label for the duplicated Co-authored-by trailer
+        let labels: Vec<_> = problem
+            .unwrap()
+            .labels()
+            .unwrap()
+            .map(|span| (span.label().unwrap().to_string(), span.offset(), span.len()))
+            .collect();
+
+        assert_eq!(
+            labels.len(),
+            1,
+            "Expected 1 label for the single duplicate trailer, but got {labels:?}"
         );
     }
 }
