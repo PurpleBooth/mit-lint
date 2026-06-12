@@ -24,7 +24,7 @@ Be careful just putting '#642' on a line by itself, as '#' is the default commen
 pub const ERROR: &str = "Your commit message is missing a GitHub ID";
 
 static RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9-]+#|GH-|#)[0-9]+( |$)").unwrap()
+    Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9_-]+#|GH-|#)[0-9]+( |$)").unwrap()
 });
 
 pub struct GitHubIdConfig {
@@ -271,6 +271,20 @@ AnUser/git-mit#642
 This is an example commit
 
 AnOrganisation/git-mit#642
+",
+            None,
+        );
+    }
+
+    #[test]
+    fn test_github_id_with_underscore_in_repo_name_passes() {
+        // GitHub repos can have underscores in their names (e.g. my_repo)
+        test_has_missing_github_id(
+            "An example commit
+
+This is an example commit
+
+AnUser/my_repo#642
 ",
             None,
         );

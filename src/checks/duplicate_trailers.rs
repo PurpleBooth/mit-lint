@@ -120,48 +120,39 @@ fn create_problem(commit: &CommitMessage, trailers_to_check: &[String]) -> Probl
     let commit_message = String::from(commit.clone());
     let warning = warning(&duplicated_trailers);
 
-    // Create labels for all duplicated trailers
-    let labels = duplicated_trailers
+    // Create labels for all duplicated trailers using iterator-based line scanning.
+    // We need to track byte offsets manually since str::split doesn't provide them.
+    // The iterator feeds directly into the fold, avoiding an intermediate collection.
+    duplicated_trailers
         .iter()
         .flat_map(|trailer| {
-            let mut results = Vec::new();
+            let prefix = format!("{trailer}: ");
             let mut occurrence_count = 0;
-            let mut offset = 0;
-
-            while offset < commit_message.len() {
-                let remaining = &commit_message[offset..];
-                let line_end = remaining
-                    .find('\n')
-                    .map_or(commit_message.len(), |i| offset + i);
-                let line = &commit_message[offset..line_end];
-
-                if line.starts_with(&format!("{trailer}: ")) {
-                    occurrence_count += 1;
-                    if occurrence_count > 1 {
-                        results.push((format!("Duplicated `{trailer}`"), offset, line.len()));
-                    }
-                }
-
-                if line_end == commit_message.len() {
-                    break;
-                }
-                offset = line_end + 1;
-            }
-
-            results
+            commit_message
+                .split('\n')
+                .scan(0usize, move |offset, line| {
+                    let start = *offset;
+                    let label = if line.starts_with(&prefix) {
+                        occurrence_count += 1;
+                        if occurrence_count > 1 {
+                            Some((format!("Duplicated `{trailer}`"), start, line.len()))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+                    *offset += line.len() + 1; // +1 for the '\n'
+                    Some(label)
+                })
+                .flatten()
         })
-        .collect::<Vec<_>>();
-
-    // Use ProblemBuilder to create the Problem
-    let mut builder = ProblemBuilder::new(ERROR, warning, Code::DuplicatedTrailers, commit)
-        .with_url("https://git-scm.com/docs/githooks#_commit_msg");
-
-    // Add all labels to the builder
-    for (label, position, length) in labels {
-        builder = builder.with_label(label, position, length);
-    }
-
-    builder.build()
+        .fold(
+            ProblemBuilder::new(ERROR, warning, Code::DuplicatedTrailers, commit)
+                .with_url("https://git-scm.com/docs/githooks#_commit_msg"),
+            |builder, (label, position, length)| builder.with_label(label, position, length),
+        )
+        .build()
 }
 
 /// Generate a warning message for duplicated trailers
