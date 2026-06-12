@@ -512,11 +512,7 @@ impl TryFrom<&str> for Lint {
 
     fn try_from(from: &str) -> Result<Self, Self::Error> {
         Self::all_lints()
-            .zip(Self::all_lints().map(|lint| format!("{lint}")))
-            .filter_map(|(lint, name): (Self, String)| if name == from { Some(lint) } else { None })
-            .collect::<Vec<Self>>()
-            .first()
-            .copied()
+            .find(|lint| lint.name() == from)
             .ok_or_else(|| Error::new_lint_not_found(from))
     }
 }
