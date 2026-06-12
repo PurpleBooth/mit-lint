@@ -133,11 +133,9 @@ fn create_problem(commit: &CommitMessage, trailers_to_check: &[String]) -> Probl
             // Then, calculate line lengths for each position
             let mut results = Vec::new();
             for (position, _) in positions {
-                let line_length = commit_message
-                    .chars()
-                    .skip(position)
-                    .take_while(|x| x != &'\n')
-                    .count();
+                let line_length = commit_message[position..]
+                    .find('\n')
+                    .unwrap_or(commit_message.len() - position);
 
                 results.push((format!("Duplicated `{trailer}`"), position, line_length));
             }
@@ -185,7 +183,7 @@ fn warning(duplicated_trailers: &[String]) -> String {
 mod tests {
     use std::option::Option::None;
 
-    use miette::{GraphicalReportHandler, GraphicalTheme, Report};
+    use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, Report};
     use mit_commit::CommitMessage;
     use quickcheck::TestResult;
 
@@ -480,5 +478,46 @@ Co-authored-by: Billie Thompson <email@example.com>
         let message = CommitMessage::from(commit);
         let result = lint(&message);
         TestResult::from_bool(result.is_none())
+    }
+
+    #[test]
+    fn test_duplicate_trailers_label_position_with_multibyte_chars() {
+        // Multi-byte UTF-8 chars (ä, ö, ü) in the body before trailers
+        let message = "Beispiel-Commit\n\nÜberprüfung der Änderungen im Börsenbereich.\n\nSigned-off-by: Billie Thompson <email@example.com>\nSigned-off-by: Billie Thompson <email@example.com>\n";
+        let problem = lint(&CommitMessage::from(message.to_string())).unwrap();
+
+        // Get the labels from the diagnostic
+        let labels: Vec<_> = problem
+            .labels()
+            .unwrap()
+            .map(|span| (span.label().unwrap().to_string(), span.offset(), span.len()))
+            .collect();
+
+        // There should be exactly 1 label for the duplicated Signed-off-by
+        assert_eq!(labels.len(), 1, "Expected 1 label, got {labels:?}");
+        let (label_text, offset, len) = &labels[0];
+        assert_eq!(label_text, "Duplicated `Signed-off-by`");
+
+        // The label offset should point to the byte position of the second "Signed-off-by"
+        let expected_byte_offset = message.find("Signed-off-by").unwrap();
+        let second_occurrence = message[expected_byte_offset + 1..]
+            .find("Signed-off-by")
+            .unwrap()
+            + expected_byte_offset
+            + 1;
+        assert_eq!(
+            *offset, second_occurrence,
+            "Label offset should be byte position of second trailer"
+        );
+
+        // The label length should cover the full trailer line in bytes
+        let trailer_line = "Signed-off-by: Billie Thompson <email@example.com>";
+        assert_eq!(
+            *len,
+            trailer_line.len(),
+            "Label length should be byte length of trailer line, got {} (expected {})",
+            len,
+            trailer_line.len()
+        );
     }
 }
