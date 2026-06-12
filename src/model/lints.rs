@@ -236,10 +236,9 @@ mod tests {
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    #[allow(unused_must_use)]
     #[quickcheck]
     fn no_lint_segfaults(lint: Lint, commit: String) -> TestResult {
-        lint.lint(&commit.into());
+        let _ = lint.lint(&commit.into());
 
         TestResult::passed()
     }

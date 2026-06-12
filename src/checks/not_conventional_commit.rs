@@ -42,7 +42,7 @@ impl ConventionalCommitConfig {
     /// # Returns
     ///
     /// A new `ConventionalCommitConfig` with the specified allowed types and scopes
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Used in tests only; public API for downstream consumers
     pub const fn new(
         allowed_types: Option<HashSet<String>>,
         allowed_scopes: Option<HashSet<String>>,
