@@ -346,4 +346,29 @@ This is an example commit
         let result = lint(&message);
         TestResult::from_bool(result.is_none())
     }
+
+    #[test]
+    fn test_jira_key_in_scissors_section_is_ignored() {
+        let message = [
+            "An example commit",
+            "",
+            "This is an example commit",
+            "# ------------------------ >8 ------------------------",
+            "JRA-123",
+        ]
+        .join("\n");
+
+        // Should fail because JRA-123 is in scissors section, not actual commit message
+        test_has_missing_jira_issue_key(
+            &message.clone(),
+            Some(Problem::new(
+                ERROR.into(),
+                HELP_MESSAGE.into(),
+                Code::JiraIssueKeyMissing,
+                &message.into(),
+                Some(vec![("No JIRA Issue Key".to_string(), 46_usize, 5_usize)]),
+                Some("https://support.atlassian.com/jira-software-cloud/docs/what-is-an-issue/#Workingwithissues-Projectkeys".parse().unwrap()),
+            )).as_ref(),
+        );
+    }
 }
