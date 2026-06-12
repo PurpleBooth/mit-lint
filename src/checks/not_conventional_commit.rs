@@ -62,7 +62,10 @@ fn parse_conventional_commit(subject: &str) -> Option<(String, Option<String>, b
     let colon_pos = subject.find(':')?;
 
     // Extract the description (must have a space after the colon)
-    if subject.len() <= colon_pos + 1 || subject.chars().nth(colon_pos + 1) != Some(' ') {
+    // Use byte slicing (safe because ':' is ASCII) rather than .chars().nth()
+    // which would treat the byte offset as a character index and break on
+    // multi-byte UTF-8 in the scope.
+    if subject.len() <= colon_pos + 1 || !subject[colon_pos + 1..].starts_with(' ') {
         return None;
     }
     // Extract the description (can be empty)
@@ -537,5 +540,38 @@ This is an example commit
         // Test the specific case that failed in QuickCheck: ("0", None, "", None, None)
         let commit = CommitMessage::from("0: ");
         assert!(lint(&commit).is_none());
+    }
+
+    #[test]
+    fn test_parse_conventional_commit_with_multibyte_scope() {
+        // Bug: parse_conventional_commit mixes byte offsets with char indices
+        // when checking for space after colon. Multi-byte chars in the scope
+        // cause the byte position of ':' to differ from its char index.
+        //
+        // "feat(ü): description" - 'ü' is 2 bytes in UTF-8, so colon is at
+        // byte 9 but char index 7. Using byte position as char index checks
+        // the wrong character.
+
+        // Unicode scope with 2-byte char
+        assert!(
+            parse_conventional_commit("feat(ü): add feature").is_some(),
+            "conventional commit with Unicode scope 'ü' should parse successfully"
+        );
+
+        // Verify full lint accepts it too
+        let commit = CommitMessage::from("feat(ü): add feature\n");
+        assert!(
+            lint(&commit).is_none(),
+            "commit with Unicode scope should pass lint"
+        );
+    }
+
+    #[test]
+    fn test_parse_conventional_commit_with_cjk_scope() {
+        // CJK characters are 3 bytes in UTF-8, more likely to trigger the bug
+        assert!(
+            parse_conventional_commit("feat(機能): add feature").is_some(),
+            "conventional commit with CJK scope should parse successfully"
+        );
     }
 }
