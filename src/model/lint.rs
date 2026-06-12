@@ -218,7 +218,7 @@ pub enum Lint {
     /// );
     /// ```
     GitHubIdMissing,
-    /// Subject being not being seperated from the body
+    /// Subject not being separated from the body
     ///
     /// # Examples
     ///

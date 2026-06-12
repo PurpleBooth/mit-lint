@@ -460,8 +460,8 @@ index 5a83784..ebaee48 100644
                 continue;
             }
 
-            // Check actual byte length like the linter does
-            if line.len() > 72 {
+            // Check character count like the linter does
+            if line.chars().count() > 72 {
                 lines_valid = false;
                 break;
             }
