@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v4.0.0 - 2026-06-13
+#### Features
+- <span style="background-color: #d73a49; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.85em;">BREAKING</span>(**not-conventional-commit**) accept hyphens in commit scope - (6f86e2e) - Billie Thompson
+#### Bug Fixes
+- replace inadequate quickcheck guard in not_conventional_commit::fail_check - (d32f637) - Billie Thompson
+- remove unnecessary clones and O(n^2) allocation in Lints::try_from - (209230f) - Billie Thompson
+- use correct byte length for multi-byte first char in subject-not-capitalized label - (8f5bfd6) - Billie Thompson
+- missing-github-id regex now accepts underscores in repo names - (fc55bb8) - Billie Thompson
+- correct typo in doc comment, fix misleading quickcheck guard - (d7439e9) - Billie Thompson
+- missing-jira-issue-key excludes scissors section from check - (4605618) - Billie Thompson
+- duplicate-trailers labels only highlight actual trailer lines - (be073e6) - Billie Thompson
+- problem-builder label length uses byte offsets for Unicode correctness - (bc8fab4) - Billie Thompson
+- subject-too-long label uses byte offsets for Unicode correctness - (3b998fe) - Billie Thompson
+- subject-not-capitalized label offset uses byte positions of leading whitespace only - (f18cb81) - Billie Thompson
+- resolve clippy pedantic warnings (implicit_clone, manual_is_variant_and, collapsible_if, manual_checked_ops) - (c7e87b2) - Billie Thompson
+#### Tests
+- add regression tests for fail_check quickcheck guard in not_conventional_commit - (badbd23) - Billie Thompson
+#### Refactoring
+- replace unused_must_use allow with explicit discard, clarify dead_code allow - (9704dd3) - Billie Thompson
+- eliminate string allocations in Lint TryFrom<&str> - (3386c95) - Billie Thompson
+- remove unnecessary Vec allocations in iterator chains - (0072de9) - Billie Thompson
+
+- - -
+
 ## v3.4.1 - 2026-06-12
 #### Bug Fixes
 - subject period label offset uses byte positions, not char count - (ddd1633) - Billie Thompson
