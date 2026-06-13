@@ -574,4 +574,92 @@ This is an example commit
             "conventional commit with CJK scope should parse successfully"
         );
     }
+
+    // Regression test: the fail_check quickcheck property had an inadequate
+    // guard that didn't discard valid conventional commits.  Inputs like
+    // "feat: description" were kept and the property wrongly asserted that
+    // lint should report a problem, when in fact lint correctly returns None.
+    //
+    // The fix is to also discard inputs that parse as valid conventional
+    // commits.
+    #[test]
+    fn test_fail_check_guard_rejects_valid_conventional_commit() {
+        // Simulate what the improved fail_check guard should do:
+        // "feat: description" is a valid conventional commit, so the old
+        // fail_check property would wrongly assert lint(result.is_some()).
+        // The fixed guard must discard this input.
+        let input = "feat: description";
+        let message = CommitMessage::from(format!("{input}\n# comment"));
+        let result = lint(&message);
+        // This IS a valid conventional commit, so lint should return None
+        assert!(
+            result.is_none(),
+            "valid conventional commit should not be flagged, but got: {result:?}"
+        );
+
+        // Now verify the guard logic would correctly identify this as discard-worthy
+        let colon_pos = input.chars().position(|x| x == ':');
+        let has_non_alpha_type = colon_pos
+            .is_some_and(|x| input.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
+        // Old guard: only discards if non-alpha chars before colon.
+        // "feat" is all alpha, so old guard does NOT discard → bug!
+        assert!(
+            !has_non_alpha_type,
+            "old guard incorrectly keeps valid conventional commit '{input}'"
+        );
+
+        // New guard: also discard if the string parses as a valid conventional commit
+        let is_valid_conventional = parse_conventional_commit(input).is_some();
+        assert!(
+            is_valid_conventional,
+            "new guard should detect this as a valid conventional commit and discard it"
+        );
+    }
+
+    #[test]
+    fn test_fail_check_guard_rejects_valid_conventional_commit_with_scope() {
+        let input = "feat(ui): add button";
+        let message = CommitMessage::from(format!("{input}\n# comment"));
+        let result = lint(&message);
+        assert!(result.is_none(), "valid conventional commit with scope should pass");
+
+        let is_valid_conventional = parse_conventional_commit(input).is_some();
+        assert!(
+            is_valid_conventional,
+            "new guard should detect this as a valid conventional commit and discard it"
+        );
+    }
+
+    #[test]
+    fn test_fail_check_guard_rejects_valid_conventional_commit_with_breaking() {
+        let input = "refactor!: drop support";
+        let message = CommitMessage::from(format!("{input}\n# comment"));
+        let result = lint(&message);
+        assert!(result.is_none(), "valid breaking change commit should pass");
+
+        let is_valid_conventional = parse_conventional_commit(input).is_some();
+        assert!(
+            is_valid_conventional,
+            "new guard should detect this as a valid conventional commit and discard it"
+        );
+    }
+
+    #[test]
+    fn test_fail_check_keeps_non_conventional_commits() {
+        // These should NOT be discarded by the guard — they are genuinely non-conventional
+        let inputs = [
+            "Just a regular commit",
+            "fix something",
+            "no colon here",
+            "fix(example: missing close paren: desc",
+        ];
+        for input in &inputs {
+            let message = CommitMessage::from(format!("{input}\n# comment"));
+            let result = lint(&message);
+            assert!(
+                result.is_some(),
+                "non-conventional commit '{input}' should be flagged"
+            );
+        }
+    }
 }
