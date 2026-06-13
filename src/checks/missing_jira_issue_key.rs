@@ -15,7 +15,7 @@ You can fix this by adding a key like `JRA-123` to the commit message" ;
 /// Description of the problem
 pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
-static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?mi)\b[A-Z]{2,}-\d+\b").unwrap());
+static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)\b[A-Z]{2,}-\d+\b").unwrap());
 
 pub struct JiraIssueKeyConfig;
 impl Default for JiraIssueKeyConfig {
@@ -92,6 +92,22 @@ mod tests {
     use quickcheck::TestResult;
 
     use super::*;
+
+    #[test]
+    fn test_lowercase_token_is_not_a_jira_key() {
+        // JIRA project keys are ALWAYS uppercase, so a lowercase token like
+        // "parser-2024" must NOT count as a JIRA issue key. The commit message
+        // below contains no uppercase KEY-NUMBER token and should therefore be
+        // flagged as missing a JIRA issue key.
+        let message = "fix the parser-2024 regression";
+        let actual = lint(&CommitMessage::from(message));
+        assert!(
+            actual.is_some(),
+            "Lowercase token 'parser-2024' should not count as a JIRA key; \
+             the commit should be flagged as missing a JIRA issue key, \
+             but lint returned None"
+        );
+    }
 
     #[test]
     fn test_jira_keys_in_comments_are_ignored() {
