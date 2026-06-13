@@ -381,11 +381,12 @@ This is an example commit
     #[allow(clippy::needless_pass_by_value)]
     #[quickcheck]
     fn fail_check(commit: String) -> TestResult {
-        let has_non_alpha_type = commit
-            .chars()
-            .position(|x| x == ':')
-            .is_some_and(|x| commit.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
-        if has_non_alpha_type {
+        // Discard inputs that are actually valid conventional commits,
+        // since the property asserts that lint reports a problem.
+        // Without this guard, inputs like "feat: description" would be
+        // kept, and the property would wrongly assert is_some() when the
+        // lint correctly returns None.
+        if parse_conventional_commit(&commit).is_some() {
             return TestResult::discard();
         }
         let message = CommitMessage::from(format!("{commit}\n# comment"));
@@ -599,8 +600,8 @@ This is an example commit
 
         // Now verify the guard logic would correctly identify this as discard-worthy
         let colon_pos = input.chars().position(|x| x == ':');
-        let has_non_alpha_type = colon_pos
-            .is_some_and(|x| input.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
+        let has_non_alpha_type =
+            colon_pos.is_some_and(|x| input.chars().take(x).any(|x| !x.is_ascii_alphanumeric()));
         // Old guard: only discards if non-alpha chars before colon.
         // "feat" is all alpha, so old guard does NOT discard → bug!
         assert!(
@@ -621,7 +622,10 @@ This is an example commit
         let input = "feat(ui): add button";
         let message = CommitMessage::from(format!("{input}\n# comment"));
         let result = lint(&message);
-        assert!(result.is_none(), "valid conventional commit with scope should pass");
+        assert!(
+            result.is_none(),
+            "valid conventional commit with scope should pass"
+        );
 
         let is_valid_conventional = parse_conventional_commit(input).is_some();
         assert!(

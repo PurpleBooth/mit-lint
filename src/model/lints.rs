@@ -293,7 +293,7 @@ mod tests {
         let result: Lints = names
             .try_into()
             .expect("Empty vec should produce empty Lints");
-        assert!(result.clone().into_iter().next().is_none());
+        assert!(result.into_iter().next().is_none());
     }
 
     #[quickcheck]
