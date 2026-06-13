@@ -437,6 +437,19 @@ Co-authored-by: Billie Thompson <email@example.com>
         out
     }
 
+    #[test]
+    fn test_duplicate_checked_trailer_is_flagged() {
+        // Direct (non-quickcheck) confirmation that a duplicated checked
+        // trailer key is flagged — the behaviour the quickcheck property
+        // should actually exercise.
+        let message = "Subject\n\nBody text\n\nSigned-off-by: Billie <billie@example.com>\nSigned-off-by: Billie <billie@example.com>\n";
+        let result = lint(&CommitMessage::from(message));
+        assert!(
+            result.is_some(),
+            "Duplicated Signed-off-by trailer should be flagged"
+        );
+    }
+
     #[allow(clippy::needless_pass_by_value)]
     #[quickcheck]
     fn test_quickcheck_duplicate_trailers_fail(
@@ -445,20 +458,32 @@ Co-authored-by: Billie Thompson <email@example.com>
         trailer_text: String,
         repeats: usize,
     ) -> TestResult {
-        if trailer_tag.len() > 10000
-            || trailer_tag.is_empty()
-            || trailer_tag.chars().any(|x| !x.is_ascii_alphanumeric())
-        {
-            return TestResult::discard();
-        }
-        if trailer_text.len() > 10000
-            || trailer_text.is_empty()
-            || trailer_text.chars().any(|x| !x.is_ascii_alphanumeric())
-        {
+        // The lint only flags duplicates of these three trailer keys. The old
+        // guard required the tag to be ASCII-alphanumeric, which excluded all
+        // three checked keys (they contain hyphens). Combined with an equally
+        // aggressive guard on trailer_text, virtually every random input was
+        // discarded and the property never actually exercised duplicate
+        // detection — giving false confidence.
+        const CHECKED_KEYS: [&str; 3] = ["Signed-off-by", "Co-authored-by", "Relates-to"];
+        let trailer_tag = CHECKED_KEYS[trailer_tag.len() % CHECKED_KEYS.len()];
+
+        // Sanitise the trailer value: strip characters that would break the
+        // trailer line, but allow most Unicode (unlike the old ASCII-only guard).
+        let trailer_text: String = trailer_text
+            .chars()
+            .filter(|c| !matches!(c, '\n' | '\r' | '\0'))
+            .collect();
+        if trailer_text.is_empty() || trailer_text.len() > 10000 {
             return TestResult::discard();
         }
 
         if repeats > 50 {
+            return TestResult::discard();
+        }
+
+        // Discard if the commit body contains a scissors marker, as trailers
+        // after it would be ignored by the parser.
+        if commit.contains(">8") || commit.contains("8<") {
             return TestResult::discard();
         }
 
