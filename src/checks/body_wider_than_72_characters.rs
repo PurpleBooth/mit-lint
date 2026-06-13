@@ -81,6 +81,14 @@ fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
     let scissors_start_line = calculate_scissors_start_line(commit, &commit_text);
     let comment_char = commit.get_comment_char().map(|x| format!("{x} "));
 
+    // The body begins after the subject line and the blank line that separates
+    // it from the subject. Lines before that are the subject — out of scope for
+    // this lint (the subject-length lints handle those).
+    let body_start_line = commit_text
+        .lines()
+        .position(str::is_empty)
+        .map_or(0, |blank_line_index| blank_line_index + 1);
+
     let mut builder = ProblemBuilder::new(
         ERROR,
         HELP_MESSAGE,
@@ -89,8 +97,12 @@ fn create_problem(commit: &CommitMessage, limit: usize) -> Problem {
     )
     .with_url("https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines");
 
-    // Add labels for all lines that exceed the limit
+    // Add labels for body lines that exceed the limit
     for (line_index, line) in commit_text.lines().enumerate() {
+        // Skip the subject and blank separator before the body
+        if line_index < body_start_line {
+            continue;
+        }
         // Skip lines after scissors line or comment lines
         if line_index > scissors_start_line
             || comment_char.as_ref().is_some_and(|cc| line.starts_with(cc))
@@ -294,6 +306,37 @@ index 5a83784..ebaee48 100644
         ]
         .join("\n");
         test_body_wider_than_72_characters(&message, None);
+    }
+
+    #[test]
+    fn test_subject_line_is_not_highlighted() {
+        // When both the subject and a body line exceed 72 chars, the body-width
+        // lint must only label body lines — never the subject line (which is
+        // the separate subject-length lint's responsibility).
+        use miette::Diagnostic;
+
+        let long_line = "x".repeat(80);
+        let message = format!("{long_line}\n\n{long_line}");
+        let problem = lint(&CommitMessage::from(message.clone()))
+            .expect("should detect an over-long body line");
+
+        // Body starts after the 80-char subject + "\n\n" separator = byte 82.
+        let body_start_byte = 80 + 2;
+
+        let offsets: Vec<_> = problem
+            .labels()
+            .unwrap()
+            .map(|span| span.offset())
+            .collect();
+
+        assert!(
+            !offsets.is_empty(),
+            "expected at least one label for the over-long body line"
+        );
+        assert!(
+            offsets.iter().all(|&offset| offset >= body_start_byte),
+            "body-width labels must not fall on the subject line; found offsets {offsets:?}"
+        );
     }
 
     fn test_body_wider_than_72_characters(message: &str, expected: Option<&Problem>) {
