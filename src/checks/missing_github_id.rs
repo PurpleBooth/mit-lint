@@ -24,7 +24,7 @@ Be careful just putting '#642' on a line by itself, as '#' is the default commen
 pub const ERROR: &str = "Your commit message is missing a GitHub ID";
 
 static RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?m)(^| )([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9_-]+#|GH-|#)[0-9]+( |$)").unwrap()
+    Regex::new(r"(?m)(^| |\()([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9_-]+#|GH-|#)[0-9]+\b").unwrap()
 });
 
 pub struct GitHubIdConfig {
@@ -291,6 +291,15 @@ AnUser/my_repo#642
     }
 
     #[test]
+    fn test_github_id_followed_by_punctuation_passes() {
+        // A GitHub ID reference followed by common punctuation — an
+        // end-of-sentence period, or wrapped in parentheses — should still be
+        // recognised as a valid reference and NOT flagged as missing.
+        test_has_missing_github_id("An example commit\n\nSee issue #642.\n", None);
+        test_has_missing_github_id("An example commit\n\nFixes (#642) the crash\n", None);
+    }
+
+    #[test]
     fn test_commit_without_github_id_fails() {
         let message = "An example commit
 
@@ -412,6 +421,14 @@ This is an example commit
         }
 
         let message = CommitMessage::from(commit);
+
+        // Discard commits that actually contain a GitHub ID. The lint returns
+        // `None` for those (by design), so they are outside this property's
+        // scope, which asserts that a commit *without* an ID is flagged.
+        if message.matches_pattern(&GitHubIdConfig::default().pattern) {
+            return TestResult::discard();
+        }
+
         let result = lint(&message);
         TestResult::from_bool(result.is_some())
     }
