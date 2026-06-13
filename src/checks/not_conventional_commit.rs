@@ -99,9 +99,11 @@ fn parse_conventional_commit(subject: &str) -> Option<(String, Option<String>, b
         return None;
     }
 
-    // Validate scope is alphanumeric if present
+    // Validate scope if present. Hyphens are permitted (e.g. component
+    // identifiers like "git-mit"); otherwise the scope must be non-empty and
+    // made up of alphanumeric characters.
     if let Some(scope) = &scope
-        && (!scope.chars().all(char::is_alphanumeric) || scope.is_empty())
+        && (!scope.chars().all(|c| c.is_alphanumeric() || c == '-') || scope.is_empty())
     {
         return None;
     }
@@ -410,7 +412,7 @@ This is an example commit
             return TestResult::discard();
         }
         if let Some(scope) = scope.clone()
-            && (scope.is_empty() || scope.chars().any(|x| !x.is_alphanumeric()))
+            && (scope.is_empty() || scope.chars().any(|x| !x.is_alphanumeric() && x != '-'))
         {
             return TestResult::discard();
         }
@@ -529,11 +531,37 @@ This is an example commit
         // Test with empty scope (should fail)
         assert!(parse_conventional_commit("feat(): add feature").is_none());
 
-        // Test with non-alphanumeric scope (should fail)
-        assert!(parse_conventional_commit("feat(ui-component): add feature").is_none());
+        // Test with scope containing characters other than alphanumerics and
+        // hyphens (should fail)
+        assert!(parse_conventional_commit("feat(ui_component): add feature").is_none());
+
+        // Test with hyphenated scope (should pass)
+        assert!(parse_conventional_commit("feat(ui-component): add feature").is_some());
 
         // Test with alphanumeric scope (should pass)
         assert!(parse_conventional_commit("feat(ui123): add feature").is_some());
+    }
+
+    #[test]
+    fn test_parse_conventional_commit_scope_allows_hyphens() {
+        // Hyphens are common in scope names — module/component identifiers
+        // such as "git-mit" — and should be accepted by the parser.
+        let result = parse_conventional_commit("fix(git-mit): Some text");
+        assert!(
+            result.is_some(),
+            "scope with a hyphen should parse successfully"
+        );
+
+        let (commit_type, scope, _, _) = result.unwrap();
+        assert_eq!(commit_type, "fix");
+        assert_eq!(scope.as_deref(), Some("git-mit"));
+
+        // The full lint should also accept it.
+        let commit = CommitMessage::from("fix(git-mit): Some text\n");
+        assert!(
+            lint(&commit).is_none(),
+            "commit with a hyphenated scope should pass the lint"
+        );
     }
 
     #[test]
