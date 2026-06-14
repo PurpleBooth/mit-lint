@@ -97,12 +97,12 @@ impl ProblemBuilder {
             return self;
         }
 
-        let position = SourceOffset::from_location(
-            commit_text,
-            line_index + 1,
-            line.chars().take(limit).map(char::len_utf8).sum::<usize>() + 1,
-        )
-        .offset();
+        // SourceOffset::from_location expects a 1-indexed CHARACTER column,
+        // not a byte offset. Passing a byte offset here breaks when the line
+        // contains multi-byte UTF-8 characters before `limit` (e.g. Umlauts),
+        // because the byte offset exceeds the character count and from_location
+        // overshoots the target position. Use the character count directly.
+        let position = SourceOffset::from_location(commit_text, line_index + 1, limit + 1).offset();
 
         let length: usize = line.chars().skip(limit).map(char::len_utf8).sum();
 
@@ -351,6 +351,55 @@ mod tests {
             suffix.chars().count(),
             suffix.len(),
             labels[0].len()
+        );
+    }
+
+    #[test]
+    fn test_with_label_for_line_multibyte_before_limit() {
+        // A body line with multi-byte UTF-8 characters BEFORE the 72-char limit.
+        // Each 'é' is 2 bytes in UTF-8. The line has 80 'é' chars = 160 bytes.
+        //
+        // The label should start at the 73rd character (char index 72),
+        // which is at byte offset 72*2 = 144 within the line.
+        // Total byte offset in commit_text = 9 ("Subject\n\n") + 144 = 153.
+        //
+        // BUG: with_label_for_line passes a BYTE offset (144) + 1 = 145 as the
+        // character column to SourceOffset::from_location, which interprets it
+        // as a character position. Since the line only has 80 characters,
+        // from_location overshoots and returns the wrong offset.
+        let line = "é".repeat(80);
+        let commit_text = format!("Subject\n\n{line}");
+        let commit = CommitMessage::from(commit_text.as_str());
+
+        let problem = ProblemBuilder::new(
+            "Error message",
+            "Fix advice",
+            Code::BodyWiderThan72Characters,
+            &commit,
+        )
+        .with_label_for_line(&commit_text, 2, &line, 72, "Too long")
+        .build();
+
+        let labels = problem.labels().unwrap().collect::<Vec<_>>();
+        assert_eq!(labels.len(), 1);
+
+        // Expected: byte offset 9 + 144 = 153, byte length 8*2 = 16
+        let expected_offset = "Subject\n\n".len() + 72 * 2; // 153
+        assert_eq!(
+            labels[0].offset(),
+            expected_offset,
+            "Label offset should be {} (byte offset of the 73rd char), but got {}",
+            expected_offset,
+            labels[0].offset()
+        );
+
+        // The remaining 8 chars are each 2 bytes = 16 bytes
+        let expected_length = (80 - 72) * 2; // 16
+        assert_eq!(
+            labels[0].len(),
+            expected_length,
+            "Label length should be {} bytes for the 8 remaining 'é' chars",
+            expected_length
         );
     }
 
