@@ -16,7 +16,9 @@ You can fix this by adding an ID like the following examples:
 #642
 GL-642
 AnUser/git-mit#642
-AnOrganisation/git-mit#642
+group/subgroup/project#642
+https://gitlab.com/AnUser/git-mit/-/issues/642
+https://gitlab.com/group/subgroup/project/-/work_items/642
 fixes #642
 
 Be careful just putting '#642' on a line by itself, as '#' is the default comment character";
@@ -25,7 +27,14 @@ Be careful just putting '#642' on a line by itself, as '#' is the default commen
 pub const ERROR: &str = "Your commit message is missing a GitLab ID";
 
 static RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?m)(^| |\()([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9_-]+#|GL-|#)[0-9]+\b").unwrap()
+    // GitLab issue reference patterns:
+    // 1. Same project: #123
+    // 2. Alternative: GL-123
+    // 3. Cross-project (supports nested groups): group/subgroup/project#123
+    // 4. Full URLs: https://gitlab.com/user/project/-/issues/123 or .../-/work_items/123
+    Regex::new(
+        r"(?m)(^| |\()((?:[a-zA-Z0-9_-]+/)+[a-zA-Z0-9_-]+#|GL-|#)[0-9]+\b|https?://\S+/-/(?:issues|work_items)/[0-9]+\b"
+    ).unwrap()
 });
 
 pub struct GitLabIdConfig {
@@ -272,6 +281,43 @@ AnOrganisation/git-mit#642
     }
 
     #[test]
+    fn test_gitlab_id_with_nested_groups_passes() {
+        // GitLab supports nested group paths
+        test_has_missing_gitlab_id(
+            "An example commit
+
+This is an example commit
+
+group/subgroup/project#642
+",
+            None,
+        );
+    }
+
+    #[test]
+    fn test_gitlab_id_with_full_url_passes() {
+        // Full URLs with /-issues/ and /-work_items/
+        test_has_missing_gitlab_id(
+            "An example commit
+
+This is an example commit
+
+https://gitlab.com/user/project/-/issues/642
+",
+            None,
+        );
+        test_has_missing_gitlab_id(
+            "An example commit
+
+This is an example commit
+
+https://gitlab.example.com/group/subgroup/project/-/work_items/642
+",
+            None,
+        );
+    }
+
+    #[test]
     fn test_gitlab_id_with_underscore_in_repo_name_passes() {
         // GitLab repos can have underscores in their names (e.g. my_repo)
         test_has_missing_gitlab_id(
@@ -390,7 +436,9 @@ This is an example commit
         #642
         GL-642
         AnUser/git-mit#642
-        AnOrganisation/git-mit#642
+        group/subgroup/project#642
+        https://gitlab.com/AnUser/git-mit/-/issues/642
+        https://gitlab.com/group/subgroup/project/-/work_items/642
         fixes #642
         
         Be careful just putting '#642' on a line by itself, as '#' is the
