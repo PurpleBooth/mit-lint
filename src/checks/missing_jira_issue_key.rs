@@ -125,6 +125,18 @@ mod tests {
     }
 
     #[test]
+    fn test_jira_key_in_comment_line_is_ignored() {
+        // Regression test for quickcheck failure: when the subject line starts with #,
+        // the entire line is treated as a comment and the JIRA key is ignored.
+        let message = "# AA-0\n# comment";
+        let result = lint(&CommitMessage::from(message));
+        assert!(
+            result.is_some(),
+            "Commit with JIRA key in comment should fail"
+        );
+    }
+
+    #[test]
     fn test_commit_with_jira_id_passes() {
         test_has_missing_jira_issue_key(
             "JRA-123 An example commit
@@ -338,6 +350,12 @@ This is an example commit
                 .chars()
                 .any(|x| !x.is_ascii_alphabetic() || !x.is_uppercase())
         {
+            return TestResult::discard();
+        }
+
+        // Reject cases where `before` would make the JIRA key appear in a comment
+        // (lines starting with # are treated as comments and excluded from matches_pattern)
+        if before.as_ref().map_or(false, |s| s.contains('#')) {
             return TestResult::discard();
         }
 
