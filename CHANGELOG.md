@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v4.0.1 - 2026-06-14
+#### Bug Fixes
+- with_label_for_line passes byte offset as char column to from_location - (54c7f6f) - Billie Thompson
+- replace inadequate quickcheck guard in duplicate_trailers::fail_check - (cc23007) - Billie Thompson
+- body-width lint no longer highlights the subject line - (8cd92c3) - Billie Thompson
+- GitHub ID regex accepts ids followed by punctuation - (0fbe9b6) - Billie Thompson
+- JIRA regex no longer matches lowercase "keys" - (e015ebf) - Billie Thompson
+#### Continuous Integration
+- use shared install-rust action - (312831b) - Billie Thompson
+- migrate from Woodpecker to Forgejo Actions - (90e836e) - Billie Thompson
+#### Miscellaneous Chores
+- (**deps**) update all dependencies - (82259da) - Billie Thompson
+
+- - -
+
 ## v4.0.0 - 2026-06-13
 #### Features
 - <span style="background-color: #d73a49; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.85em;">BREAKING</span>(**not-conventional-commit**) accept hyphens in commit scope - (6f86e2e) - Billie Thompson
