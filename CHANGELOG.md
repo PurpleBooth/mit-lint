@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v4.0.2 - 2026-06-16
+#### Bug Fixes
+- (**test**) discard invalid quickcheck cases with comment prefix - (325be2d) - purplebooth
+
+- - -
+
 ## v4.0.1 - 2026-06-14
 #### Bug Fixes
 - with_label_for_line passes byte offset as char column to from_location - (54c7f6f) - Billie Thompson
