@@ -1,6 +1,7 @@
 pub mod body_wider_than_72_characters;
 pub mod duplicate_trailers;
 pub mod missing_github_id;
+pub mod missing_gitlab_id;
 pub mod missing_jira_issue_key;
 pub mod missing_pivotal_tracker_id;
 pub mod not_conventional_commit;

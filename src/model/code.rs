@@ -35,6 +35,8 @@ pub enum Code {
     NotConventionalCommit,
     /// Unique ID for `NotEmojiLog` failure
     NotEmojiLog,
+    /// Unique ID for `GitLabIdMissing` failure
+    GitLabIdMissing,
 }
 
 impl Arbitrary for Code {
@@ -48,7 +50,7 @@ impl Arbitrary for Code {
 }
 
 impl Code {
-    const fn get_codes() -> [Self; 14] {
+    const fn get_codes() -> [Self; 15] {
         [
             Self::InitialNotMatchedToAuthor,
             Self::UnparsableAuthorFile,
@@ -57,6 +59,7 @@ impl Code {
             Self::PivotalTrackerIdMissing,
             Self::JiraIssueKeyMissing,
             Self::GitHubIdMissing,
+            Self::GitLabIdMissing,
             Self::SubjectNotSeparateFromBody,
             Self::SubjectLongerThan72Characters,
             Self::SubjectNotCapitalized,

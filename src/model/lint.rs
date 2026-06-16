@@ -502,6 +502,8 @@ pub enum Lint {
     /// );
     /// ```
     NotEmojiLog,
+    /// Check for a missing gitlab id
+    GitLabIdMissing,
 }
 
 /// The prefix we put in front of the lint when serialising
@@ -547,6 +549,7 @@ impl Lint {
             Self::PivotalTrackerIdMissing => checks::missing_pivotal_tracker_id::CONFIG,
             Self::JiraIssueKeyMissing => checks::missing_jira_issue_key::CONFIG,
             Self::GitHubIdMissing => checks::missing_github_id::CONFIG,
+            Self::GitLabIdMissing => checks::missing_gitlab_id::CONFIG,
             Self::SubjectNotSeparateFromBody => checks::subject_not_separate_from_body::CONFIG,
             Self::SubjectLongerThan72Characters => {
                 checks::subject_longer_than_72_characters::CONFIG
@@ -561,13 +564,14 @@ impl Lint {
 }
 
 /// All the available lints
-static ALL_LINTS: LazyLock<[Lint; 11]> = LazyLock::new(|| {
+static ALL_LINTS: LazyLock<[Lint; 12]> = LazyLock::new(|| {
     [
         Lint::DuplicatedTrailers,
         Lint::PivotalTrackerIdMissing,
         Lint::JiraIssueKeyMissing,
-        Lint::SubjectNotSeparateFromBody,
         Lint::GitHubIdMissing,
+        Lint::GitLabIdMissing,
+        Lint::SubjectNotSeparateFromBody,
         Lint::SubjectLongerThan72Characters,
         Lint::SubjectNotCapitalized,
         Lint::SubjectEndsWithPeriod,
@@ -663,6 +667,7 @@ impl Lint {
             }
             Self::JiraIssueKeyMissing => checks::missing_jira_issue_key::lint(commit_message),
             Self::GitHubIdMissing => checks::missing_github_id::lint(commit_message),
+            Self::GitLabIdMissing => checks::missing_gitlab_id::lint(commit_message),
             Self::SubjectNotSeparateFromBody => {
                 checks::subject_not_separate_from_body::lint(commit_message)
             }
@@ -809,8 +814,9 @@ mod tests {
                 Lint::DuplicatedTrailers,
                 Lint::PivotalTrackerIdMissing,
                 Lint::JiraIssueKeyMissing,
-                Lint::SubjectNotSeparateFromBody,
                 Lint::GitHubIdMissing,
+                Lint::GitLabIdMissing,
+                Lint::SubjectNotSeparateFromBody,
                 Lint::SubjectLongerThan72Characters,
                 Lint::SubjectNotCapitalized,
                 Lint::SubjectEndsWithPeriod,
