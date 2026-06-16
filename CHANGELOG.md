@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v4.1.0 - 2026-06-16
+#### Features
+- add GitLab ID missing lint - (ac4c0fa) - purplebooth
+#### Bug Fixes
+- update GitLab ID regex to support nested groups and URLs - (b013d28) - Billie Thompson
+
+- - -
+
 ## v4.0.2 - 2026-06-16
 #### Bug Fixes
 - (**test**) discard invalid quickcheck cases with comment prefix - (325be2d) - purplebooth
