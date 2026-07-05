@@ -26,6 +26,7 @@ You can fix it using one of the prefixes:
 pub const ERROR: &str = "Your commit message isn't in emoji log style";
 
 /// Configuration for emoji log linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct EmojiLogConfig;
 
 impl Default for EmojiLogConfig {
@@ -64,12 +65,12 @@ impl Default for EmojiLogConfig {
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &EmojiLogConfig)
+    lint_with_config(commit_message, EmojiLogConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &EmojiLogConfig,
+    _config: EmojiLogConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| has_problem(commit))
