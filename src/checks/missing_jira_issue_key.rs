@@ -17,6 +17,8 @@ pub const ERROR: &str = "Your commit message is missing a JIRA Issue Key";
 
 static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)\b[A-Z]{2,}-\d+\b").unwrap());
 
+/// Configuration for JIRA issue key linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct JiraIssueKeyConfig;
 impl Default for JiraIssueKeyConfig {
     fn default() -> Self {
@@ -54,12 +56,12 @@ impl Default for JiraIssueKeyConfig {
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &JiraIssueKeyConfig)
+    lint_with_config(commit_message, JiraIssueKeyConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &JiraIssueKeyConfig,
+    _config: JiraIssueKeyConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| !has_jira_key(commit, &RE))

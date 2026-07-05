@@ -37,8 +37,11 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
     ).unwrap()
 });
 
+/// Configuration for GitLab ID linting
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GitLabIdConfig {
     /// Regular expression for matching GitLab IDs
+    #[serde(with = "crate::model::serde_regex")]
     pub pattern: Regex,
 }
 
@@ -49,6 +52,14 @@ impl Default for GitLabIdConfig {
         }
     }
 }
+
+impl PartialEq for GitLabIdConfig {
+    fn eq(&self, other: &Self) -> bool {
+        self.pattern.as_str() == other.pattern.as_str()
+    }
+}
+
+impl Eq for GitLabIdConfig {}
 
 /// Checks if the commit message contains a GitLab ID
 ///

@@ -34,7 +34,7 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Configuration for Pivotal Tracker ID linting
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub struct PivotalTrackerIdConfig;
 
 /// Checks if the commit message contains a Pivotal Tracker ID
@@ -67,12 +67,12 @@ pub struct PivotalTrackerIdConfig;
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &PivotalTrackerIdConfig)
+    lint_with_config(commit_message, PivotalTrackerIdConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &PivotalTrackerIdConfig,
+    _config: PivotalTrackerIdConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| has_problem(commit, &RE))

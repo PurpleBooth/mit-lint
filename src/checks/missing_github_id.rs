@@ -27,8 +27,11 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?m)(^| |\()([a-zA-Z0-9_-]{3,39}/[a-zA-Z0-9_-]+#|GH-|#)[0-9]+\b").unwrap()
 });
 
+/// Configuration for GitHub ID linting
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GitHubIdConfig {
     /// Regular expression for matching GitHub IDs
+    #[serde(with = "crate::model::serde_regex")]
     pub pattern: Regex,
 }
 
@@ -39,6 +42,14 @@ impl Default for GitHubIdConfig {
         }
     }
 }
+
+impl PartialEq for GitHubIdConfig {
+    fn eq(&self, other: &Self) -> bool {
+        self.pattern.as_str() == other.pattern.as_str()
+    }
+}
+
+impl Eq for GitHubIdConfig {}
 
 /// Checks if the commit message contains a GitHub ID
 ///

@@ -20,6 +20,8 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
         .is_some_and(|x| x.is_lowercase())
 }
 
+/// Configuration for subject capitalization linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SubjectNotCapitalizedConfig;
 impl Default for SubjectNotCapitalizedConfig {
     fn default() -> Self {
@@ -28,12 +30,12 @@ impl Default for SubjectNotCapitalizedConfig {
 }
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &SubjectNotCapitalizedConfig)
+    lint_with_config(commit_message, SubjectNotCapitalizedConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &SubjectNotCapitalizedConfig,
+    _config: SubjectNotCapitalizedConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| has_problem(commit))

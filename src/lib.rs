@@ -48,10 +48,19 @@
 extern crate quickcheck_macros;
 
 pub use cmd::{async_lint, lint};
-pub use model::{CONFIG_KEY_PREFIX, Code, Error, Lint, LintError, Lints, Problem};
+pub use config::{
+    BodyWidthConfig, ConventionalCommitConfig, DuplicatedTrailersConfig, EmojiLogConfig,
+    GitHubIdConfig, GitLabIdConfig, JiraIssueKeyConfig, PivotalTrackerIdConfig,
+    SubjectLengthConfig, SubjectLineEndsWithPeriodConfig, SubjectNotCapitalizedConfig,
+    SubjectNotSeparateFromBodyConfig,
+};
+pub use model::{
+    CONFIG_KEY_PREFIX, Code, Error, Lint, LintError, Lints, Problem, SerializableRegex,
+};
 
 mod checks;
 mod cmd;
+pub mod config;
 mod model;
 
 #[cfg(doctest)]
