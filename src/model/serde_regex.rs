@@ -132,3 +132,47 @@ mod tests {
         assert!(regex.is_match("abc"));
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
+    use super::*;
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_pattern() {
+        // Concrete proof: serialise then deserialise a known regex and
+        // verify the pattern string survives the round trip.
+        let original = SerializableRegex::from(Regex::new(r"\d+").unwrap());
+        let json = serde_json::to_string(&original).unwrap();
+        let recovered: SerializableRegex = serde_json::from_str(&json).unwrap();
+        assert_eq!(
+            original, recovered,
+            "serde round-trip must preserve the regex"
+        );
+    }
+
+    #[kani::proof]
+    fn equal_regexes_hash_equally() {
+        // Hash/Eq contract: if two SerializableRegex values are equal,
+        // their hashes must be equal too. We use two independently
+        // constructed regexes with the same pattern.
+        let a = SerializableRegex::from(Regex::new(r"^foo\d+$").unwrap());
+        let b = SerializableRegex::from(Regex::new(r"^foo\d+$").unwrap());
+
+        assert_eq!(a, b, "same pattern must be equal");
+
+        let mut ha = DefaultHasher::new();
+        a.hash(&mut ha);
+        let mut hb = DefaultHasher::new();
+        b.hash(&mut hb);
+        assert_eq!(ha.finish(), hb.finish(), "equal values must hash equally");
+    }
+
+    #[kani::proof]
+    fn display_matches_pattern() {
+        let regex = SerializableRegex::from(Regex::new(r"abc").unwrap());
+        assert_eq!(format!("{regex}"), r"abc");
+    }
+}
