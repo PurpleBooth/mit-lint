@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v4.2.0 - 2026-07-07
+#### Features
+- provide serializable way to configure lints - (9b53901) - Billie Thompson
+#### Miscellaneous Chores
+- loosen up the dependencies - (3873cc2) - Billie Thompson
+
+- - -
+
 ## v4.1.0 - 2026-06-16
 #### Features
 - add GitLab ID missing lint - (ac4c0fa) - purplebooth
