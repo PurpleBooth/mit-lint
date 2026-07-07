@@ -582,3 +582,28 @@ This is an example commit
         TestResult::from_bool(result.is_none())
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn gitlab_config_eq_is_symmetric() {
+        let a = GitLabIdConfig::default();
+        let b = GitLabIdConfig::default();
+
+        assert_eq!(a, b, "default configs must be equal");
+        assert_eq!(b, a, "equality must be symmetric");
+    }
+
+    #[kani::proof]
+    fn gitlab_config_eq_compares_pattern_string() {
+        let a = GitLabIdConfig::default();
+        let b = GitLabIdConfig {
+            pattern: Regex::new(a.pattern.as_str()).unwrap(),
+        };
+
+        // Same pattern string but independently compiled — must be equal
+        assert_eq!(a, b, "configs with same pattern string must be equal");
+    }
+}

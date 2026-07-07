@@ -526,3 +526,28 @@ This is an example commit
         TestResult::from_bool(result.is_none())
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn github_config_eq_is_symmetric() {
+        let a = GitHubIdConfig::default();
+        let b = GitHubIdConfig::default();
+
+        assert_eq!(a, b, "default configs must be equal");
+        assert_eq!(b, a, "equality must be symmetric");
+    }
+
+    #[kani::proof]
+    fn github_config_eq_compares_pattern_string() {
+        let a = GitHubIdConfig::default();
+        let b = GitHubIdConfig {
+            pattern: Regex::new(a.pattern.as_str()).unwrap(),
+        };
+
+        // Same pattern string but independently compiled — must be equal
+        assert_eq!(a, b, "configs with same pattern string must be equal");
+    }
+}

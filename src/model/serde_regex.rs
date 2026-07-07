@@ -132,3 +132,49 @@ mod tests {
         assert!(regex.is_match("abc"));
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_pattern() {
+        // Concrete proof: serialise then deserialise a known regex and
+        // verify the pattern string survives the round trip. Uses toml
+        // (a regular dependency) rather than serde_json (dev-only).
+        let original = SerializableRegex::from(Regex::new(r"\d+").unwrap());
+        let serialized = toml::to_string(&original).unwrap();
+        let recovered: SerializableRegex = toml::from_str(&serialized).unwrap();
+        assert_eq!(
+            original, recovered,
+            "serde round-trip must preserve the regex"
+        );
+    }
+
+    #[kani::proof]
+    fn independently_compiled_regexes_with_same_pattern_are_equal() {
+        // PartialEq contract: two SerializableRegex values compiled
+        // independently from the same pattern string must be equal.
+        let pattern = r"^foo\d+$";
+        let a = SerializableRegex::from(Regex::new(pattern).unwrap());
+        let b = SerializableRegex::from(Regex::new(pattern).unwrap());
+
+        assert_eq!(a, b, "same pattern string must produce equal regexes");
+        // Reflexivity
+        assert_eq!(a, a, "equality must be reflexive");
+    }
+
+    #[kani::proof]
+    fn different_patterns_are_not_equal() {
+        let a = SerializableRegex::from(Regex::new(r"abc").unwrap());
+        let b = SerializableRegex::from(Regex::new(r"xyz").unwrap());
+
+        assert_ne!(a, b, "different patterns must not be equal");
+    }
+
+    #[kani::proof]
+    fn display_matches_pattern() {
+        let regex = SerializableRegex::from(Regex::new(r"abc").unwrap());
+        assert_eq!(format!("{regex}"), r"abc");
+    }
+}

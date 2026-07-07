@@ -604,3 +604,55 @@ subject-not-separated-from-body = true
         );
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+    use crate::model::Lint;
+
+    #[kani::proof]
+    fn merge_is_commutative() {
+        // set-theoretic identity: A ∪ B == B ∪ A
+        let a = Lints::new(Lint::all_lints().step_by(2).collect());
+        let b = Lints::new(Lint::all_lints().skip(1).step_by(2).collect());
+
+        assert_eq!(a.merge(&b), b.merge(&a), "merge must be commutative");
+    }
+
+    #[kani::proof]
+    fn merge_is_idempotent() {
+        // A ∪ A == A
+        let a = Lints::new(Lint::all_lints().step_by(3).collect());
+
+        assert_eq!(a.merge(&a), a, "merging a set with itself must be a no-op");
+    }
+
+    #[kani::proof]
+    fn subtract_yields_no_overlap() {
+        // A - B contains no elements from B
+        let a = Lints::new(Lint::all_lints().collect());
+        let b = Lints::new(Lint::all_lints().step_by(2).collect());
+
+        let diff = a.subtract(&b);
+        let diff_vec: Vec<_> = diff.clone().into();
+        let b_vec: Vec<_> = b.clone().into();
+
+        for lint in &diff_vec {
+            assert!(!b_vec.contains(lint), "subtracted set must not overlap");
+        }
+    }
+
+    #[kani::proof]
+    fn subtract_then_merge_restores_original() {
+        // (A - B) ∪ (A ∩ B) == A — when B ⊆ A, subtract then merge
+        // with the intersection restores the original set.
+        let a = Lints::new(Lint::all_lints().collect());
+        let b = Lints::new(Lint::all_lints().step_by(2).collect());
+
+        let diff = a.subtract(&b);
+        // The intersection is b (since b ⊆ a — all lint variants come from a)
+        let restored = diff.merge(&b);
+
+        assert_eq!(restored, a, "subtract then merge must restore original");
+    }
+}
