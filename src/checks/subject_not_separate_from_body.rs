@@ -19,6 +19,8 @@ fn has_problem(commit_message: &CommitMessage<'_>) -> bool {
     subject.lines().count() > 1
 }
 
+/// Configuration for subject/body separation linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SubjectNotSeparateFromBodyConfig;
 impl Default for SubjectNotSeparateFromBodyConfig {
     fn default() -> Self {
@@ -27,12 +29,12 @@ impl Default for SubjectNotSeparateFromBodyConfig {
 }
 
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &SubjectNotSeparateFromBodyConfig)
+    lint_with_config(commit_message, SubjectNotSeparateFromBodyConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &SubjectNotSeparateFromBodyConfig,
+    _config: SubjectNotSeparateFromBodyConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| has_problem(commit))

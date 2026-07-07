@@ -14,6 +14,7 @@ pub const HELP_MESSAGE: &str = "It's important to keep your commits short, becau
                             subjects.\n\nYou can fix this by removing the period";
 
 /// Configuration for subject line ending with period linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SubjectLineEndsWithPeriodConfig;
 
 impl Default for SubjectLineEndsWithPeriodConfig {
@@ -52,12 +53,12 @@ impl Default for SubjectLineEndsWithPeriodConfig {
 ///
 /// This function will never return an error, only an Option<Problem>
 pub fn lint(commit_message: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit_message, &SubjectLineEndsWithPeriodConfig)
+    lint_with_config(commit_message, SubjectLineEndsWithPeriodConfig)
 }
 
 fn lint_with_config(
     commit_message: &CommitMessage<'_>,
-    _config: &SubjectLineEndsWithPeriodConfig,
+    _config: SubjectLineEndsWithPeriodConfig,
 ) -> Option<Problem> {
     Some(commit_message)
         .filter(|commit| has_problem(commit))
