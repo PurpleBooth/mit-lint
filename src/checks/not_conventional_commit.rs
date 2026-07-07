@@ -23,7 +23,7 @@ You can fix it by following style
 pub const ERROR: &str = "Your commit message isn't in conventional style";
 
 /// Configuration for conventional commit linting
-#[derive(Default)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, Default)]
 pub struct ConventionalCommitConfig {
     /// Allowed commit types (None means any alphanumeric type is allowed)
     pub allowed_types: Option<HashSet<String>>,
@@ -43,6 +43,7 @@ impl ConventionalCommitConfig {
     ///
     /// A new `ConventionalCommitConfig` with the specified allowed types and scopes
     #[allow(dead_code)] // Used in tests only; public API for downstream consumers
+    #[must_use]
     pub const fn new(
         allowed_types: Option<HashSet<String>>,
         allowed_scopes: Option<HashSet<String>>,

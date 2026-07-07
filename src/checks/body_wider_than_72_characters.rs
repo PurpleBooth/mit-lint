@@ -17,6 +17,8 @@ pub const ERROR: &str = "Your commit has a body wider than 72 characters";
 /// Character limit for body width
 pub const CHARACTER_LIMIT: usize = 72;
 
+/// Configuration for body width linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct BodyWidthConfig {
     /// Maximum allowed width for body lines
     pub character_limit: usize,
@@ -59,10 +61,10 @@ impl Default for BodyWidthConfig {
 /// ```
 /// Configuration for body width linting
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit, &BodyWidthConfig::default())
+    lint_with_config(commit, BodyWidthConfig::default())
 }
 
-fn lint_with_config(commit: &CommitMessage, config: &BodyWidthConfig) -> Option<Problem> {
+fn lint_with_config(commit: &CommitMessage, config: BodyWidthConfig) -> Option<Problem> {
     Some(commit)
         .filter(|commit| has_problem(commit, config.character_limit))
         .map(|commit| create_problem(commit, config.character_limit))
@@ -566,13 +568,13 @@ index 5a83784..ebaee48 100644
         // Test with a line exactly at the custom limit
         let message = format!("Subject\n\n{}", "x".repeat(50));
         let commit = CommitMessage::from(message);
-        let result = lint_with_config(&commit, &config);
+        let result = lint_with_config(&commit, config);
         assert!(result.is_none(), "Line at custom limit should pass");
 
         // Test with a line exceeding the custom limit
         let message = format!("Subject\n\n{}", "x".repeat(51));
         let commit = CommitMessage::from(message);
-        let result = lint_with_config(&commit, &config);
+        let result = lint_with_config(&commit, config);
         assert!(result.is_some(), "Line exceeding custom limit should fail");
 
         // Verify the error message references the custom limit

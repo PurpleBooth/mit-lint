@@ -18,6 +18,7 @@ pub const HELP_MESSAGE: &str = "It's important to keep the subject of the commit
 const LIMIT: usize = 72;
 
 /// Configuration for subject length linting
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SubjectLengthConfig {
     /// Maximum allowed length for subject line
     pub character_limit: usize,
@@ -32,10 +33,10 @@ impl Default for SubjectLengthConfig {
 }
 
 pub fn lint(commit: &CommitMessage<'_>) -> Option<Problem> {
-    lint_with_config(commit, &SubjectLengthConfig::default())
+    lint_with_config(commit, SubjectLengthConfig::default())
 }
 
-fn lint_with_config(commit: &CommitMessage<'_>, config: &SubjectLengthConfig) -> Option<Problem> {
+fn lint_with_config(commit: &CommitMessage<'_>, config: SubjectLengthConfig) -> Option<Problem> {
     Some(commit)
         .filter(|commit| has_problem(commit, config.character_limit))
         .map(|commit| create_problem(commit, config.character_limit))

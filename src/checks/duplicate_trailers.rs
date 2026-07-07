@@ -15,6 +15,7 @@ const FIELD_SINGULAR: &str = "field";
 const FIELD_PLURAL: &str = "fields";
 
 /// Configuration for duplicated trailers linting
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct DuplicatedTrailersConfig {
     /// Trailers to check for duplicates
     pub trailers_to_check: Vec<String>,
