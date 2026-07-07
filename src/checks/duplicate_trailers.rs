@@ -595,3 +595,35 @@ Co-authored-by: Billie Thompson <email@example.com>
         );
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn default_has_trailers_to_check() {
+        let config = DuplicatedTrailersConfig::default();
+        assert!(!config.trailers_to_check.is_empty());
+    }
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_config() {
+        let original = DuplicatedTrailersConfig {
+            trailers_to_check: vec!["Co-authored-by".into(), "Signed-off-by".into()],
+        };
+        let toml_str = toml::to_string(&original).unwrap();
+        let recovered: DuplicatedTrailersConfig = toml::from_str(&toml_str).unwrap();
+        assert_eq!(original, recovered);
+    }
+
+    #[kani::proof]
+    fn empty_config_does_not_flag() {
+        let config = DuplicatedTrailersConfig {
+            trailers_to_check: vec![],
+        };
+        // A commit with duplicated trailers but empty config should not flag
+        let commit =
+            CommitMessage::from("Subject\n\nBody\n\nCo-authored-by: a\nCo-authored-by: a\n");
+        assert!(lint_with_config(&commit, &config).is_none());
+    }
+}

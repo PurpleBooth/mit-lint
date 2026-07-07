@@ -640,3 +640,41 @@ index 5a83784..ebaee48 100644
         TestResult::from_bool(result.is_some())
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn default_has_72_char_limit() {
+        let config = BodyWidthConfig::default();
+        assert_eq!(config.character_limit, CHARACTER_LIMIT);
+        assert_eq!(config.character_limit, 72);
+    }
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_config() {
+        let original = BodyWidthConfig {
+            character_limit: 100,
+        };
+        let toml_str = toml::to_string(&original).unwrap();
+        let recovered: BodyWidthConfig = toml::from_str(&toml_str).unwrap();
+        assert_eq!(original, recovered);
+    }
+
+    #[kani::proof]
+    fn custom_limit_takes_effect() {
+        let config = BodyWidthConfig {
+            character_limit: 50,
+        };
+        // A line exactly at the limit should pass
+        let message = format!("Subject\n\n{}", "x".repeat(50));
+        let commit = CommitMessage::from(message);
+        assert!(lint_with_config(commit, config).is_none());
+
+        // A line one char over should fail
+        let message = format!("Subject\n\n{}", "x".repeat(51));
+        let commit = CommitMessage::from(message);
+        assert!(lint_with_config(commit, config).is_some());
+    }
+}

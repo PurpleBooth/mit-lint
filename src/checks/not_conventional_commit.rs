@@ -696,3 +696,34 @@ This is an example commit
         }
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn default_allows_any_type_and_scope() {
+        let config = ConventionalCommitConfig::default();
+        assert!(config.allowed_types.is_none());
+        assert!(config.allowed_scopes.is_none());
+    }
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_config() {
+        let original = ConventionalCommitConfig {
+            allowed_types: Some(HashSet::from(["feat".into(), "fix".into()])),
+            allowed_scopes: Some(HashSet::from(["ui".into()])),
+        };
+        let toml_str = toml::to_string(&original).unwrap();
+        let recovered: ConventionalCommitConfig = toml::from_str(&toml_str).unwrap();
+        assert_eq!(original, recovered);
+    }
+
+    #[kani::proof]
+    fn serde_roundtrip_default_config() {
+        let original = ConventionalCommitConfig::default();
+        let toml_str = toml::to_string(&original).unwrap();
+        let recovered: ConventionalCommitConfig = toml::from_str(&toml_str).unwrap();
+        assert_eq!(original, recovered);
+    }
+}

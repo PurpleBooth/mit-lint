@@ -413,3 +413,68 @@ mod tests {
         );
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn new_stores_fields() {
+        let msg = String::from("test commit");
+        let problem = Problem::new(
+            "error msg".into(),
+            "tip msg".into(),
+            Code::SubjectLongerThan72Characters,
+            &msg.into(),
+            None,
+            None,
+        );
+        assert_eq!(problem.error(), "error msg");
+        assert_eq!(problem.tip(), "tip msg");
+    }
+
+    #[kani::proof]
+    fn new_with_labels_and_url() {
+        let msg = String::from("test commit");
+        let labels = vec![("label".to_string(), 0, 5)];
+        let problem = Problem::new(
+            "err".into(),
+            "tip".into(),
+            Code::SubjectLongerThan72Characters,
+            &msg.into(),
+            Some(labels),
+            Some("https://example.com".to_string()),
+        );
+        assert_eq!(problem.error(), "err");
+    }
+
+    #[kani::proof]
+    fn commit_message_round_trips() {
+        let msg = String::from("subject\n\nbody");
+        let problem = Problem::new(
+            "err".into(),
+            "tip".into(),
+            Code::SubjectNotSeparateFromBody,
+            &msg.into(),
+            None,
+            None,
+        );
+        let recovered = problem.commit_message();
+        assert_eq!(String::from(recovered), msg);
+    }
+
+    #[kani::proof]
+    fn clone_preserves_equality() {
+        let msg = String::from("test");
+        let problem = Problem::new(
+            "err".into(),
+            "tip".into(),
+            Code::DuplicatedTrailers,
+            &msg.into(),
+            None,
+            None,
+        );
+        let cloned = problem.clone();
+        assert_eq!(problem, cloned);
+    }
+}

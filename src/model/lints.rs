@@ -656,3 +656,48 @@ mod proofs {
         assert_eq!(restored, a, "subtract then merge must restore original");
     }
 }
+
+#[cfg(kani)]
+mod additional_proofs {
+    use super::*;
+    use crate::model::Lint;
+
+    #[kani::proof]
+    fn empty_lints_has_no_names() {
+        let empty = Lints::new(BTreeSet::new());
+        assert!(empty.names().is_empty());
+    }
+
+    #[kani::proof]
+    fn names_and_config_keys_have_same_count() {
+        let lints = Lints::new(Lint::all_lints().collect());
+        assert_eq!(lints.names().len(), lints.config_keys().len());
+    }
+
+    #[kani::proof]
+    fn subtract_from_empty_is_empty() {
+        let empty = Lints::new(BTreeSet::new());
+        let all = Lints::new(Lint::all_lints().collect());
+        let result = empty.subtract(&all);
+        assert!(result.names().is_empty());
+    }
+
+    #[kani::proof]
+    fn merge_with_empty_is_identity() {
+        let empty = Lints::new(BTreeSet::new());
+        let all = Lints::new(Lint::all_lints().collect());
+        assert_eq!(all.merge(&empty), all);
+        assert_eq!(empty.merge(&all), all);
+    }
+
+    #[kani::proof]
+    fn vec_roundtrip_preserves_elements() {
+        let original: Vec<Lint> = Lint::all_lints().step_by(2).collect();
+        let lints: Lints = original.clone().into();
+        let recovered: Vec<Lint> = lints.into();
+        // Both should have the same set of lints (order may differ from BTreeSet)
+        let orig_set: BTreeSet<_> = original.into_iter().collect();
+        let recv_set: BTreeSet<_> = recovered.into_iter().collect();
+        assert_eq!(orig_set, recv_set);
+    }
+}

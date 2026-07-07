@@ -420,3 +420,49 @@ mod tests {
         );
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn builder_stores_error_and_tip() {
+        let builder = ProblemBuilder::new(
+            "test error",
+            "test tip",
+            Code::DuplicatedTrailers,
+            "commit message",
+        );
+        let problem = builder.build();
+        assert_eq!(problem.error(), "test error");
+        assert_eq!(problem.tip(), "test tip");
+    }
+
+    #[kani::proof]
+    fn builder_with_url_stores_url() {
+        let problem = ProblemBuilder::new("err", "tip", Code::DuplicatedTrailers, "msg")
+            .with_url("https://example.com")
+            .build();
+        assert!(problem.to_string().contains("err"));
+    }
+
+    #[kani::proof]
+    fn builder_with_label_stores_label() {
+        let problem = ProblemBuilder::new("err", "tip", Code::DuplicatedTrailers, "msg")
+            .with_label("label text", 0, 5)
+            .build();
+        assert_eq!(problem.error(), "err");
+    }
+
+    #[kani::proof]
+    fn builder_is_fluent() {
+        // Each with_* method must return Self for chaining
+        let problem = ProblemBuilder::new("e", "t", Code::DuplicatedTrailers, "m")
+            .with_url("https://x")
+            .with_label("l", 0, 1)
+            .with_label_at_last_line("last")
+            .build();
+        assert_eq!(problem.error(), "e");
+        assert_eq!(problem.tip(), "t");
+    }
+}

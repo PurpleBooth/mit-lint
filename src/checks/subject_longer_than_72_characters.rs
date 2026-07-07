@@ -907,3 +907,39 @@ index 5a83784..ebaee48 100644
         TestResult::from_bool(result.is_none())
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn default_has_72_char_limit() {
+        let config = SubjectLengthConfig::default();
+        assert_eq!(config.character_limit, LIMIT);
+        assert_eq!(config.character_limit, 72);
+    }
+
+    #[kani::proof]
+    fn serde_roundtrip_preserves_config() {
+        let original = SubjectLengthConfig {
+            character_limit: 100,
+        };
+        let toml_str = toml::to_string(&original).unwrap();
+        let recovered: SubjectLengthConfig = toml::from_str(&toml_str).unwrap();
+        assert_eq!(original, recovered);
+    }
+
+    #[kani::proof]
+    fn custom_limit_at_boundary() {
+        let config = SubjectLengthConfig {
+            character_limit: 50,
+        };
+        // Subject exactly at limit should pass
+        let commit = CommitMessage::from("x".repeat(50));
+        assert!(lint_with_config(commit, config).is_none());
+
+        // Subject one char over should fail
+        let commit = CommitMessage::from("x".repeat(51));
+        assert!(lint_with_config(commit, config).is_some());
+    }
+}

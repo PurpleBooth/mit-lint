@@ -836,3 +836,56 @@ mod tests {
         assert!(!Lint::GitHubIdMissing.enabled_by_default());
     }
 }
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    #[kani::proof]
+    fn name_round_trips_through_try_from() {
+        // Every lint's name should parse back to the same lint via TryFrom
+        for lint in Lint::all_lints() {
+            let name: &str = lint.into();
+            let parsed = Lint::try_from(name).expect("name must round-trip");
+            assert_eq!(lint, parsed, "TryFrom must preserve lint identity");
+        }
+    }
+
+    #[kani::proof]
+    fn config_key_starts_with_prefix() {
+        for lint in Lint::all_lints() {
+            let key = lint.config_key();
+            assert!(
+                key.starts_with(CONFIG_KEY_PREFIX),
+                "config_key must start with the prefix"
+            );
+        }
+    }
+
+    #[kani::proof]
+    fn all_lints_is_non_empty() {
+        assert!(Lint::all_lints().next().is_some());
+    }
+
+    #[kani::proof]
+    fn all_lints_are_unique() {
+        let all: Vec<_> = Lint::all_lints().collect();
+        for i in 0..all.len() {
+            for j in (i + 1)..all.len() {
+                assert_ne!(all[i], all[j], "all lints must be distinct");
+            }
+        }
+    }
+
+    #[kani::proof]
+    fn enabled_by_default_is_deterministic() {
+        // Calling enabled_by_default twice must return the same value
+        for lint in Lint::all_lints() {
+            assert_eq!(
+                lint.enabled_by_default(),
+                lint.enabled_by_default(),
+                "enabled_by_default must be deterministic"
+            );
+        }
+    }
+}
