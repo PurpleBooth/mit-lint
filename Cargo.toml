@@ -21,6 +21,18 @@ toml = "1"
 futures = "0.3"
 quickcheck = "1"
 strum_macros = "0.28"
+[profile.release-max]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = false
+debug-assertions = false
+overflow-checks = false
+incremental = false
+strip = "symbols"
+
 
 [dev-dependencies]
 criterion = { version = "0.8", features = ["async_tokio"] }
